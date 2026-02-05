@@ -7,18 +7,25 @@ import {
   Input,
   Label,
   Radio,
+  RadioGroup,
   Link,
 } from "@fluentui/react-components";
-import { ArrowClockwiseRegular, LockClosedRegular, StarAddRegular, MoreHorizontalRegular } from "@fluentui/react-icons";
+import { 
+  ArrowClockwiseRegular, 
+  LockClosedRegular, 
+  StarAddRegular, 
+  MoreHorizontalRegular,
+} from "@fluentui/react-icons";
 
-const img2 = "https://www.figma.com/api/mcp/asset/e68ee78b-5c06-40ca-b830-c6783462f567";
+const avatarImg = "https://www.figma.com/api/mcp/asset/528e9b06-2a76-4d8a-8266-7e9f60c2023a";
 
 const useStyles = makeStyles({
   root: {
     display: "flex",
     flexDirection: "column",
     width: "100%",
-    height: "100%",
+    height: "100vh",
+    overflow: "hidden",
   },
   browserContainer: {
     display: "flex",
@@ -29,6 +36,7 @@ const useStyles = makeStyles({
     maxWidth: "1919px",
     position: "relative",
     backgroundColor: tokens.colorNeutralBackground6,
+    height: "100%",
   },
   browserBar: {
     display: "flex",
@@ -47,11 +55,16 @@ const useStyles = makeStyles({
     height: "100%",
     objectFit: "cover" as const,
   },
+  actionsLeft: {
+    display: "flex",
+    gap: "16px",
+    padding: "0 8px",
+  },
   browserButton: {
+    minWidth: "24px",
     width: "24px",
     height: "24px",
-    minWidth: "24px",
-    padding: "4px",
+    padding: "0px",
   },
   searchBar: {
     display: "flex",
@@ -71,6 +84,13 @@ const useStyles = makeStyles({
     color: tokens.colorNeutralForeground3,
     overflow: "hidden",
     paddingBottom: "2px",
+  },
+  actionsRight: {
+    display: "flex",
+    gap: "20px",
+    alignItems: "center",
+    paddingLeft: "2px",
+    paddingRight: "8px",
   },
   win11Commands: {
     display: "flex",
@@ -95,9 +115,10 @@ const useStyles = makeStyles({
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    overflow: "hidden",
-    flex: "1 0 0",
+    overflow: "auto",
+    flex: "1",
     width: "100%",
+    minHeight: 0,
   },
   bodyContainer: {
     display: "flex",
@@ -105,6 +126,7 @@ const useStyles = makeStyles({
     gap: "0px",
     width: "1329px",
     paddingTop: "24px",
+    paddingBottom: "24px",
   },
   mainContent: {
     display: "flex",
@@ -167,7 +189,6 @@ const useStyles = makeStyles({
     fontSize: "14px",
     lineHeight: "20px",
     color: tokens.colorNeutralForeground3,
-    width: "224px",
     margin: 0,
   },
   navContainer: {
@@ -212,6 +233,13 @@ const useStyles = makeStyles({
     width: "100%",
     margin: 0,
   },
+  h6Title: {
+    fontSize: "14px",
+    lineHeight: "20px",
+    fontWeight: 600,
+    color: tokens.colorNeutralForeground1,
+    margin: 0,
+  },
   sectionDescription: {
     fontSize: "14px",
     lineHeight: "20px",
@@ -248,9 +276,28 @@ const useStyles = makeStyles({
     flex: "1 0 0",
     minWidth: "196px",
   },
+  outputColumn: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px",
+    flex: "1 0 0",
+  },
+  outputLabel: {
+    fontSize: "14px",
+    lineHeight: "20px",
+    color: "black",
+    margin: 0,
+  },
+  outputValue: {
+    fontSize: "32px",
+    lineHeight: "40px",
+    fontWeight: 600,
+    color: "#0078d4",
+    margin: 0,
+  },
   calculationContainer: {
     display: "flex",
-    width: "596px",
+    height: "760px",
     overflow: "hidden",
   },
   calculationPanel: {
@@ -291,7 +338,7 @@ const useStyles = makeStyles({
     display: "flex",
     flexDirection: "column",
     gap: "24px",
-    overflow: "hidden",
+    overflow: "auto",
     width: "100%",
   },
   calcSectionContainer: {
@@ -328,6 +375,23 @@ const useStyles = makeStyles({
   calcH4Value: {
     fontSize: "16px",
     lineHeight: "22px",
+    fontWeight: 600,
+    color: tokens.colorNeutralForeground1,
+    margin: 0,
+  },
+  calcH5Text: {
+    flex: "1 0 0",
+    fontSize: "14px",
+    lineHeight: "20px",
+    fontWeight: 600,
+    color: tokens.colorNeutralForeground1,
+    paddingRight: "24px",
+    maxWidth: "460px",
+    margin: 0,
+  },
+  calcH5Value: {
+    fontSize: "14px",
+    lineHeight: "20px",
     fontWeight: 600,
     color: tokens.colorNeutralForeground1,
     margin: 0,
@@ -383,6 +447,22 @@ const useStyles = makeStyles({
     color: tokens.colorNeutralForeground1,
     margin: 0,
   },
+  calcDescription: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "2px",
+    paddingLeft: "10px",
+    maxWidth: "460px",
+    width: "100%",
+  },
+  calcDescriptionText: {
+    fontSize: "14px",
+    lineHeight: "20px",
+    color: tokens.colorNeutralForeground3,
+    maxWidth: "360px",
+    width: "100%",
+    margin: 0,
+  },
   legalContainer: {
     display: "flex",
     alignItems: "center",
@@ -401,6 +481,24 @@ const useStyles = makeStyles({
     textAlign: "center" as const,
     margin: 0,
   },
+  tableRow: {
+    display: "flex",
+    flexWrap: "wrap" as const,
+    gap: "8px",
+    alignItems: "center",
+    width: "100%",
+  },
+  tableLabel: {
+    fontSize: "16px",
+    lineHeight: "22px",
+    color: "black",
+    margin: 0,
+    width: "155px",
+    maxWidth: "155px",
+  },
+  tableInput: {
+    flex: "1 0 0",
+  },
 });
 
 function App() {
@@ -409,14 +507,14 @@ function App() {
   return (
     <FluentProvider theme={webLightTheme}>
       <div className={styles.root}>
-        {/* Browser Chrome */}
         <div className={styles.browserContainer}>
+          {/* Browser Bar */}
           <div className={styles.browserBar}>
             <div className={styles.avatar}>
-              <img src={img2} alt="" className={styles.avatarImage} />
+              <img src={avatarImg} alt="" className={styles.avatarImage} />
             </div>
             
-            <div style={{ display: "flex", gap: "16px", padding: "0 8px" }}>
+            <div className={styles.actionsLeft}>
               <Button
                 appearance="subtle"
                 size="small"
@@ -449,7 +547,7 @@ function App() {
               />
             </div>
 
-            <div style={{ display: "flex", gap: "20px", alignItems: "center", paddingLeft: "2px", paddingRight: "8px" }}>
+            <div className={styles.actionsRight}>
               <Button appearance="subtle" size="small" icon={<StarAddRegular />} className={styles.browserButton} />
               <Button appearance="subtle" size="small" icon={<LockClosedRegular />} className={styles.browserButton} />
               <Button appearance="subtle" size="small" icon={<MoreHorizontalRegular />} className={styles.browserButton} />
@@ -471,7 +569,7 @@ function App() {
                   <div className={styles.h1Container}>
                     <p className={styles.headline}>Microsoft agent usage estimator</p>
                     <p className={styles.headerDescription}>
-                      Use the estimator to forecast your agent's Copilot credit volume. Select from licensing options, agent types, and the features your agent leverages to respond to your end users. See the credit consumption impact based on these selections. This estimator provides a monthly credit informational estimate for a single agent and makes no guarantees of final costs. This isn't' a pricing calculator, so you should not rely on it to make cost decisions or to make any definite forecasts around your monthly expenses.
+                      Use the estimator to forecast your agent's Copilot credit volume. Select from licensing options, agent types, and the features your agent leverages to respond to your end users. See the credit consumption impact based on these selections. This estimator provides a monthly credit informational estimate for a single agent and makes no guarantees of final costs. This isn't a pricing calculator, so you should not rely on it to make cost decisions or to make any definite forecasts around your monthly expenses.
                     </p>
                   </div>
 
@@ -479,9 +577,7 @@ function App() {
                     <div className={styles.creditConversion}>
                       <p className={styles.creditTitle}>1 Copilot credit = $0.01</p>
                       <p className={styles.creditLink}>
-                        <span>Go </span>
-                        <Link href="#">here</Link>
-                        <span> to convert to your currency.</span>
+                        Go <Link href="#">here</Link> to convert to your currency.
                       </p>
                     </div>
                   </div>
@@ -490,7 +586,11 @@ function App() {
                 {/* Nav Container */}
                 <div className={styles.navContainer}>
                   <div className={styles.navButtons}>
-                    <Button appearance="primary">Learn more</Button>
+                    <Button appearance="primary">ID Help me</Button>
+                    <Button appearance="secondary">Read</Button>
+                    <Button appearance="secondary">Download results</Button>
+                    <Button appearance="secondary">Buy Copilot credits</Button>
+                    <Button appearance="secondary">Free Copilot chat</Button>
                   </div>
                 </div>
 
@@ -498,27 +598,26 @@ function App() {
                 <div className={styles.section}>
                   <div className={styles.radioContainer}>
                     <p className={styles.sectionDescription}>
-                      Placeholder section description lorem ipsum
+                      Choose which type of agent you'll add most frequently. You can layer expenses for various types in a single tenant by running the estimator for distinct agent types & scenarios separately for subsequent aggregation, to create a comprehensive estimation.
                     </p>
                   </div>
-                  <div className={styles.radioChoices}>
+                  <RadioGroup layout="horizontal">
                     <Radio value="copilot-chat" label="Copilot Chat employee facing agent (Copilot Studio Lite)" />
-                    <Radio value="standard" label="Label" />
-                  </div>
+                    <Radio value="standard" label="Custom engine agent (Standard)" />
+                    <Radio value="custom" label="Custom engine automation (Studio)" />
+                  </RadioGroup>
                 </div>
 
                 {/* Licensing Inputs */}
                 <div className={styles.inputsRow}>
                   <div className={styles.inputColumn}>
-                    <div className={styles.radioContainer}>
-                      <p className={styles.sectionDescription}>
-                        Placeholder section description lorem ipsum
-                      </p>
-                    </div>
-                    <div className={styles.radioChoices}>
+                    <p className={styles.sectionDescription}>
+                      Do any users have Microsoft 365 Copilot licenses?
+                    </p>
+                    <RadioGroup layout="horizontal">
                       <Radio value="yes" label="Yes" />
                       <Radio value="no" label="No" />
-                    </div>
+                    </RadioGroup>
                   </div>
                   
                   <div className={styles.inputColumn}>
@@ -532,11 +631,9 @@ function App() {
                   <div className={styles.h4Container}>
                     <div className={styles.h4Content}>
                       <p className={styles.h4Title}>Agent traffic</p>
-                      <div>
-                        <p className={styles.sectionDescription}>
-                          Agent traffic quantifies the activity an agent supports by assessing the number of end users accessing the agent and their monthly engagement frequency.
-                        </p>
-                      </div>
+                      <p className={styles.sectionDescription}>
+                        Agent traffic quantifies the activity an agent supports by assessing the number of end users accessing the agent and their monthly engagement frequency.
+                      </p>
                     </div>
                   </div>
 
@@ -557,19 +654,20 @@ function App() {
                   <div className={styles.h4Container}>
                     <div className={styles.h4Content}>
                       <p className={styles.h4Title}>Agent orchestration</p>
-                      <div>
-                        <p className={styles.sectionDescription}>
-                          Orchestration involves managing and coordinating an agent's capabilities and actions to effectively respond to user queries and perform tasks.
-                        </p>
-                        <Link href="#">Learn more</Link>
-                      </div>
+                      <p className={styles.sectionDescription}>
+                        Orchestration involves managing and coordinating an agent's capabilities and actions to effectively respond to user queries and perform tasks.
+                      </p>
+                      <Link href="#">Learn more</Link>
                     </div>
                   </div>
 
-                  <div className={styles.radioChoices}>
+                  <p className={styles.sectionDescription}>
+                    What type of orchestration will you use?
+                  </p>
+                  <RadioGroup layout="horizontal">
                     <Radio value="generative" label="Generative" />
                     <Radio value="classic" label="Classic" />
-                  </div>
+                  </RadioGroup>
                 </div>
 
                 {/* Agent Knowledge Section */}
@@ -577,12 +675,10 @@ function App() {
                   <div className={styles.h4Container}>
                     <div className={styles.h4Content}>
                       <p className={styles.h4Title}>Agent knowledge</p>
-                      <div>
-                        <p className={styles.sectionDescription}>
-                          Knowledge sources enable agents to provide relevant information and insights. Published agents use configured knowledge sources to ground their responses.
-                        </p>
-                        <Link href="#">Learn more</Link>
-                      </div>
+                      <p className={styles.sectionDescription}>
+                        Knowledge sources enable agents to provide relevant information and insights. Published agents use configured knowledge sources to ground their responses.
+                      </p>
+                      <Link href="#">Learn more</Link>
                     </div>
                   </div>
 
@@ -591,21 +687,230 @@ function App() {
                     <Input appearance="outline" size="medium" placeholder="Placeholder text" />
                   </div>
 
-                  <div className={styles.inputsRow} style={{ paddingLeft: "36px" }}>
+                  <div className={styles.inputsRow} style={{ paddingLeft: "36px", gap: "24px" }}>
                     <div className={styles.inputColumn}>
                       <Label>What is the percentage of knowledge responses from tenant graph grounding?</Label>
                       <Input appearance="outline" size="medium" placeholder="Placeholder text" />
                     </div>
+                    <div className={styles.outputColumn}>
+                      <p className={styles.outputLabel}>All other knowledge</p>
+                      <p className={styles.outputValue}>100%</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Agent Actions & Topics Section */}
+                <div className={`${styles.section} ${styles.sectionBorder}`}>
+                  <div style={{ display: "flex", gap: "20px", width: "100%" }}>
+                    <div style={{ flex: "1 0 0", maxWidth: "596px" }}>
+                      <div className={styles.h4Content}>
+                        <p className={styles.h4Title}>Agent actions and topics</p>
+                        <p className={styles.sectionDescription}>
+                          Help agents answer a query, execute workflows, connect to external systems, or provide topic-specific guidance.
+                        </p>
+                      </div>
+                    </div>
+                    <div className={styles.outputColumn}>
+                      <p className={styles.outputLabel}>Number of Copilot credits that charge for actions and topics</p>
+                      <p className={styles.outputValue}>100%</p>
+                    </div>
+                  </div>
+
+                  <div className={styles.inputsRow} style={{ gap: "24px" }}>
                     <div className={styles.inputColumn}>
-                      <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                        <div style={{ display: "flex", height: "44px", alignItems: "flex-start", width: "100%" }}>
-                          <p style={{ flex: "1 0 0", fontSize: "14px", lineHeight: "20px", margin: 0 }}>All other knowledge</p>
+                      <Label>How many agent flows have you configured for your agent (either within a topic or standalone agent action)?</Label>
+                      <Link href="#">Learn more</Link>
+                      <Input appearance="outline" size="medium" placeholder="Placeholder text" />
+                    </div>
+                    <div className={styles.inputColumn}>
+                      <Label>How often will these flows run per month?</Label>
+                      <Input appearance="outline" size="medium" placeholder="Placeholder text" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Agent Topics Section */}
+                <div className={`${styles.section} ${styles.sectionBorder}`}>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "24px", width: "100%" }}>
+                    <div style={{ flex: "1 0 0" }}>
+                      <div className={styles.h4Content}>
+                        <p className={styles.h4Title}>Agent topics</p>
+                        <p className={styles.sectionDescription}>
+                          Help agents answer a query, execute workflows, connect to external systems, or provide topic-specific guidance.
+                        </p>
+                      </div>
+                    </div>
+                    <div className={styles.outputColumn}>
+                      <p className={styles.outputLabel}>All other knowledge</p>
+                      <p className={styles.outputValue}>100%</p>
+                    </div>
+                  </div>
+
+                  <div className={styles.inputsRow} style={{ gap: "24px" }}>
+                    <div className={styles.inputColumn}>
+                      <Label>How many agent flows are included in your topics?</Label>
+                      <Link href="#">Learn more</Link>
+                      <Input appearance="outline" size="medium" placeholder="Placeholder text" />
+                    </div>
+                    <div className={styles.inputColumn}>
+                      <Label>How often will these flows run per month?</Label>
+                      <Input appearance="outline" size="medium" placeholder="Placeholder text" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Autonomous Triggers Section */}
+                <div className={`${styles.section} ${styles.sectionBorder}`}>
+                  <div className={styles.h4Container}>
+                    <div className={styles.h4Content}>
+                      <p className={styles.h4Title}>Agent autonomous triggers</p>
+                      <p className={styles.sectionDescription}>
+                        These triggers act independently in response to specific events, without requiring user input to automate workflows and processes.
+                      </p>
+                      <Link href="#">Learn more</Link>
+                    </div>
+                  </div>
+
+                  <div style={{ display: "flex", flexDirection: "column", gap: "20px", width: "100%" }}>
+                    <div className={styles.inputColumn}>
+                      <Label>How many triggers will you add to your agent (if any)?</Label>
+                      <Input appearance="outline" size="medium" placeholder="Placeholder text" />
+                    </div>
+
+                    <div style={{ display: "flex", flexDirection: "column", gap: "20px", width: "100%" }}>
+                      {/* Trigger 1 */}
+                      <div style={{ display: "flex", flexDirection: "column", gap: "10px", width: "100%" }}>
+                        <p className={styles.h6Title}>Trigger 1</p>
+
+                        <div style={{ display: "flex", flexDirection: "column", gap: "20px", width: "100%" }}>
+                          <div className={styles.inputsRow} style={{ gap: "24px" }}>
+                            <div className={styles.inputColumn}>
+                              <Label>How often will this trigger event occur each month?</Label>
+                              <Input appearance="outline" size="medium" placeholder="Placeholder text" />
+                            </div>
+                            <div className={styles.inputColumn}>
+                              <p className={styles.sectionDescription}>
+                                Will this trigger use deep reasoning?
+                              </p>
+                              <RadioGroup layout="horizontal">
+                                <Radio value="yes" label="Yes" />
+                                <Radio value="no" label="No" />
+                              </RadioGroup>
+                            </div>
+                          </div>
+
+                          <div className={styles.inputsRow} style={{ gap: "24px" }}>
+                            <div className={styles.inputColumn}>
+                              <Label>How many agent actions will this trigger use?</Label>
+                              <Input appearance="outline" size="medium" placeholder="Placeholder text" />
+                            </div>
+                            <div className={styles.inputColumn}>
+                              <Label>How many of these agent actions are agent flows (if any)?</Label>
+                              <Link href="#">Learn more</Link>
+                              <Input appearance="outline" size="medium" placeholder="Placeholder text" />
+                            </div>
+                          </div>
                         </div>
-                        <div style={{ display: "flex", height: "40px", alignItems: "center", width: "100%" }}>
-                          <p style={{ flex: "1 0 0", fontSize: "32px", lineHeight: "40px", fontWeight: 600, color: "#0078d4", margin: 0 }}>100%</p>
+                      </div>
+
+                      {/* Trigger 2 */}
+                      <div style={{ display: "flex", flexDirection: "column", gap: "10px", width: "100%" }}>
+                        <p className={styles.h6Title}>Trigger 2</p>
+
+                        <div style={{ display: "flex", flexDirection: "column", gap: "20px", width: "100%" }}>
+                          <div className={styles.inputsRow} style={{ gap: "24px" }}>
+                            <div className={styles.inputColumn}>
+                              <Label>How often will this trigger event occur each month?</Label>
+                              <Input appearance="outline" size="medium" placeholder="Placeholder text" />
+                            </div>
+                            <div className={styles.inputColumn}>
+                              <p className={styles.sectionDescription}>
+                                Will this trigger use deep reasoning?
+                              </p>
+                              <RadioGroup layout="horizontal">
+                                <Radio value="yes" label="Yes" />
+                                <Radio value="no" label="No" />
+                              </RadioGroup>
+                            </div>
+                          </div>
+
+                          <div className={styles.inputsRow} style={{ gap: "24px" }}>
+                            <div className={styles.inputColumn}>
+                              <Label>How many agent actions will this trigger use?</Label>
+                              <Input appearance="outline" size="medium" placeholder="Placeholder text" />
+                            </div>
+                            <div className={styles.inputColumn}>
+                              <Label>How many of these agent actions are agent flows (if any)?</Label>
+                              <Input appearance="outline" size="medium" placeholder="Placeholder text" />
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
+                  </div>
+                </div>
+
+                {/* Optional Modifiers Section */}
+                <div className={styles.section} style={{ paddingBottom: "20px" }}>
+                  <div className={styles.h4Container}>
+                    <div className={styles.h4Content}>
+                      <p className={styles.h4Title}>Agent optional modifiers</p>
+                      <p className={styles.sectionDescription}>
+                        These features are not required for agents but drive additional Copilot credit consumption.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className={styles.section}>
+                    <p style={{ fontSize: "16px", lineHeight: "24px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, width: "100%" }}>
+                      Will you use prompt tools?
+                    </p>
+                    <Link href="#">Learn more</Link>
+                    <RadioGroup layout="horizontal">
+                      <Radio value="yes" label="Yes" />
+                      <Radio value="no" label="No" />
+                    </RadioGroup>
+                  </div>
+
+                  {/* Prompts Table */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: "20px", width: "100%" }}>
+                    <div style={{ display: "flex", gap: "8px", alignItems: "flex-start", justifyContent: "center", width: "100%" }}>
+                      <div style={{ display: "flex", flexDirection: "column", flex: "1 0 0", maxWidth: "155px", alignItems: "flex-start", justifyContent: "flex-end" }}>
+                        <p style={{ fontSize: "16px", lineHeight: "22px", color: "black", margin: 0, width: "100%" }}>Prompt model type</p>
+                        <Link href="#">Learn more</Link>
+                      </div>
+                      <p style={{ flex: "1 0 0", fontSize: "16px", lineHeight: "22px", color: "black", margin: 0 }}>How many prompts?</p>
+                      <p style={{ flex: "1 0 0", fontSize: "16px", lineHeight: "22px", color: "black", margin: 0 }}>How often will they be triggered in your agent?</p>
+                    </div>
+
+                    <div className={styles.tableRow}>
+                      <p className={styles.tableLabel}>Basic GPT-4o mini</p>
+                      <Input appearance="outline" size="medium" placeholder="Placeholder text" className={styles.tableInput} />
+                      <Input appearance="outline" size="medium" placeholder="Placeholder text" className={styles.tableInput} />
+                    </div>
+
+                    <div className={styles.tableRow}>
+                      <p className={styles.tableLabel}>Standard GPT-4o</p>
+                      <Input appearance="outline" size="medium" placeholder="Placeholder text" className={styles.tableInput} />
+                      <Input appearance="outline" size="medium" placeholder="Placeholder text" className={styles.tableInput} />
+                    </div>
+
+                    <div className={styles.tableRow}>
+                      <p className={styles.tableLabel}>Premium o1-preview</p>
+                      <Input appearance="outline" size="medium" placeholder="Placeholder text" className={styles.tableInput} />
+                      <Input appearance="outline" size="medium" placeholder="Placeholder text" className={styles.tableInput} />
+                    </div>
+                  </div>
+
+                  <div className={styles.section}>
+                    <p style={{ fontSize: "16px", lineHeight: "24px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, width: "100%" }}>
+                      Is code interpreter enabled?
+                    </p>
+                    <Link href="#">Learn more</Link>
+                    <RadioGroup layout="horizontal">
+                      <Radio value="yes" label="Yes" />
+                      <Radio value="no" label="No" />
+                    </RadioGroup>
                   </div>
                 </div>
               </div>
@@ -706,6 +1011,11 @@ function App() {
                             <p className={styles.calcItemValue}>0</p>
                           </div>
                         </div>
+                        <div className={styles.calcDescription}>
+                          <p className={styles.calcDescriptionText}>
+                            Because you have XX users with a Microsoft 365 Copilot License, XX credits from actions and topics have been subtracted from your credits driven by actions and topics.
+                          </p>
+                        </div>
                       </div>
 
                       <div className={styles.calcH6Container}>
@@ -751,6 +1061,38 @@ function App() {
                           <p className={styles.calcH4Value}>0</p>
                         </div>
                       </div>
+
+                      <div className={styles.calcH6Container}>
+                        <div className={styles.calcItemRow}>
+                          <div className={styles.calcItemContent}>
+                            <div className={styles.calcItemText}>
+                              <div className={styles.bulletContainer}>
+                                <div className={styles.bullet} />
+                              </div>
+                              <p className={styles.calcItemLabel}>
+                                Number of Copilot credits that charge trigger 1
+                              </p>
+                            </div>
+                            <p className={styles.calcItemValue}>0</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className={styles.calcH6Container}>
+                        <div className={styles.calcItemRow}>
+                          <div className={styles.calcItemContent}>
+                            <div className={styles.calcItemText}>
+                              <div className={styles.bulletContainer}>
+                                <div className={styles.bullet} />
+                              </div>
+                              <p className={styles.calcItemLabel}>
+                                Number of Copilot credits that charge trigger 2
+                              </p>
+                            </div>
+                            <p className={styles.calcItemValue}>0</p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
 
                     {/* Optional Modifiers Section */}
@@ -766,21 +1108,107 @@ function App() {
 
                       <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                         <div style={{ display: "flex", height: "20px", justifyContent: "space-between" }}>
-                          <p style={{ flex: "1 0 0", fontSize: "14px", lineHeight: "20px", fontWeight: 600, color: tokens.colorNeutralForeground1, maxWidth: "460px", margin: 0 }}>
-                            Prompts
-                          </p>
-                          <p style={{ fontSize: "14px", lineHeight: "20px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0 }}>
-                            0
-                          </p>
+                          <p className={styles.calcH5Text}>Prompts</p>
+                          <p className={styles.calcH5Value}>0</p>
                         </div>
 
-                        <div style={{ display: "flex", height: "20px", justifyContent: "space-between" }}>
-                          <p style={{ flex: "1 0 0", fontSize: "14px", lineHeight: "20px", fontWeight: 600, color: tokens.colorNeutralForeground1, maxWidth: "460px", margin: 0 }}>
-                            Code interpreter
-                          </p>
-                          <p style={{ fontSize: "14px", lineHeight: "20px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0 }}>
-                            0
-                          </p>
+                        <div className={styles.calcH6Container}>
+                          <div className={styles.calcItemRow}>
+                            <div className={styles.calcItemContent}>
+                              <div className={styles.calcItemText}>
+                                <div className={styles.bulletContainer}>
+                                  <div className={styles.bullet} />
+                                </div>
+                                <p className={styles.calcItemLabel}>Basic</p>
+                              </div>
+                              <p className={styles.calcItemValue}>0</p>
+                            </div>
+                          </div>
+                          <div className={styles.calcDescription}>
+                            <p className={styles.calcDescriptionText}>
+                              1 Copilot credit per every 10 responses
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className={styles.calcH6Container}>
+                          <div className={styles.calcItemRow}>
+                            <div className={styles.calcItemContent}>
+                              <div className={styles.calcItemText}>
+                                <div className={styles.bulletContainer}>
+                                  <div className={styles.bullet} />
+                                </div>
+                                <p className={styles.calcItemLabel}>Standard</p>
+                              </div>
+                              <p className={styles.calcItemValue}>0</p>
+                            </div>
+                          </div>
+                          <div className={styles.calcDescription}>
+                            <p className={styles.calcDescriptionText}>
+                              15 Copilot credits per every 10 responses
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className={styles.calcH6Container}>
+                          <div className={styles.calcItemRow}>
+                            <div className={styles.calcItemContent}>
+                              <div className={styles.calcItemText}>
+                                <div className={styles.bulletContainer}>
+                                  <div className={styles.bullet} />
+                                </div>
+                                <p className={styles.calcItemLabel}>Premium</p>
+                              </div>
+                              <p className={styles.calcItemValue}>0</p>
+                            </div>
+                          </div>
+                          <div className={styles.calcDescription}>
+                            <p className={styles.calcDescriptionText}>
+                              100 Copilot credits per 10 responses
+                            </p>
+                          </div>
+                        </div>
+
+                        <div style={{ display: "flex", height: "20px", justifyContent: "space-between", marginTop: "8px" }}>
+                          <p className={styles.calcH5Text}>Code interpreter</p>
+                          <p className={styles.calcH5Value}>0</p>
+                        </div>
+
+                        <div className={styles.calcH6Container}>
+                          <div className={styles.calcItemRow}>
+                            <div className={styles.calcItemContent}>
+                              <div className={styles.calcItemText}>
+                                <div className={styles.bulletContainer}>
+                                  <div className={styles.bullet} />
+                                </div>
+                                <p className={styles.calcItemLabel}>
+                                  Copilot credits driven by code interpreter
+                                </p>
+                              </div>
+                              <p className={styles.calcItemValue}>0</p>
+                            </div>
+                          </div>
+                          <div className={styles.calcDescription}>
+                            <p className={styles.calcDescriptionText}>
+                              1 Copilot credit per every 10 responses
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className={styles.calcH6Container}>
+                          <div className={styles.calcItemRow}>
+                            <div className={styles.calcItemContent}>
+                              <div className={styles.calcItemText}>
+                                <div className={styles.bulletContainer}>
+                                  <div className={styles.bullet} />
+                                </div>
+                                <p className={styles.calcItemLabel} style={{ fontStyle: "italic" }}>
+                                  Copilot credits negated for users with Microsoft 365 Copilot licenses
+                                </p>
+                              </div>
+                              <p className={styles.calcItemValue}>0</p>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
