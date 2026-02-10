@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   FluentProvider,
   webLightTheme,
@@ -9,174 +10,270 @@ import {
   Radio,
   RadioGroup,
   Link,
+  Checkbox,
+  Badge,
 } from "@fluentui/react-components";
 import { 
-  ArrowClockwiseRegular, 
-  LockClosedRegular, 
-  StarAddRegular, 
-  MoreHorizontalRegular,
+  AddRegular,
+  DeleteRegular,
+  ArrowSyncRegular,
+  ArrowDownloadRegular,
+  CartRegular,
+  ChatRegular,
+  CheckmarkRegular,
+  PeopleRegular,
+  PersonRegular,
+  ShoppingBagRegular,
+  BuildingRegular,
+  AppGenericRegular,
 } from "@fluentui/react-icons";
 
-const avatarImg = "https://www.figma.com/api/mcp/asset/528e9b06-2a76-4d8a-8266-7e9f60c2023a";
-
 const useStyles = makeStyles({
-  root: {
-    display: "flex",
-    flexDirection: "column",
-    width: "100%",
-    height: "100vh",
-    overflow: "hidden",
-  },
-  browserContainer: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "6px",
-    padding: "8px",
-    borderRadius: "8px",
-    maxWidth: "1919px",
-    position: "relative",
-    backgroundColor: tokens.colorNeutralBackground6,
-    height: "100%",
-  },
-  browserBar: {
-    display: "flex",
-    gap: "8px",
-    alignItems: "center",
-    width: "100%",
-  },
-  avatar: {
-    width: "24px",
-    height: "24px",
-    borderRadius: "100px",
-    overflow: "hidden",
-  },
-  avatarImage: {
-    width: "100%",
-    height: "100%",
-    objectFit: "cover" as const,
-  },
-  actionsLeft: {
-    display: "flex",
-    gap: "16px",
-    padding: "0 8px",
-  },
-  browserButton: {
-    minWidth: "24px",
-    width: "24px",
-    height: "24px",
-    padding: "0px",
-  },
-  searchBar: {
-    display: "flex",
-    flex: "1 0 0",
-    gap: "12px",
-    height: "30px",
-    alignItems: "center",
-    padding: "2px 8px",
-    backgroundColor: tokens.colorNeutralBackground1,
-    border: `1px solid ${tokens.colorNeutralStroke1}`,
-    borderRadius: "9999px",
-  },
-  searchText: {
-    flex: "1 0 0",
-    fontSize: "14px",
-    lineHeight: "20px",
-    color: tokens.colorNeutralForeground3,
-    overflow: "hidden",
-    paddingBottom: "2px",
-  },
-  actionsRight: {
-    display: "flex",
-    gap: "20px",
-    alignItems: "center",
-    paddingLeft: "2px",
-    paddingRight: "8px",
-  },
-  win11Commands: {
-    display: "flex",
-    height: "30px",
-    alignItems: "center",
-    justifyContent: "center",
-    borderTopRightRadius: "7px",
-    overflow: "hidden",
-  },
-  win11Button: {
-    width: "44px",
-    height: "100%",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "10px",
-    fontFamily: "'Segoe Fluent Icons'",
-    color: tokens.colorNeutralForeground1,
-  },
   appContainer: {
     backgroundColor: tokens.colorNeutralBackground2,
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
+    justifyContent: "flex-start",
     overflow: "auto",
-    flex: "1",
     width: "100%",
-    minHeight: 0,
+    minHeight: "100vh",
   },
   bodyContainer: {
     display: "flex",
-    flexDirection: "row" as const,
+    flexDirection: "column" as const,
     gap: "0px",
-    width: "1329px",
+    maxWidth: "1600px",
+    width: "100%",
+    margin: "0 auto",
     paddingTop: "24px",
-    paddingBottom: "24px",
+    paddingBottom: "48px",
+    paddingLeft: "clamp(24px, 5vw, 80px)",
+    paddingRight: "clamp(24px, 5vw, 80px)",
+    boxSizing: "border-box" as const,
   },
-  mainContent: {
+  twoColumnLayout: {
+    display: "flex",
+    flexDirection: "row" as const,
+    gap: "24px",
+    width: "100%",
+    alignItems: "flex-start",
+  },
+  estimationColumn: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "24px",
+    flex: "1 1 0",
+    minWidth: 0,
+    overflow: "auto",
+  },
+  productCategorySection: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "16px",
+    padding: "32px 48px",
+    backgroundColor: tokens.colorNeutralBackground1,
+    borderRadius: "8px",
+    border: `1px solid ${tokens.colorNeutralStroke2}`,
+  },
+  categoryCatalogGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+    gap: "16px",
+  },
+  categoryCatalogItem: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "12px",
+    padding: "16px",
+    backgroundColor: tokens.colorNeutralBackground1,
+    border: `1px solid ${tokens.colorNeutralStroke2}`,
+    borderRadius: "8px",
+    position: "relative" as const,
+    cursor: "pointer",
+  },
+  categoryCatalogItemSelected: {
+    borderColor: tokens.colorBrandBackground,
+    borderWidth: "2px",
+    padding: "15px",
+  },
+  categoryGrid: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: "8px 24px",
+  },
+  productCard: {
     display: "flex",
     flexDirection: "column",
     gap: "32px",
-    flex: "1 0 0",
+    padding: "32px 48px",
+    backgroundColor: tokens.colorNeutralBackground1,
+    borderRadius: "12px",
+    border: `1px solid ${tokens.colorNeutralStroke2}`,
+  },
+  productSelectionSection: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "16px",
+    padding: "32px 48px",
+    backgroundColor: tokens.colorNeutralBackground1,
+    borderRadius: "8px",
+    border: `1px solid ${tokens.colorNeutralStroke2}`,
+  },
+  productChipsGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+    gap: "16px",
+  },
+  productChip: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "12px",
+    padding: "16px",
+    backgroundColor: tokens.colorNeutralBackground1,
+    border: `1px solid ${tokens.colorNeutralStroke2}`,
+    borderRadius: "8px",
+    position: "relative" as const,
+  },
+  chipTopRow: {
+    display: "flex",
+    alignItems: "flex-start",
+    gap: "16px",
+  },
+  chipIcon: {
+    width: "48px",
+    height: "48px",
+    backgroundColor: tokens.colorBrandBackground2,
+    borderRadius: "8px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+    fontSize: "28px",
+  },
+  chipContent: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "4px",
+    flex: 1,
+  },
+  chipTitle: {
+    fontSize: "16px",
+    lineHeight: "22px",
+    fontWeight: 600,
+    color: tokens.colorNeutralForeground1,
+    margin: 0,
+  },
+  chipDescription: {
+    fontSize: "14px",
+    lineHeight: "20px",
+    color: tokens.colorNeutralForeground3,
+    margin: 0,
+  },
+  categoryPill: {
+    display: "inline-flex",
+    alignItems: "center",
+    padding: "2px 8px",
+    borderRadius: "9999px",
+    fontSize: "12px",
+    lineHeight: "16px",
+    fontWeight: 500,
+    color: tokens.colorNeutralForeground3,
+    backgroundColor: tokens.colorNeutralBackground4,
+    whiteSpace: "nowrap" as const,
+    width: "fit-content",
+    marginTop: "auto",
+  },
+  chipActions: {
+    display: "flex",
+    gap: "8px",
+    alignItems: "center",
+    position: "relative" as const,
+  },
+  badgeWrapper: {
+    position: "relative" as const,
+    display: "inline-flex",
+  },
+  countBadge: {
+    position: "absolute" as const,
+    top: "-6px",
+    right: "-6px",
+    minWidth: "16px",
+    height: "16px",
+    borderRadius: "50%",
+    fontSize: "10px",
+    fontWeight: 600,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: "0 3px",
+  },
+  productCardHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingBottom: "16px",
+    borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,
+  },
+  productTitle: {
+    fontSize: "20px",
+    lineHeight: "28px",
+    fontWeight: 600,
+    color: tokens.colorNeutralForeground1,
+    margin: 0,
+  },
+  addProductButton: {
+    marginTop: "16px",
   },
   headerSection: {
     display: "flex",
     flexDirection: "column",
-    gap: "16px",
+    gap: "0px",
     width: "100%",
   },
-  h1Container: {
+  headerCard: {
     display: "flex",
     flexDirection: "column",
-    gap: "10px",
+    gap: "16px",
     alignItems: "center",
     justifyContent: "center",
     width: "100%",
+    padding: "48px 48px 20px",
+    boxSizing: "border-box" as const,
   },
   headline: {
-    fontSize: "32px",
-    lineHeight: "40px",
-    fontWeight: 600,
-    color: tokens.colorNeutralForeground1,
+    fontSize: "36px",
+    lineHeight: "44px",
+    fontWeight: 700,
+    color: tokens.colorBrandForeground1,
     textAlign: "center" as const,
-    flex: "1 0 0",
     margin: 0,
   },
   headerDescription: {
     fontSize: "14px",
-    lineHeight: "20px",
-    color: tokens.colorNeutralForeground3,
+    lineHeight: "22px",
+    color: tokens.colorNeutralForeground2,
     textAlign: "center" as const,
-    maxWidth: "850px",
-    width: "850px",
+    maxWidth: "960px",
     margin: 0,
   },
-  creditContainer: {
+  creditCard: {
     display: "flex",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    width: "100%",
+    alignItems: "center",
+    width: "fit-content",
+    margin: "0 auto",
+    padding: "24px 32px",
+    backgroundColor: tokens.colorNeutralBackground1,
+    borderRadius: "12px",
+    border: `1px solid ${tokens.colorNeutralStroke2}`,
+    boxSizing: "border-box" as const,
   },
-  creditConversion: {
+  creditContent: {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     flex: "1 0 0",
+    gap: "4px",
   },
   creditTitle: {
     fontSize: "18px",
@@ -193,25 +290,21 @@ const useStyles = makeStyles({
   },
   navContainer: {
     display: "flex",
-    flexDirection: "column",
+    justifyContent: "center",
     alignItems: "center",
     width: "100%",
-  },
-  navButtons: {
-    display: "flex",
-    gap: "16px",
-    height: "40px",
-    alignItems: "center",
+    gap: "12px",
+    flexWrap: "wrap" as const,
   },
   section: {
     display: "flex",
     flexDirection: "column",
-    gap: "8px",
+    gap: "16px",
     width: "100%",
   },
   sectionBorder: {
     borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,
-    paddingBottom: "20px",
+    paddingBottom: "32px",
   },
   h4Container: {
     display: "flex",
@@ -226,12 +319,13 @@ const useStyles = makeStyles({
     flex: "1 0 0",
   },
   h4Title: {
-    fontSize: "18px",
-    lineHeight: "24px",
+    fontSize: "16px",
+    lineHeight: "22px",
     fontWeight: 600,
     color: tokens.colorNeutralForeground1,
-    width: "100%",
     margin: 0,
+    borderLeft: `3px solid ${tokens.colorBrandBackground}`,
+    paddingLeft: "12px",
   },
   h6Title: {
     fontSize: "14px",
@@ -292,46 +386,41 @@ const useStyles = makeStyles({
     fontSize: "32px",
     lineHeight: "40px",
     fontWeight: 600,
-    color: "#0078d4",
+    color: tokens.colorBrandBackground,
     margin: 0,
   },
-  calculationContainer: {
-    display: "flex",
-    height: "760px",
-    overflow: "hidden",
-  },
   calculationPanel: {
-    backgroundColor: tokens.colorNeutralBackground3,
-    borderLeft: `1px solid ${tokens.colorNeutralStroke2}`,
+    backgroundColor: tokens.colorNeutralBackground1,
+    border: `1px solid ${tokens.colorNeutralStroke2}`,
     display: "flex",
     flexDirection: "column",
-    gap: "8px",
+    gap: "20px",
     padding: "32px",
-    width: "596px",
+    flex: "1 1 0",
+    minWidth: 0,
+    height: "fit-content",
+    position: "sticky" as const,
+    top: "24px",
+    borderRadius: "16px",
   },
   totalHeading: {
     display: "flex",
     alignItems: "center",
-    justifyContent: "space-between",
-    paddingBottom: "10px",
-    borderBottom: `0.5px solid ${tokens.colorNeutralStroke1}`,
+    gap: "10px",
     width: "100%",
   },
   totalText: {
-    fontSize: "24px",
-    lineHeight: "32px",
+    fontSize: "20px",
+    lineHeight: "28px",
     fontWeight: 700,
-    color: tokens.colorBrandBackground,
-    flex: "1 0 0",
-    maxWidth: "380px",
-    paddingRight: "24px",
+    color: tokens.colorNeutralForeground1,
     margin: 0,
   },
   totalValue: {
-    fontSize: "24px",
-    lineHeight: "32px",
+    fontSize: "20px",
+    lineHeight: "28px",
     fontWeight: 700,
-    color: tokens.colorBrandBackground,
+    color: tokens.colorNeutralForeground1,
     margin: 0,
   },
   expandedSection: {
@@ -344,11 +433,14 @@ const useStyles = makeStyles({
   calcSectionContainer: {
     display: "flex",
     flexDirection: "column",
-    gap: "8px",
-    minWidth: "400px",
-    borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,
-    paddingBottom: "20px",
+    gap: "12px",
     width: "100%",
+    paddingBottom: "20px",
+    borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,
+    '&:last-child': {
+      borderBottom: "none",
+      paddingBottom: 0,
+    },
   },
   calcH4Container: {
     display: "flex",
@@ -404,8 +496,45 @@ const useStyles = makeStyles({
   },
   calcItemRow: {
     display: "flex",
-    gap: "0px",
+    alignItems: "baseline",
+    gap: "8px",
     width: "100%",
+    boxSizing: "border-box" as const,
+    paddingTop: "4px",
+    paddingBottom: "4px",
+    paddingLeft: "15px",
+  },
+  calcNegationRow: {
+    display: "flex",
+    alignItems: "baseline",
+    gap: "8px",
+    width: "100%",
+    boxSizing: "border-box" as const,
+    paddingTop: "4px",
+    paddingBottom: "4px",
+    paddingLeft: "15px",
+  },
+  calcNegationLabel: {
+    fontSize: "14px",
+    lineHeight: "20px",
+    color: tokens.colorNeutralForeground2,
+    margin: 0,
+  },
+  calcLeader: {
+    flex: "1 1 0",
+    borderBottom: `1px dashed ${tokens.colorNeutralStroke2}`,
+    minWidth: "16px",
+    alignSelf: "baseline" as const,
+    marginBottom: "4px",
+  },
+  calcNegationValue: {
+    fontSize: "20px",
+    lineHeight: "28px",
+    fontWeight: 600,
+    color: "#107c41",
+    margin: 0,
+    flexShrink: 0,
+    whiteSpace: "nowrap" as const,
   },
   calcItemContent: {
     display: "flex",
@@ -434,18 +563,19 @@ const useStyles = makeStyles({
     borderRadius: "9999px",
   },
   calcItemLabel: {
-    flex: "1 0 0",
     fontSize: "14px",
     lineHeight: "20px",
-    color: tokens.colorNeutralForeground1,
-    maxWidth: "360px",
+    color: tokens.colorNeutralForeground2,
     margin: 0,
   },
   calcItemValue: {
-    fontSize: "14px",
-    lineHeight: "20px",
+    fontSize: "20px",
+    lineHeight: "28px",
+    fontWeight: 600,
     color: tokens.colorNeutralForeground1,
     margin: 0,
+    flexShrink: 0,
+    whiteSpace: "nowrap" as const,
   },
   calcDescription: {
     display: "flex",
@@ -469,7 +599,7 @@ const useStyles = makeStyles({
     justifyContent: "center",
     maxWidth: "1200px",
     width: "800px",
-    paddingBottom: "48px",
+    paddingBottom: "96px",
     paddingLeft: "56px",
     paddingRight: "56px",
   },
@@ -499,735 +629,896 @@ const useStyles = makeStyles({
   tableInput: {
     flex: "1 0 0",
   },
+  sectionHeader: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px",
+  },
+  toolsTable: {
+    display: "flex",
+    flexDirection: "column",
+    borderRadius: "8px",
+    overflow: "hidden",
+    border: `1px solid ${tokens.colorNeutralStroke2}`,
+  },
+  toolsTableHeader: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr 1fr",
+    gap: "16px",
+    padding: "12px 16px",
+    backgroundColor: tokens.colorBrandBackground2,
+  },
+  toolsTableHeaderCell: {
+    fontSize: "14px",
+    lineHeight: "20px",
+    fontWeight: 600,
+    color: tokens.colorNeutralForeground1,
+    margin: 0,
+  },
+  toolsTableRow: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr 1fr",
+    gap: "16px",
+    padding: "12px 16px",
+    alignItems: "center",
+    borderTop: `1px solid ${tokens.colorNeutralStroke2}`,
+  },
+  toolsTableCell: {
+    fontSize: "14px",
+    lineHeight: "20px",
+    color: tokens.colorNeutralForeground1,
+    margin: 0,
+  },
 });
+
+type ProductCategory = "Employee facing custom" | "Customer facing custom" | "Dynamics 365 Sales" | "Dynamics 365 Service" | "Business Central" | "M365" | "";
+
+interface Product {
+  id: number;
+  productId: string;
+  category: ProductCategory;
+  name: string;
+  agentType: "customer-facing" | "employee-facing" | "";
+  m365LicenseCount: string;
+  customerOrPartner: "customer" | "partner" | "";
+  users: string;
+  interactionsPerMonth: string;
+  turnsPerInteraction: string;
+  knowledgePercent: string;
+  tenantGraphPercent: string;
+  usePrompt: boolean;
+  useAgentFlow: boolean;
+  useComputerUse: boolean;
+  useCustomConnector: boolean;
+  useMCP: boolean;
+  useRESTAPI: boolean;
+  promptCount: string;
+  promptFreq: string;
+  agentFlowCount: string;
+  agentFlowFreq: string;
+  computerUseCount: string;
+  computerUseFreq: string;
+  customConnectorCount: string;
+  customConnectorFreq: string;
+  mcpCount: string;
+  mcpFreq: string;
+  restApiCount: string;
+  restApiFreq: string;
+  promptBasicCount: string;
+  promptBasicFreq: string;
+  promptStandardCount: string;
+  promptStandardFreq: string;
+  promptPremiumCount: string;
+  promptPremiumFreq: string;
+  agentFlowConfiguredCount: string;
+  agentFlowActionsCount: string;
+}
+
+interface ProductDefinition {
+  id: string;
+  name: string;
+  description: string;
+  category: ProductCategory;
+}
+
+const AllProducts: ProductDefinition[] = [
+  // Dynamics 365 Service
+  { id: "customer-intent", name: "Customer intent agent", description: "Present your services, products and yourself in professional way.", category: "Dynamics 365 Service" },
+  { id: "customer-knowledge", name: "Customer knowledge management agent", description: "Manage and organize customer knowledge effectively.", category: "Dynamics 365 Service" },
+  { id: "case-management", name: "Case management agent", description: "Streamline case management workflows.", category: "Dynamics 365 Service" },
+  { id: "quality-eval", name: "Quality evaluation agent", description: "Evaluate and improve service quality.", category: "Dynamics 365 Service" },
+  // Dynamics 365 Sales
+  { id: "sales-qualification", name: "Sales qualification agent", description: "Qualify leads and prioritize sales opportunities.", category: "Dynamics 365 Sales" },
+];
 
 function App() {
   const styles = useStyles();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<ProductCategory[]>([]);
+  const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
+
+  const toggleCategory = (category: ProductCategory) => {
+    setSelectedCategories(prev =>
+      prev.includes(category)
+        ? prev.filter(c => c !== category)
+        : [...prev, category]
+    );
+  };
+
+  const visibleProducts = AllProducts.filter(p => selectedCategories.includes(p.category));
+
+  const addProduct = (productId: string, productName: string, category: ProductCategory) => {
+    // Count how many of this product type already exist
+    const existingCount = products.filter(p => p.productId === productId).length;
+    const numberedName = `${productName} ${existingCount + 1}`;
+    
+    const newProduct: Product = {
+      id: Date.now(),
+      productId: productId,
+      category: category,
+      name: numberedName,
+      agentType: "",
+      m365LicenseCount: "",
+      customerOrPartner: "",
+      users: "",
+      interactionsPerMonth: "",
+      turnsPerInteraction: "",
+      knowledgePercent: "",
+      tenantGraphPercent: "",
+      usePrompt: false,
+      useAgentFlow: false,
+      useComputerUse: false,
+      useCustomConnector: false,
+      useMCP: false,
+      useRESTAPI: false,
+      promptCount: "",
+      promptFreq: "",
+      agentFlowCount: "",
+      agentFlowFreq: "",
+      computerUseCount: "",
+      computerUseFreq: "",
+      customConnectorCount: "",
+      customConnectorFreq: "",
+      mcpCount: "",
+      mcpFreq: "",
+      restApiCount: "",
+      restApiFreq: "",
+      promptBasicCount: "",
+      promptBasicFreq: "",
+      promptStandardCount: "",
+      promptStandardFreq: "",
+      promptPremiumCount: "",
+      promptPremiumFreq: "",
+      agentFlowConfiguredCount: "",
+      agentFlowActionsCount: "",
+    };
+    
+    setProducts([...products, newProduct]);
+    setSelectedProductIds([...selectedProductIds, productId]);
+  };
+
+  const removeProduct = (id: number, productId: string) => {
+    setProducts(products.filter(p => p.id !== id));
+    setSelectedProductIds(selectedProductIds.filter(pid => pid !== productId));
+  };
+
+  const updateProduct = (id: number, updates: Partial<Product>) => {
+    setProducts(products.map(p => p.id === id ? { ...p, ...updates } : p));
+  };
+
+  const calculateProductCredits = (product: Product): number => {
+    const users = parseInt(product.users) || 0;
+    const m365Count = parseInt(product.m365LicenseCount) || 0;
+    const interactions = parseInt(product.interactionsPerMonth) || 0;
+    const knowledgePct = (parseInt(product.knowledgePercent) || 0) / 100;
+    const tenantGraphPct = (parseInt(product.tenantGraphPercent) || 0) / 100;
+    const otherKnowledgePct = 1 - tenantGraphPct;
+
+    // Billable users (zero-rated for M365 Copilot license holders)
+    const billableUsers = Math.max(users - m365Count, 0);
+    const agentTraffic = billableUsers * interactions;
+
+    // Knowledge messages
+    const trafficRequiringKnowledge = agentTraffic * knowledgePct;
+    const ttgMessages = trafficRequiringKnowledge * tenantGraphPct * 12;
+    const otherKnowledgeMessages = trafficRequiringKnowledge * otherKnowledgePct * 2;
+    const knowledgeMessages = ttgMessages + otherKnowledgeMessages;
+
+    // Agent tools/actions messages (generative): billableUsers * interactions * toolInvocations * 5 messages per tool
+    const promptToolCount = parseInt(product.promptCount) || 0;
+    const computerUseCount = parseInt(product.computerUseCount) || 0;
+    const customConnectorCount = parseInt(product.customConnectorCount) || 0;
+    const mcpCount = parseInt(product.mcpCount) || 0;
+    const restApiCount = parseInt(product.restApiCount) || 0;
+    const totalToolInvocations = promptToolCount + computerUseCount + customConnectorCount + mcpCount + restApiCount;
+    const actionsMessages = agentTraffic * totalToolInvocations * 5;
+
+    // Agent flows: # of flows x # runs per month x 1.69
+    const flowsConfigured = parseInt(product.agentFlowConfiguredCount) || 0;
+    const flowActionsCount = parseInt(product.agentFlowActionsCount) || 0;
+    // Using 0.13 per action (13 messages per 100 actions)
+    const flowsMessages = flowsConfigured * flowActionsCount * 0.13 * interactions;
+
+    // Optional modifiers (prompts) with Copilot license zero-rating
+    const copilotRatio = users > 0 ? (users - m365Count) / users : 1;
+    const basicCount = parseInt(product.promptBasicCount) || 0;
+    const basicFreq = parseFloat(product.promptBasicFreq) || 0;
+    const standardCount = parseInt(product.promptStandardCount) || 0;
+    const standardFreq = parseFloat(product.promptStandardFreq) || 0;
+    const premiumCount = parseInt(product.promptPremiumCount) || 0;
+    const premiumFreq = parseFloat(product.promptPremiumFreq) || 0;
+
+    // Basic: # prompts x 0.1 message x 3.073 x copilotRatio
+    const basicMessages = basicCount * basicFreq * 0.1 * 3.073 * copilotRatio;
+    // Standard: # prompts x 1.5 messages x 4.945 x copilotRatio
+    const standardMessages = standardCount * standardFreq * 1.5 * 4.945 * copilotRatio;
+    // Premium: # prompts x 10 messages x 7.091 x copilotRatio
+    const premiumMessages = premiumCount * premiumFreq * 10 * 7.091 * copilotRatio;
+    const modifierMessages = basicMessages + standardMessages + premiumMessages;
+
+    // Determine agent type from category
+    const isB2C = product.category === "Customer facing custom";
+    // B2C excludes TTG messages
+    const totalMessages = isB2C
+      ? otherKnowledgeMessages + actionsMessages + flowsMessages + modifierMessages
+      : ttgMessages + otherKnowledgeMessages + actionsMessages + flowsMessages + modifierMessages;
+
+    return Math.round(totalMessages);
+  };
+
+  const totalCredits = products.reduce((sum, product) => sum + calculateProductCredits(product), 0);
 
   return (
     <FluentProvider theme={webLightTheme}>
-      <div className={styles.root}>
-        <div className={styles.browserContainer}>
-          {/* Browser Bar */}
-          <div className={styles.browserBar}>
-            <div className={styles.avatar}>
-              <img src={avatarImg} alt="" className={styles.avatarImage} />
-            </div>
-            
-            <div className={styles.actionsLeft}>
-              <Button
-                appearance="subtle"
-                size="small"
-                icon={<ArrowClockwiseRegular />}
-                className={styles.browserButton}
-              />
-              <Button
-                appearance="subtle"
-                size="small"
-                icon={<ArrowClockwiseRegular />}
-                className={styles.browserButton}
-              />
-            </div>
-
-            <div className={styles.searchBar}>
-              <Button
-                appearance="subtle"
-                size="small"
-                icon={<ArrowClockwiseRegular />}
-                className={styles.browserButton}
-              />
-              <div className={styles.searchText}>
-                https://www.copilotstudio.microsoft.com
-              </div>
-              <Button
-                appearance="subtle"
-                size="small"
-                icon={<ArrowClockwiseRegular />}
-                className={styles.browserButton}
-              />
-            </div>
-
-            <div className={styles.actionsRight}>
-              <Button appearance="subtle" size="small" icon={<StarAddRegular />} className={styles.browserButton} />
-              <Button appearance="subtle" size="small" icon={<LockClosedRegular />} className={styles.browserButton} />
-              <Button appearance="subtle" size="small" icon={<MoreHorizontalRegular />} className={styles.browserButton} />
-            </div>
-
-            <div className={styles.win11Commands}>
-              <div className={styles.win11Button}>−</div>
-              <div className={styles.win11Button}>□</div>
-              <div className={styles.win11Button}>×</div>
-            </div>
-          </div>
-
-          {/* App Container */}
-          <div className={styles.appContainer}>
-            <div className={styles.bodyContainer}>
-              <div className={styles.mainContent}>
-                {/* Header */}
+      <div className={styles.appContainer}>
+        <div className={styles.bodyContainer}>
+              {/* Header */}
+              <div style={{ width: "100%", marginBottom: "32px" }}>
                 <div className={styles.headerSection}>
-                  <div className={styles.h1Container}>
+                  <div className={styles.headerCard}>
                     <p className={styles.headline}>Microsoft agent usage estimator</p>
                     <p className={styles.headerDescription}>
-                      Use the estimator to forecast your agent's Copilot credit volume. Select from licensing options, agent types, and the features your agent leverages to respond to your end users. See the credit consumption impact based on these selections. This estimator provides a monthly credit informational estimate for a single agent and makes no guarantees of final costs. This isn't a pricing calculator, so you should not rely on it to make cost decisions or to make any definite forecasts around your monthly expenses.
+                      Use the estimator to forecast your agent's Copilot credit volume. Select from licensing options, agent types, and the features your agent leverages to respond to your end users. See the Copilot credit consumption impact based on these selections. This estimator provides a monthly Copilot credit informational estimate for a single agent and makes no guarantees of final costs. While message rates and currency converter links are provided here for your convenience, this tool should not be used as a pricing calculator or a way to create definite forecasts around your monthly expenses.
                     </p>
                   </div>
 
-                  <div className={styles.creditContainer}>
-                    <div className={styles.creditConversion}>
-                      <p className={styles.creditTitle}>1 Copilot credit = $0.01</p>
+                  <div className={styles.creditCard} style={{ marginTop: "6px" }}>
+                    <div className={styles.creditContent}>
+                      <p className={styles.creditTitle}>1 Copilot credit = $.01</p>
                       <p className={styles.creditLink}>
                         Go <Link href="#">here</Link> to convert to your currency.
                       </p>
                     </div>
                   </div>
-                </div>
 
-                {/* Nav Container */}
-                <div className={styles.navContainer}>
-                  <div className={styles.navButtons}>
-                    <Button appearance="primary">ID Help me</Button>
-                    <Button appearance="secondary">Read</Button>
-                    <Button appearance="secondary">Download results</Button>
-                    <Button appearance="secondary">Buy Copilot credits</Button>
-                    <Button appearance="secondary">Free Copilot chat</Button>
+                  <div className={styles.navContainer} style={{ marginTop: "24px" }}>
+                    <Button appearance="primary" size="large" icon={<ArrowSyncRegular />}>Reset</Button>
+                    <Button appearance="outline" size="large" icon={<ArrowDownloadRegular />}>Download Results</Button>
+                    <Button appearance="outline" size="large">Buy Copilot Credits</Button>
+                    <Button appearance="outline" size="large">Free Copilot Chat</Button>
                   </div>
                 </div>
+              </div>
 
-                {/* Agent Type Section */}
-                <div className={styles.section}>
-                  <div className={styles.radioContainer}>
+              {/* Product Category Selection */}
+              <div style={{ width: "100%", marginBottom: "16px" }}>
+                <div className={styles.productCategorySection}>
+                  <div>
+                    <h2 style={{ fontSize: "20px", fontWeight: 600, margin: 0, marginBottom: "8px" }}>
+                      Select product category
+                    </h2>
                     <p className={styles.sectionDescription}>
-                      Choose which type of agent you'll add most frequently. You can layer expenses for various types in a single tenant by running the estimator for distinct agent types & scenarios separately for subsequent aggregation, to create a comprehensive estimation.
+                      Choose a product category to begin configuring your agent estimation.
                     </p>
-                  </div>
-                  <RadioGroup layout="horizontal">
-                    <Radio value="copilot-chat" label="Copilot Chat employee facing agent (Copilot Studio Lite)" />
-                    <Radio value="standard" label="Custom engine agent (Standard)" />
-                    <Radio value="custom" label="Custom engine automation (Studio)" />
-                  </RadioGroup>
-                </div>
-
-                {/* Licensing Inputs */}
-                <div className={styles.inputsRow}>
-                  <div className={styles.inputColumn}>
-                    <p className={styles.sectionDescription}>
-                      Do any users have Microsoft 365 Copilot licenses?
-                    </p>
-                    <RadioGroup layout="horizontal">
-                      <Radio value="yes" label="Yes" />
-                      <Radio value="no" label="No" />
-                    </RadioGroup>
                   </div>
                   
-                  <div className={styles.inputColumn}>
-                    <Label>How many users have Microsoft 365 Copilot licenses?</Label>
-                    <Input appearance="outline" size="medium" placeholder="Placeholder text" />
-                  </div>
-                </div>
-
-                {/* Agent Traffic Section */}
-                <div className={`${styles.section} ${styles.sectionBorder}`}>
-                  <div className={styles.h4Container}>
-                    <div className={styles.h4Content}>
-                      <p className={styles.h4Title}>Agent traffic</p>
-                      <p className={styles.sectionDescription}>
-                        Agent traffic quantifies the activity an agent supports by assessing the number of end users accessing the agent and their monthly engagement frequency.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className={styles.inputsRow}>
-                    <div className={styles.inputColumn}>
-                      <Label>How many users?</Label>
-                      <Input appearance="outline" size="medium" placeholder="Placeholder text" />
-                    </div>
-                    <div className={styles.inputColumn}>
-                      <Label>On average, how many times per month will your users interact with your agent?</Label>
-                      <Input appearance="outline" size="medium" placeholder="Placeholder text" />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Agent Orchestration Section */}
-                <div className={`${styles.section} ${styles.sectionBorder}`}>
-                  <div className={styles.h4Container}>
-                    <div className={styles.h4Content}>
-                      <p className={styles.h4Title}>Agent orchestration</p>
-                      <p className={styles.sectionDescription}>
-                        Orchestration involves managing and coordinating an agent's capabilities and actions to effectively respond to user queries and perform tasks.
-                      </p>
-                      <Link href="#">Learn more</Link>
-                    </div>
-                  </div>
-
-                  <p className={styles.sectionDescription}>
-                    What type of orchestration will you use?
-                  </p>
-                  <RadioGroup layout="horizontal">
-                    <Radio value="generative" label="Generative" />
-                    <Radio value="classic" label="Classic" />
-                  </RadioGroup>
-                </div>
-
-                {/* Agent Knowledge Section */}
-                <div className={`${styles.section} ${styles.sectionBorder}`}>
-                  <div className={styles.h4Container}>
-                    <div className={styles.h4Content}>
-                      <p className={styles.h4Title}>Agent knowledge</p>
-                      <p className={styles.sectionDescription}>
-                        Knowledge sources enable agents to provide relevant information and insights. Published agents use configured knowledge sources to ground their responses.
-                      </p>
-                      <Link href="#">Learn more</Link>
-                    </div>
-                  </div>
-
-                  <div className={styles.inputColumn}>
-                    <Label>What is the percentage of agent responses are from knowledge added to your agent? *</Label>
-                    <Input appearance="outline" size="medium" placeholder="Placeholder text" />
-                  </div>
-
-                  <div className={styles.inputsRow} style={{ paddingLeft: "36px", gap: "24px" }}>
-                    <div className={styles.inputColumn}>
-                      <Label>What is the percentage of knowledge responses from tenant graph grounding?</Label>
-                      <Input appearance="outline" size="medium" placeholder="Placeholder text" />
-                    </div>
-                    <div className={styles.outputColumn}>
-                      <p className={styles.outputLabel}>All other knowledge</p>
-                      <p className={styles.outputValue}>100%</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Agent Actions & Topics Section */}
-                <div className={`${styles.section} ${styles.sectionBorder}`}>
-                  <div style={{ display: "flex", gap: "20px", width: "100%" }}>
-                    <div style={{ flex: "1 0 0", maxWidth: "596px" }}>
-                      <div className={styles.h4Content}>
-                        <p className={styles.h4Title}>Agent actions and topics</p>
-                        <p className={styles.sectionDescription}>
-                          Help agents answer a query, execute workflows, connect to external systems, or provide topic-specific guidance.
-                        </p>
-                      </div>
-                    </div>
-                    <div className={styles.outputColumn}>
-                      <p className={styles.outputLabel}>Number of Copilot credits that charge for actions and topics</p>
-                      <p className={styles.outputValue}>100%</p>
-                    </div>
-                  </div>
-
-                  <div className={styles.inputsRow} style={{ gap: "24px" }}>
-                    <div className={styles.inputColumn}>
-                      <Label>How many agent flows have you configured for your agent (either within a topic or standalone agent action)?</Label>
-                      <Link href="#">Learn more</Link>
-                      <Input appearance="outline" size="medium" placeholder="Placeholder text" />
-                    </div>
-                    <div className={styles.inputColumn}>
-                      <Label>How often will these flows run per month?</Label>
-                      <Input appearance="outline" size="medium" placeholder="Placeholder text" />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Agent Topics Section */}
-                <div className={`${styles.section} ${styles.sectionBorder}`}>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "24px", width: "100%" }}>
-                    <div style={{ flex: "1 0 0" }}>
-                      <div className={styles.h4Content}>
-                        <p className={styles.h4Title}>Agent topics</p>
-                        <p className={styles.sectionDescription}>
-                          Help agents answer a query, execute workflows, connect to external systems, or provide topic-specific guidance.
-                        </p>
-                      </div>
-                    </div>
-                    <div className={styles.outputColumn}>
-                      <p className={styles.outputLabel}>All other knowledge</p>
-                      <p className={styles.outputValue}>100%</p>
-                    </div>
-                  </div>
-
-                  <div className={styles.inputsRow} style={{ gap: "24px" }}>
-                    <div className={styles.inputColumn}>
-                      <Label>How many agent flows are included in your topics?</Label>
-                      <Link href="#">Learn more</Link>
-                      <Input appearance="outline" size="medium" placeholder="Placeholder text" />
-                    </div>
-                    <div className={styles.inputColumn}>
-                      <Label>How often will these flows run per month?</Label>
-                      <Input appearance="outline" size="medium" placeholder="Placeholder text" />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Autonomous Triggers Section */}
-                <div className={`${styles.section} ${styles.sectionBorder}`}>
-                  <div className={styles.h4Container}>
-                    <div className={styles.h4Content}>
-                      <p className={styles.h4Title}>Agent autonomous triggers</p>
-                      <p className={styles.sectionDescription}>
-                        These triggers act independently in response to specific events, without requiring user input to automate workflows and processes.
-                      </p>
-                      <Link href="#">Learn more</Link>
-                    </div>
-                  </div>
-
-                  <div style={{ display: "flex", flexDirection: "column", gap: "20px", width: "100%" }}>
-                    <div className={styles.inputColumn}>
-                      <Label>How many triggers will you add to your agent (if any)?</Label>
-                      <Input appearance="outline" size="medium" placeholder="Placeholder text" />
-                    </div>
-
-                    <div style={{ display: "flex", flexDirection: "column", gap: "20px", width: "100%" }}>
-                      {/* Trigger 1 */}
-                      <div style={{ display: "flex", flexDirection: "column", gap: "10px", width: "100%" }}>
-                        <p className={styles.h6Title}>Trigger 1</p>
-
-                        <div style={{ display: "flex", flexDirection: "column", gap: "20px", width: "100%" }}>
-                          <div className={styles.inputsRow} style={{ gap: "24px" }}>
-                            <div className={styles.inputColumn}>
-                              <Label>How often will this trigger event occur each month?</Label>
-                              <Input appearance="outline" size="medium" placeholder="Placeholder text" />
+                  <div className={styles.categoryCatalogGrid}>
+                    {[
+                      { name: "Employee facing custom" as ProductCategory, description: "Custom agents for internal employee-facing scenarios.", icon: <PeopleRegular /> },
+                      { name: "Customer facing custom" as ProductCategory, description: "Custom agents for external customer-facing scenarios.", icon: <PersonRegular /> },
+                      { name: "Dynamics 365 Sales" as ProductCategory, description: "Pre-built agents for Dynamics 365 Sales workflows.", icon: <ShoppingBagRegular /> },
+                      { name: "Dynamics 365 Service" as ProductCategory, description: "Pre-built agents for Dynamics 365 Service workflows.", icon: <BuildingRegular /> },
+                      { name: "Business Central" as ProductCategory, description: "Pre-built agents for Business Central workflows.", icon: <CartRegular /> },
+                      { name: "M365" as ProductCategory, description: "Pre-built agents for Microsoft 365 scenarios.", icon: <AppGenericRegular /> },
+                    ].map(cat => {
+                      const isSelected = selectedCategories.includes(cat.name);
+                      return (
+                        <div
+                          key={cat.name}
+                          className={`${styles.categoryCatalogItem} ${isSelected ? styles.categoryCatalogItemSelected : ''}`}
+                          onClick={() => toggleCategory(cat.name)}
+                        >
+                          <div className={styles.chipTopRow}>
+                            <div className={styles.chipIcon}>
+                              {cat.icon}
                             </div>
-                            <div className={styles.inputColumn}>
-                              <p className={styles.sectionDescription}>
-                                Will this trigger use deep reasoning?
-                              </p>
-                              <RadioGroup layout="horizontal">
-                                <Radio value="yes" label="Yes" />
-                                <Radio value="no" label="No" />
-                              </RadioGroup>
+                            <div className={styles.chipContent}>
+                              <h4 className={styles.chipTitle}>{cat.name}</h4>
+                              <p className={styles.chipDescription}>{cat.description}</p>
                             </div>
-                          </div>
-
-                          <div className={styles.inputsRow} style={{ gap: "24px" }}>
-                            <div className={styles.inputColumn}>
-                              <Label>How many agent actions will this trigger use?</Label>
-                              <Input appearance="outline" size="medium" placeholder="Placeholder text" />
-                            </div>
-                            <div className={styles.inputColumn}>
-                              <Label>How many of these agent actions are agent flows (if any)?</Label>
-                              <Link href="#">Learn more</Link>
-                              <Input appearance="outline" size="medium" placeholder="Placeholder text" />
+                            <div className={styles.chipActions}>
+                              <Checkbox
+                                size="large"
+                                checked={isSelected}
+                                onChange={() => {}}
+                              />
                             </div>
                           </div>
                         </div>
-                      </div>
-
-                      {/* Trigger 2 */}
-                      <div style={{ display: "flex", flexDirection: "column", gap: "10px", width: "100%" }}>
-                        <p className={styles.h6Title}>Trigger 2</p>
-
-                        <div style={{ display: "flex", flexDirection: "column", gap: "20px", width: "100%" }}>
-                          <div className={styles.inputsRow} style={{ gap: "24px" }}>
-                            <div className={styles.inputColumn}>
-                              <Label>How often will this trigger event occur each month?</Label>
-                              <Input appearance="outline" size="medium" placeholder="Placeholder text" />
-                            </div>
-                            <div className={styles.inputColumn}>
-                              <p className={styles.sectionDescription}>
-                                Will this trigger use deep reasoning?
-                              </p>
-                              <RadioGroup layout="horizontal">
-                                <Radio value="yes" label="Yes" />
-                                <Radio value="no" label="No" />
-                              </RadioGroup>
-                            </div>
-                          </div>
-
-                          <div className={styles.inputsRow} style={{ gap: "24px" }}>
-                            <div className={styles.inputColumn}>
-                              <Label>How many agent actions will this trigger use?</Label>
-                              <Input appearance="outline" size="medium" placeholder="Placeholder text" />
-                            </div>
-                            <div className={styles.inputColumn}>
-                              <Label>How many of these agent actions are agent flows (if any)?</Label>
-                              <Input appearance="outline" size="medium" placeholder="Placeholder text" />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Optional Modifiers Section */}
-                <div className={styles.section} style={{ paddingBottom: "20px" }}>
-                  <div className={styles.h4Container}>
-                    <div className={styles.h4Content}>
-                      <p className={styles.h4Title}>Agent optional modifiers</p>
-                      <p className={styles.sectionDescription}>
-                        These features are not required for agents but drive additional Copilot credit consumption.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className={styles.section}>
-                    <p style={{ fontSize: "16px", lineHeight: "24px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, width: "100%" }}>
-                      Will you use prompt tools?
-                    </p>
-                    <Link href="#">Learn more</Link>
-                    <RadioGroup layout="horizontal">
-                      <Radio value="yes" label="Yes" />
-                      <Radio value="no" label="No" />
-                    </RadioGroup>
-                  </div>
-
-                  {/* Prompts Table */}
-                  <div style={{ display: "flex", flexDirection: "column", gap: "20px", width: "100%" }}>
-                    <div style={{ display: "flex", gap: "8px", alignItems: "flex-start", justifyContent: "center", width: "100%" }}>
-                      <div style={{ display: "flex", flexDirection: "column", flex: "1 0 0", maxWidth: "155px", alignItems: "flex-start", justifyContent: "flex-end" }}>
-                        <p style={{ fontSize: "16px", lineHeight: "22px", color: "black", margin: 0, width: "100%" }}>Prompt model type</p>
-                        <Link href="#">Learn more</Link>
-                      </div>
-                      <p style={{ flex: "1 0 0", fontSize: "16px", lineHeight: "22px", color: "black", margin: 0 }}>How many prompts?</p>
-                      <p style={{ flex: "1 0 0", fontSize: "16px", lineHeight: "22px", color: "black", margin: 0 }}>How often will they be triggered in your agent?</p>
-                    </div>
-
-                    <div className={styles.tableRow}>
-                      <p className={styles.tableLabel}>Basic GPT-4o mini</p>
-                      <Input appearance="outline" size="medium" placeholder="Placeholder text" className={styles.tableInput} />
-                      <Input appearance="outline" size="medium" placeholder="Placeholder text" className={styles.tableInput} />
-                    </div>
-
-                    <div className={styles.tableRow}>
-                      <p className={styles.tableLabel}>Standard GPT-4o</p>
-                      <Input appearance="outline" size="medium" placeholder="Placeholder text" className={styles.tableInput} />
-                      <Input appearance="outline" size="medium" placeholder="Placeholder text" className={styles.tableInput} />
-                    </div>
-
-                    <div className={styles.tableRow}>
-                      <p className={styles.tableLabel}>Premium o1-preview</p>
-                      <Input appearance="outline" size="medium" placeholder="Placeholder text" className={styles.tableInput} />
-                      <Input appearance="outline" size="medium" placeholder="Placeholder text" className={styles.tableInput} />
-                    </div>
-                  </div>
-
-                  <div className={styles.section}>
-                    <p style={{ fontSize: "16px", lineHeight: "24px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, width: "100%" }}>
-                      Is code interpreter enabled?
-                    </p>
-                    <Link href="#">Learn more</Link>
-                    <RadioGroup layout="horizontal">
-                      <Radio value="yes" label="Yes" />
-                      <Radio value="no" label="No" />
-                    </RadioGroup>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
 
-              {/* Calculation Panel */}
-              <div className={styles.calculationContainer}>
-                <div className={styles.calculationPanel}>
-                  <div>
-                    <div className={styles.totalHeading}>
-                      <p className={styles.totalText}>Total estimated Copilot credits</p>
-                      <p className={styles.totalValue}>-</p>
-                    </div>
-                  </div>
-
-                  <div className={styles.expandedSection}>
-                    {/* Knowledge Section */}
-                    <div className={styles.calcSectionContainer}>
-                      <div className={styles.calcH4Container}>
-                        <div className={styles.calcH4Heading}>
-                          <p className={styles.calcH4Text}>
-                            Copilot credits driven by knowledge
-                          </p>
-                          <p className={styles.calcH4Value}>0</p>
-                        </div>
-                      </div>
-
-                      <div className={styles.calcH6Container}>
-                        <div className={styles.calcItemRow}>
-                          <div className={styles.calcItemContent}>
-                            <div className={styles.calcItemText}>
-                              <div className={styles.bulletContainer}>
-                                <div className={styles.bullet} />
-                              </div>
-                              <p className={styles.calcItemLabel}>
-                                Copilot credits consumed for tenant graph grounding (10 Copilot credits) + generative answers (2 Copilot credits)
-                              </p>
-                            </div>
-                            <p className={styles.calcItemValue}>-</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className={styles.calcH6Container}>
-                        <div className={styles.calcItemRow}>
-                          <div className={styles.calcItemContent}>
-                            <div className={styles.calcItemText}>
-                              <div className={styles.bulletContainer}>
-                                <div className={styles.bullet} />
-                              </div>
-                              <p className={styles.calcItemLabel}>
-                                Copilot credits consumed for non-tenant graph grounding (2 Copilot credits): Dataverse, web, files
-                              </p>
-                            </div>
-                            <p className={styles.calcItemValue}>-</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className={styles.calcH6Container}>
-                        <div className={styles.calcItemRow}>
-                          <div className={styles.calcItemContent}>
-                            <div className={styles.calcItemText}>
-                              <div className={styles.bulletContainer}>
-                                <div className={styles.bullet} />
-                              </div>
-                              <p className={styles.calcItemLabel} style={{ fontStyle: "italic" }}>
-                                Copilot credits negated for users with Microsoft 365 Copilot licenses
-                              </p>
-                            </div>
-                            <p className={styles.calcItemValue}>-</p>
-                          </div>
-                        </div>
-                      </div>
+              {/* Product Selection Section */}
+              {visibleProducts.length > 0 && (
+                <div style={{ width: "100%", marginBottom: "16px" }}>
+                  <div className={styles.productSelectionSection}>
+                    <div>
+                      <h2 style={{ fontSize: "20px", fontWeight: 600, margin: 0, marginBottom: "8px" }}>
+                        Add your product or products
+                      </h2>
+                      <p className={styles.sectionDescription}>
+                        Choose the products you want to configure.
+                      </p>
                     </div>
 
-                    {/* Actions & Topics Section */}
-                    <div className={styles.calcSectionContainer}>
-                      <div className={styles.calcH4Container}>
-                        <div className={styles.calcH4Heading}>
-                          <p className={styles.calcH4Text}>
-                            Copilot credits driven by agent actions and topics
-                          </p>
-                          <p className={styles.calcH4Value}>0</p>
-                        </div>
-                      </div>
-
-                      <div className={styles.calcH6Container}>
-                        <div className={styles.calcItemRow}>
-                          <div className={styles.calcItemContent}>
-                            <div className={styles.calcItemText}>
-                              <div className={styles.bulletContainer}>
-                                <div className={styles.bullet} />
-                              </div>
-                              <p className={styles.calcItemLabel}>
-                                Number of Copilot credits that charge for actions and topics
-                              </p>
-                            </div>
-                            <p className={styles.calcItemValue}>0</p>
+                    <div className={styles.productChipsGrid}>
+                      {visibleProducts.map(product => (
+                        <div key={product.id} className={styles.productChip}>
+                          <div className={styles.chipTopRow}>
+                          <div className={styles.chipIcon}>
+                            {product.category.startsWith("Dynamics 365") ? (
+                              <svg width="28" height="28" viewBox="0 0 340 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <defs>
+                                  <linearGradient id="d365_grad0" x1="134.743" y1="-3.542" x2="200.665" y2="169.02" gradientUnits="userSpaceOnUse">
+                                    <stop stopColor="#0B53CE"/>
+                                    <stop offset="1" stopColor="#7252AA"/>
+                                  </linearGradient>
+                                  <linearGradient id="d365_grad1" x1="227.154" y1="331.118" x2="227.154" y2="125.429" gradientUnits="userSpaceOnUse">
+                                    <stop stopColor="#2266E3"/>
+                                    <stop offset="1" stopColor="#AE7FE2"/>
+                                  </linearGradient>
+                                  <linearGradient id="d365_grad2" x1="290.417" y1="201.116" x2="219.854" y2="201.116" gradientUnits="userSpaceOnUse">
+                                    <stop stopColor="#94B9FF"/>
+                                    <stop offset="0.2878" stopColor="#94B9FF" stopOpacity="0.524"/>
+                                    <stop offset="1" stopColor="#538FFF" stopOpacity="0"/>
+                                  </linearGradient>
+                                </defs>
+                                <path d="M42.5 -3.542L290.417 85V206.566C290.417 216.362 280.713 223.202 271.487 219.908L219.583 201.377V132.544C219.583 117.789 210.436 104.58 196.623 99.39L172.491 90.323C167.86 88.583 162.917 92.006 162.917 96.954V181.131L42.5 138.125V-3.542Z" fill="url(#d365_grad0)"/>
+                                <path d="M290.417 109.791C290.417 124.664 281.124 137.978 267.155 143.082L106.25 201.875V343.541L290.417 276.249V109.791Z" fill="url(#d365_grad1)"/>
+                                <path opacity="0.5" d="M290.417 109.791C290.417 124.664 281.124 137.978 267.155 143.082L106.25 201.875V343.541L290.417 276.249V109.791Z" fill="url(#d365_grad2)"/>
+                                <path opacity="0.5" d="M219.588 160.509L162.889 181.251L162.89 264.332C162.89 269.281 167.836 272.705 172.468 270.961L196.648 261.86C210.45 256.664 219.588 243.461 219.588 228.713V160.509Z" fill="#B0ADFF"/>
+                              </svg>
+                            ) : (
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="currentColor" fillOpacity="0.5"/>
+                                <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" fill="none"/>
+                                <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" fill="none"/>
+                              </svg>
+                            )}
                           </div>
-                        </div>
-                        <div className={styles.calcDescription}>
-                          <p className={styles.calcDescriptionText}>
-                            Because you have XX users with a Microsoft 365 Copilot License, XX credits from actions and topics have been subtracted from your credits driven by actions and topics.
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className={styles.calcH6Container}>
-                        <div className={styles.calcItemRow}>
-                          <div className={styles.calcItemContent}>
-                            <div className={styles.calcItemText}>
-                              <div className={styles.bulletContainer}>
-                                <div className={styles.bullet} />
-                              </div>
-                              <p className={styles.calcItemLabel}>
-                                Number of Copilot credits that charge for agent flows
-                              </p>
-                            </div>
-                            <p className={styles.calcItemValue}>0</p>
+                          <div className={styles.chipContent}>
+                            <h4 className={styles.chipTitle}>{product.name}</h4>
+                            <p className={styles.chipDescription}>{product.description}</p>
                           </div>
-                        </div>
-                      </div>
-
-                      <div className={styles.calcH6Container}>
-                        <div className={styles.calcItemRow}>
-                          <div className={styles.calcItemContent}>
-                            <div className={styles.calcItemText}>
-                              <div className={styles.bulletContainer}>
-                                <div className={styles.bullet} />
-                              </div>
-                              <p className={styles.calcItemLabel} style={{ fontStyle: "italic" }}>
-                                Copilot credits negated for users with Microsoft 365 Copilot licenses
-                              </p>
-                            </div>
-                            <p className={styles.calcItemValue}>0</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Autonomous Triggers Section */}
-                    <div className={styles.calcSectionContainer}>
-                      <div className={styles.calcH4Container}>
-                        <div className={styles.calcH4Heading}>
-                          <p className={styles.calcH4Text}>
-                            Copilot credits driven by agent autonomous triggers
-                          </p>
-                          <p className={styles.calcH4Value}>0</p>
-                        </div>
-                      </div>
-
-                      <div className={styles.calcH6Container}>
-                        <div className={styles.calcItemRow}>
-                          <div className={styles.calcItemContent}>
-                            <div className={styles.calcItemText}>
-                              <div className={styles.bulletContainer}>
-                                <div className={styles.bullet} />
-                              </div>
-                              <p className={styles.calcItemLabel}>
-                                Number of Copilot credits that charge trigger 1
-                              </p>
-                            </div>
-                            <p className={styles.calcItemValue}>0</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className={styles.calcH6Container}>
-                        <div className={styles.calcItemRow}>
-                          <div className={styles.calcItemContent}>
-                            <div className={styles.calcItemText}>
-                              <div className={styles.bulletContainer}>
-                                <div className={styles.bullet} />
-                              </div>
-                              <p className={styles.calcItemLabel}>
-                                Number of Copilot credits that charge trigger 2
-                              </p>
-                            </div>
-                            <p className={styles.calcItemValue}>0</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Optional Modifiers Section */}
-                    <div style={{ display: "flex", flexDirection: "column", gap: "8px", paddingBottom: "20px" }}>
-                      <div className={styles.calcH4Container}>
-                        <div className={styles.calcH4Heading}>
-                          <p className={styles.calcH4Text}>
-                            Copilot credits driven by optional modifiers
-                          </p>
-                          <p className={styles.calcH4Value}>0</p>
-                        </div>
-                      </div>
-
-                      <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-                        <div style={{ display: "flex", height: "20px", justifyContent: "space-between" }}>
-                          <p className={styles.calcH5Text}>Prompts</p>
-                          <p className={styles.calcH5Value}>0</p>
-                        </div>
-
-                        <div className={styles.calcH6Container}>
-                          <div className={styles.calcItemRow}>
-                            <div className={styles.calcItemContent}>
-                              <div className={styles.calcItemText}>
-                                <div className={styles.bulletContainer}>
-                                  <div className={styles.bullet} />
-                                </div>
-                                <p className={styles.calcItemLabel}>Basic</p>
-                              </div>
-                              <p className={styles.calcItemValue}>0</p>
+                          <div className={styles.chipActions}>
+                            <div className={styles.badgeWrapper}>
+                              <Button
+                                appearance="primary"
+                                size="small"
+                                icon={<AddRegular />}
+                                onClick={() => addProduct(product.id, product.name, product.category)}
+                              />
+                              {products.filter(p => p.productId === product.id).length > 0 && (
+                                <Badge 
+                                  appearance="filled" 
+                                  color="danger"
+                                  className={styles.countBadge}
+                                  shape="circular"
+                                  size="small"
+                                >
+                                  {products.filter(p => p.productId === product.id).length}
+                                </Badge>
+                              )}
                             </div>
                           </div>
-                          <div className={styles.calcDescription}>
-                            <p className={styles.calcDescriptionText}>
-                              1 Copilot credit per every 10 responses
-                            </p>
                           </div>
+                          <span className={styles.categoryPill}>{product.category}</span>
                         </div>
-
-                        <div className={styles.calcH6Container}>
-                          <div className={styles.calcItemRow}>
-                            <div className={styles.calcItemContent}>
-                              <div className={styles.calcItemText}>
-                                <div className={styles.bulletContainer}>
-                                  <div className={styles.bullet} />
-                                </div>
-                                <p className={styles.calcItemLabel}>Standard</p>
-                              </div>
-                              <p className={styles.calcItemValue}>0</p>
-                            </div>
-                          </div>
-                          <div className={styles.calcDescription}>
-                            <p className={styles.calcDescriptionText}>
-                              15 Copilot credits per every 10 responses
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className={styles.calcH6Container}>
-                          <div className={styles.calcItemRow}>
-                            <div className={styles.calcItemContent}>
-                              <div className={styles.calcItemText}>
-                                <div className={styles.bulletContainer}>
-                                  <div className={styles.bullet} />
-                                </div>
-                                <p className={styles.calcItemLabel}>Premium</p>
-                              </div>
-                              <p className={styles.calcItemValue}>0</p>
-                            </div>
-                          </div>
-                          <div className={styles.calcDescription}>
-                            <p className={styles.calcDescriptionText}>
-                              100 Copilot credits per 10 responses
-                            </p>
-                          </div>
-                        </div>
-
-                        <div style={{ display: "flex", height: "20px", justifyContent: "space-between", marginTop: "8px" }}>
-                          <p className={styles.calcH5Text}>Code interpreter</p>
-                          <p className={styles.calcH5Value}>0</p>
-                        </div>
-
-                        <div className={styles.calcH6Container}>
-                          <div className={styles.calcItemRow}>
-                            <div className={styles.calcItemContent}>
-                              <div className={styles.calcItemText}>
-                                <div className={styles.bulletContainer}>
-                                  <div className={styles.bullet} />
-                                </div>
-                                <p className={styles.calcItemLabel}>
-                                  Copilot credits driven by code interpreter
-                                </p>
-                              </div>
-                              <p className={styles.calcItemValue}>0</p>
-                            </div>
-                          </div>
-                          <div className={styles.calcDescription}>
-                            <p className={styles.calcDescriptionText}>
-                              1 Copilot credit per every 10 responses
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className={styles.calcH6Container}>
-                          <div className={styles.calcItemRow}>
-                            <div className={styles.calcItemContent}>
-                              <div className={styles.calcItemText}>
-                                <div className={styles.bulletContainer}>
-                                  <div className={styles.bullet} />
-                                </div>
-                                <p className={styles.calcItemLabel} style={{ fontStyle: "italic" }}>
-                                  Copilot credits negated for users with Microsoft 365 Copilot licenses
-                                </p>
-                              </div>
-                              <p className={styles.calcItemValue}>0</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+                      ))}
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
+              )}
 
-            {/* Legal */}
-            <div className={styles.legalContainer}>
-              <p className={styles.legalText}>
-                The Copilot Studio estimator tool is not a binding offer nor a guarantee of the final cost or availability of any Microsoft product. The estimates are purely informational, should be regarded only as guidance, and are not incorporated into any contractual agreement. Users should not rely on these estimates solely for making decisions or taking final actions. Actual costs and consumption may vary based on factors such as region, availability, workload usage, number of users, and other variables. Please contact your Microsoft representative for accurate information before making any recommendations or purchase decisions.
-                {"\n\n"}
-                Microsoft reserves the right to modify or discontinue the Copilot Studio estimator tool at any time without notice.
-              </p>
+              {/* Two Column Layout */}
+              {products.length > 0 && (
+                <div className={styles.twoColumnLayout}>
+                  {/* Estimation Form Column */}
+                  <div className={styles.estimationColumn}>
+                    {products.map(product => (
+                      <div key={product.id} className={styles.productCard}>
+                        {/* Product Header */}
+                        <div className={styles.productCardHeader}>
+                          <p className={styles.productTitle}>{product.name}</p>
+                          <Button
+                            appearance="subtle"
+                            size="small"
+                            icon={<DeleteRegular />}
+                            onClick={() => removeProduct(product.id, product.productId)}
+                          />
+                        </div>
+
+                        {/* Microsoft 365 Licenses */}
+                        <div className={`${styles.section} ${styles.sectionBorder}`}>
+                          <div className={styles.sectionHeader}>
+                            <h3 className={styles.h4Title}>Microsoft 365 Copilot licenses</h3>
+                            <p className={styles.sectionDescription}>
+                              How many users have Microsoft 365 Copilot licenses?
+                            </p>
+                          </div>
+                          <Input 
+                            value={product.m365LicenseCount}
+                            onChange={(_, data) => updateProduct(product.id, { m365LicenseCount: data.value })}
+                            placeholder="e.g. 100"
+                          />
+                        </div>
+
+                        {/* Agent Traffic */}
+                        <div className={`${styles.section} ${styles.sectionBorder}`}>
+                          <div className={styles.sectionHeader}>
+                            <h3 className={styles.h4Title}>Agent traffic</h3>
+                            <p className={styles.sectionDescription}>
+                              Agent traffic quantifies the activity an agent supports by assessing the number of end users accessing the agent and their monthly engagement frequency.
+                            </p>
+                          </div>
+
+                          <div className={styles.inputsRow}>
+                            <div className={styles.inputColumn}>
+                              <Label required>How many users?</Label>
+                              <Input 
+                                value={product.users}
+                                onChange={(_, data) => updateProduct(product.id, { users: data.value })}
+                                placeholder="e.g. 100"
+                              />
+                            </div>
+                            <div className={styles.inputColumn}>
+                              <Label required>How often will a user interact with the agent per month?</Label>
+                              <Input 
+                                value={product.interactionsPerMonth}
+                                onChange={(_, data) => updateProduct(product.id, { interactionsPerMonth: data.value })}
+                                placeholder="e.g. 100"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Agent knowledge */}
+                        <div className={`${styles.section} ${styles.sectionBorder}`}>
+                          <div className={styles.sectionHeader}>
+                            <h3 className={styles.h4Title}>Agent knowledge</h3>
+                            <p className={styles.sectionDescription}>
+                              Knowledge sources enable agents to provide relevant information and insights. Published agents use configured knowledge sources to ground their responses.
+                            </p>
+                            <Link href="#">Learn more</Link>
+                          </div>
+
+                          <div className={styles.inputColumn}>
+                            <Label required>What is the percentage of agent responses are from knowledge added to your agent?</Label>
+                            <Input 
+                              value={product.knowledgePercent}
+                              onChange={(_, data) => updateProduct(product.id, { knowledgePercent: data.value })}
+                              placeholder="e.g. 100"
+                            />
+                          </div>
+
+                          <div className={styles.inputsRow}>
+                            <div className={styles.inputColumn}>
+                              <Label>What is the percentage of knowledge responses from tenant graph grounding?</Label>
+                              <Input 
+                                value={product.tenantGraphPercent}
+                                onChange={(_, data) => updateProduct(product.id, { tenantGraphPercent: data.value })}
+                                placeholder="e.g. 100"
+                              />
+                            </div>
+                            <div className={styles.outputColumn}>
+                              <Label>All other knowledge</Label>
+                              <p className={styles.outputValue}>
+                                {100 - (parseInt(product.tenantGraphPercent) || 0)}%
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Agent tools/actions */}
+                        <div className={styles.section}>
+                          <div className={styles.sectionHeader}>
+                            <h3 className={styles.h4Title}>Agent tools/actions</h3>
+                            <p className={styles.sectionDescription}>
+                              Help agents answer a query, execute workflows, connect to external systems, or provide topic-specific guidance. <Link href="#">Learn more</Link>
+                            </p>
+                          </div>
+
+                          <div className={styles.toolsTable}>
+                            <div className={styles.toolsTableHeader}>
+                              <p className={styles.toolsTableHeaderCell}>Tool type</p>
+                              <p className={styles.toolsTableHeaderCell}>How many tools are configured?</p>
+                              <p className={styles.toolsTableHeaderCell}>How often will they be invoked per interaction?</p>
+                            </div>
+
+                            <div className={styles.toolsTableRow}>
+                              <p className={styles.toolsTableCell}>Prompt</p>
+                              <Input
+                                value={product.promptCount}
+                                onChange={(_, data) => updateProduct(product.id, { promptCount: data.value })}
+                                placeholder="0"
+                              />
+                              <Input
+                                value={product.promptFreq}
+                                onChange={(_, data) => updateProduct(product.id, { promptFreq: data.value })}
+                                placeholder="0"
+                              />
+                            </div>
+
+                            <div className={styles.toolsTableRow}>
+                              <p className={styles.toolsTableCell}>Agent flow</p>
+                              <Input
+                                value={product.agentFlowCount}
+                                onChange={(_, data) => updateProduct(product.id, { agentFlowCount: data.value })}
+                                placeholder="0"
+                              />
+                              <Input
+                                value={product.agentFlowFreq}
+                                onChange={(_, data) => updateProduct(product.id, { agentFlowFreq: data.value })}
+                                placeholder="0"
+                              />
+                            </div>
+
+                            <div className={styles.toolsTableRow}>
+                              <p className={styles.toolsTableCell}>Computer use</p>
+                              <Input
+                                value={product.computerUseCount}
+                                onChange={(_, data) => updateProduct(product.id, { computerUseCount: data.value })}
+                                placeholder="0"
+                              />
+                              <Input
+                                value={product.computerUseFreq}
+                                onChange={(_, data) => updateProduct(product.id, { computerUseFreq: data.value })}
+                                placeholder="0"
+                              />
+                            </div>
+
+                            <div className={styles.toolsTableRow}>
+                              <p className={styles.toolsTableCell}>Custom connector</p>
+                              <Input
+                                value={product.customConnectorCount}
+                                onChange={(_, data) => updateProduct(product.id, { customConnectorCount: data.value })}
+                                placeholder="1"
+                              />
+                              <Input
+                                value={product.customConnectorFreq}
+                                onChange={(_, data) => updateProduct(product.id, { customConnectorFreq: data.value })}
+                                placeholder="1"
+                              />
+                            </div>
+
+                            <div className={styles.toolsTableRow}>
+                              <p className={styles.toolsTableCell}>Model Context Protocol</p>
+                              <Input
+                                value={product.mcpCount}
+                                onChange={(_, data) => updateProduct(product.id, { mcpCount: data.value })}
+                                placeholder="e.g. 1"
+                              />
+                              <Input
+                                value={product.mcpFreq}
+                                onChange={(_, data) => updateProduct(product.id, { mcpFreq: data.value })}
+                                placeholder="e.g. 0.2"
+                              />
+                            </div>
+
+                            <div className={styles.toolsTableRow}>
+                              <p className={styles.toolsTableCell}>REST API</p>
+                              <Input
+                                value={product.restApiCount}
+                                onChange={(_, data) => updateProduct(product.id, { restApiCount: data.value })}
+                                placeholder="e.g. 1"
+                              />
+                              <Input
+                                value={product.restApiFreq}
+                                onChange={(_, data) => updateProduct(product.id, { restApiFreq: data.value })}
+                                placeholder="e.g. 0.3"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Agent flows - revealed when Agent flow has a value */}
+                        {(parseInt(product.agentFlowCount) > 0 || parseInt(product.agentFlowFreq) > 0) && (
+                          <div className={`${styles.section} ${styles.sectionBorder}`}>
+                            <div className={styles.sectionHeader}>
+                              <h3 className={styles.h4Title}>Agent flows</h3>
+                              <p className={styles.sectionDescription}>
+                                Agent flows represent the number of predefined action sequences configured for an agent. <Link href="#">Learn more</Link>
+                              </p>
+                            </div>
+
+                            <div className={styles.inputsRow}>
+                              <div className={styles.inputColumn}>
+                                <Label>How many agent flows have you configured for your agent (either within a topic or standalone agent action)?</Label>
+                                <Link href="#">Learn more</Link>
+                                <Input
+                                  value={product.agentFlowConfiguredCount}
+                                  onChange={(_, data) => updateProduct(product.id, { agentFlowConfiguredCount: data.value })}
+                                  placeholder="1"
+                                />
+                              </div>
+                              <div className={styles.inputColumn}>
+                                <Label>On average, how many actions does each agent flow contain?</Label>
+                                <Input
+                                  value={product.agentFlowActionsCount}
+                                  onChange={(_, data) => updateProduct(product.id, { agentFlowActionsCount: data.value })}
+                                  placeholder="e.g. 10"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Agent optional modifiers - revealed when Prompt has a value */}
+                        {(parseInt(product.promptCount) > 0 || parseInt(product.promptFreq) > 0) && (
+                          <div className={styles.section}>
+                            <div className={styles.sectionHeader}>
+                              <h3 className={styles.h4Title}>Agent optional modifiers</h3>
+                              <p className={styles.sectionDescription}>
+                                These features are not required for agents but drive additional Copilot credit consumption
+                              </p>
+                            </div>
+
+                            <div className={styles.toolsTable}>
+                              <div className={styles.toolsTableHeader}>
+                                <p className={styles.toolsTableHeaderCell}>Prompt model type <Link href="#">Learn more</Link></p>
+                                <p className={styles.toolsTableHeaderCell}>How many prompts?</p>
+                                <p className={styles.toolsTableHeaderCell}>How often will they be triggered in your agent?</p>
+                              </div>
+
+                              <div className={styles.toolsTableRow}>
+                                <p className={styles.toolsTableCell}>Basic</p>
+                                <Input
+                                  value={product.promptBasicCount}
+                                  onChange={(_, data) => updateProduct(product.id, { promptBasicCount: data.value })}
+                                  placeholder="1"
+                                />
+                                <Input
+                                  value={product.promptBasicFreq}
+                                  onChange={(_, data) => updateProduct(product.id, { promptBasicFreq: data.value })}
+                                  placeholder="e.g. 4"
+                                />
+                              </div>
+
+                              <div className={styles.toolsTableRow}>
+                                <p className={styles.toolsTableCell}>Standard</p>
+                                <Input
+                                  value={product.promptStandardCount}
+                                  onChange={(_, data) => updateProduct(product.id, { promptStandardCount: data.value })}
+                                  placeholder="e.g. 1"
+                                />
+                                <Input
+                                  value={product.promptStandardFreq}
+                                  onChange={(_, data) => updateProduct(product.id, { promptStandardFreq: data.value })}
+                                  placeholder="e.g. 4"
+                                />
+                              </div>
+
+                              <div className={styles.toolsTableRow}>
+                                <p className={styles.toolsTableCell}>Premium</p>
+                                <Input
+                                  value={product.promptPremiumCount}
+                                  onChange={(_, data) => updateProduct(product.id, { promptPremiumCount: data.value })}
+                                  placeholder="e.g. 1"
+                                />
+                                <Input
+                                  value={product.promptPremiumFreq}
+                                  onChange={(_, data) => updateProduct(product.id, { promptPremiumFreq: data.value })}
+                                  placeholder="e.g. 4"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Calculation Column */}
+                  <div className={styles.calculationPanel}>
+                    <div style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      gap: "8px",
+                      paddingBottom: "16px",
+                      marginBottom: "0px",
+                    }}>
+                      <p style={{ fontSize: "14px", fontWeight: 600, letterSpacing: "1px", textTransform: "uppercase", color: tokens.colorNeutralForeground3, margin: 0 }}>Total estimated Copilot credits</p>
+                      <p style={{ fontSize: "40px", fontWeight: 700, color: tokens.colorBrandBackground, margin: 0 }}>{totalCredits.toLocaleString()}</p>
+                    </div>
+
+                    <div className={styles.expandedSection}>
+                      {products.map(product => {
+                        const users = parseInt(product.users) || 0;
+                        const m365Count = parseInt(product.m365LicenseCount) || 0;
+                        const interactions = parseInt(product.interactionsPerMonth) || 0;
+                        const knowledgePct = (parseInt(product.knowledgePercent) || 0) / 100;
+                        const tenantGraphPct = (parseInt(product.tenantGraphPercent) || 0) / 100;
+                        const otherKnowledgePct = 1 - tenantGraphPct;
+
+                        const billableUsers = Math.max(users - m365Count, 0);
+                        const agentTraffic = billableUsers * interactions;
+                        const trafficRequiringKnowledge = agentTraffic * knowledgePct;
+
+                        const ttgMessages = Math.round(trafficRequiringKnowledge * tenantGraphPct * 12);
+                        const otherKnowledgeMessages = Math.round(trafficRequiringKnowledge * otherKnowledgePct * 2);
+                        const knowledgeCredits = ttgMessages + otherKnowledgeMessages;
+
+                        const promptToolCount = parseInt(product.promptCount) || 0;
+                        const computerUseCount = parseInt(product.computerUseCount) || 0;
+                        const customConnectorCount = parseInt(product.customConnectorCount) || 0;
+                        const mcpCount = parseInt(product.mcpCount) || 0;
+                        const restApiCount = parseInt(product.restApiCount) || 0;
+                        const totalToolInvocations = promptToolCount + computerUseCount + customConnectorCount + mcpCount + restApiCount;
+                        const toolsCredits = Math.round(agentTraffic * totalToolInvocations * 5);
+
+                        const flowsConfigured = parseInt(product.agentFlowConfiguredCount) || 0;
+                        const flowActionsCount = parseInt(product.agentFlowActionsCount) || 0;
+                        const flowsCredits = Math.round(flowsConfigured * flowActionsCount * 0.13 * interactions);
+
+                        const copilotRatio = users > 0 ? Math.max((users - m365Count) / users, 0) : 1;
+                        const basicCount = parseInt(product.promptBasicCount) || 0;
+                        const basicFreq = parseFloat(product.promptBasicFreq) || 0;
+                        const standardCount = parseInt(product.promptStandardCount) || 0;
+                        const standardFreq = parseFloat(product.promptStandardFreq) || 0;
+                        const premiumCount = parseInt(product.promptPremiumCount) || 0;
+                        const premiumFreq = parseFloat(product.promptPremiumFreq) || 0;
+
+                        const basicCredits = Math.round(basicCount * basicFreq * 0.1 * 3.073 * copilotRatio);
+                        const standardCredits = Math.round(standardCount * standardFreq * 1.5 * 4.945 * copilotRatio);
+                        const premiumCredits = Math.round(premiumCount * premiumFreq * 10 * 7.091 * copilotRatio);
+                        const modifiersCredits = basicCredits + standardCredits + premiumCredits;
+
+                        // Negation values (M365 Copilot license zero-rating)
+                        const knowledgeNegation = users > 0 ? Math.round(knowledgeCredits * (m365Count / users)) : 0;
+                        const toolsNegation = users > 0 ? Math.round(toolsCredits * (m365Count / users)) : 0;
+                        const flowsNegation = users > 0 ? Math.round(flowsCredits * (m365Count / users)) : 0;
+                        const modifiersNegation = users > 0 ? Math.round(modifiersCredits * (m365Count / users)) : 0;
+
+                        return (
+                          <div key={product.id} style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "20px",
+                            border: `1px solid ${tokens.colorNeutralStroke2}`,
+                            borderRadius: "12px",
+                            padding: "24px",
+                          }}>
+                            <div style={{ display: "flex", alignItems: "baseline", gap: "8px" }}>
+                              <p style={{ fontSize: "20px", lineHeight: "28px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0 }}>{product.name}</p>
+                              <span className={styles.calcLeader} />
+                              <p style={{ fontSize: "20px", lineHeight: "28px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{calculateProductCredits(product).toLocaleString()}</p>
+                            </div>
+
+                            {/* Copilot credits driven by knowledge */}
+                            <div className={styles.calcSectionContainer}>
+                              <div style={{ display: "flex", alignItems: "baseline", gap: "8px", width: "100%" }}>
+                                <h3 className={styles.h4Title}>Copilot credits driven by knowledge</h3>
+                                <span className={styles.calcLeader} />
+                                <p style={{ fontSize: "20px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{knowledgeCredits}</p>
+                              </div>
+
+                              <div className={styles.calcItemRow}>
+                                <p className={styles.calcItemLabel}>Copilot credits consumed for tenant graph grounding</p>
+                                <span className={styles.calcLeader} />
+                                <p className={styles.calcItemValue}>{ttgMessages}</p>
+                              </div>
+
+                              <div className={styles.calcItemRow}>
+                                <p className={styles.calcItemLabel}>Copilot credits consumed for non-tenant graph grounding: Dataverse, web, files</p>
+                                <span className={styles.calcLeader} />
+                                <p className={styles.calcItemValue}>{otherKnowledgeMessages}</p>
+                              </div>
+
+                              <div className={styles.calcNegationRow}>
+                                <p className={styles.calcNegationLabel}>Copilot credits negated for {m365Count} users with Microsoft 365 Copilot licenses</p>
+                                <span className={styles.calcLeader} />
+                                <p className={styles.calcNegationValue}>-{knowledgeNegation}</p>
+                              </div>
+                            </div>
+
+                            {/* Copilot credits driven by agent tools */}
+                            <div className={styles.calcSectionContainer}>
+                              <div style={{ display: "flex", alignItems: "baseline", gap: "8px", width: "100%" }}>
+                                <h3 className={styles.h4Title}>Copilot credits driven by agent tools</h3>
+                                <span className={styles.calcLeader} />
+                                <p style={{ fontSize: "20px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{toolsCredits}</p>
+                              </div>
+
+                              <div className={styles.calcNegationRow}>
+                                <p className={styles.calcNegationLabel}>Copilot credits negated for {m365Count} users with Microsoft 365 Copilot licenses</p>
+                                <span className={styles.calcLeader} />
+                                <p className={styles.calcNegationValue}>-{toolsNegation}</p>
+                              </div>
+                            </div>
+
+                            {/* Copilot credits driven by agent flows */}
+                            <div className={styles.calcSectionContainer}>
+                              <div style={{ display: "flex", alignItems: "baseline", gap: "8px", width: "100%" }}>
+                                <h3 className={styles.h4Title}>Copilot credits driven by agent flows</h3>
+                                <span className={styles.calcLeader} />
+                                <p style={{ fontSize: "20px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{flowsCredits}</p>
+                              </div>
+
+                              <div className={styles.calcNegationRow}>
+                                <p className={styles.calcNegationLabel}>Copilot credits negated for {m365Count} users with Microsoft 365 Copilot licenses</p>
+                                <span className={styles.calcLeader} />
+                                <p className={styles.calcNegationValue}>-{flowsNegation}</p>
+                              </div>
+                            </div>
+
+                            {/* Copilot credits driven by optional modifiers */}
+                            <div className={styles.calcSectionContainer}>
+                              <div style={{ display: "flex", alignItems: "baseline", gap: "8px", width: "100%" }}>
+                                <h3 className={styles.h4Title}>Copilot credits driven by optional modifiers</h3>
+                                <span className={styles.calcLeader} />
+                                <p style={{ fontSize: "20px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{modifiersCredits}</p>
+                              </div>
+
+                              <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, paddingLeft: "15px" }}>Prompts</p>
+
+                              <div className={styles.calcItemRow}>
+                                <p className={styles.calcItemLabel} style={{ fontWeight: 600, paddingLeft: "16px" }}>Basic</p>
+                                <span className={styles.calcLeader} />
+                                <p className={styles.calcItemValue}>{basicCredits}</p>
+                              </div>
+
+                              <div className={styles.calcItemRow}>
+                                <p className={styles.calcItemLabel} style={{ fontWeight: 600, paddingLeft: "16px" }}>Standard</p>
+                                <span className={styles.calcLeader} />
+                                <p className={styles.calcItemValue}>{standardCredits}</p>
+                              </div>
+
+                              <div className={styles.calcItemRow}>
+                                <p className={styles.calcItemLabel} style={{ fontWeight: 600, paddingLeft: "16px" }}>Premium</p>
+                                <span className={styles.calcLeader} />
+                                <p className={styles.calcItemValue}>{premiumCredits}</p>
+                              </div>
+
+                              <div className={styles.calcNegationRow}>
+                                <p className={styles.calcNegationLabel}>Copilot credits negated for {m365Count} users with Microsoft 365 Copilot licenses</p>
+                                <span className={styles.calcLeader} />
+                                <p className={styles.calcNegationValue}>-{modifiersNegation}</p>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    <p style={{ fontSize: "12px", lineHeight: "16px", color: tokens.colorNeutralForeground3, margin: 0, textAlign: "center" as const }}>
+                      *Estimates are for planning purposes only. Actual credit consumption may vary based on usage patterns.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Legal */}
+              <div className={styles.legalContainer} style={{ marginTop: "48px", marginBottom: "64px" }}>
+                <p className={styles.legalText}>
+                  The Copilot Studio estimator tool is not a binding offer nor a guarantee of the final cost or availability of any Microsoft product. The estimates are purely informational, should be regarded only as guidance, and are not incorporated into any contractual agreement.
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
     </FluentProvider>
   );
 }
