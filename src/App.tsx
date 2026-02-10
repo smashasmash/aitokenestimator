@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import {
   FluentProvider,
   createLightTheme,
@@ -315,6 +317,15 @@ const useStyles = makeStyles({
     width: "100%",
     gap: "12px",
     flexWrap: "wrap" as const,
+  },
+  stickyNav: {
+    position: "sticky" as const,
+    top: 0,
+    zIndex: 100,
+    padding: "12px 24px",
+    transition: "background-color 0.2s ease, box-shadow 0.2s ease",
+    marginLeft: "-24px",
+    marginRight: "-24px",
   },
   section: {
     display: "flex",
@@ -759,6 +770,24 @@ function App() {
   const [selectedCategories, setSelectedCategories] = useState<ProductCategory[]>([]);
   const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
   const [timePeriod, setTimePeriod] = useState<"month" | "year">("month");
+  const [isScrolled, setIsScrolled] = useState(false);
+  const navRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 80);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const handleReset = () => {
+    setProducts([]);
+    setSelectedCategories([]);
+    setSelectedProductIds([]);
+    setTimePeriod("month");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const toggleCategory = (category: ProductCategory) => {
     setSelectedCategories(prev =>
@@ -944,6 +973,97 @@ function App() {
   const displayCredits = totalCredits * timeMultiplier;
   const displayNegated = totalNegated * timeMultiplier;
 
+  const handleDownloadPDF = () => {
+    const doc = new jsPDF();
+    const purple = [70, 79, 235] as const;
+
+    // Title
+    doc.setFontSize(18);
+    doc.setTextColor(purple[0], purple[1], purple[2]);
+    doc.text("Microsoft Agent Usage Estimator", 14, 20);
+
+    doc.setFontSize(10);
+    doc.setTextColor(100, 100, 100);
+    doc.text(`Generated: ${new Date().toLocaleDateString()} | Period: Per ${timePeriod}`, 14, 28);
+
+    // Summary
+    doc.setFontSize(14);
+    doc.setTextColor(0, 0, 0);
+    doc.text("Summary", 14, 40);
+
+    autoTable(doc, {
+      startY: 44,
+      head: [["Metric", "Value"]],
+      body: [
+        ["Total Estimated Copilot Credits", displayCredits.toLocaleString()],
+        ["Credits Negated with M365 Copilot", displayNegated.toLocaleString()],
+        ["Time Period", `Per ${timePeriod}`],
+      ],
+      theme: "grid",
+      headStyles: { fillColor: [purple[0], purple[1], purple[2]] },
+    });
+
+    // Per-product details
+    if (products.length > 0) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let currentY = (doc as any).lastAutoTable?.finalY ?? 70;
+
+      products.forEach((product) => {
+        const users = parseInt(product.users) || 0;
+        const m365Count = parseInt(product.m365LicenseCount) || 0;
+        const interactions = parseInt(product.interactionsPerMonth) || 0;
+        const productCredits = calculateProductCredits(product);
+        const productNegation = calculateProductNegation(product);
+
+        currentY += 10;
+        if (currentY > 260) {
+          doc.addPage();
+          currentY = 20;
+        }
+
+        doc.setFontSize(12);
+        doc.setTextColor(purple[0], purple[1], purple[2]);
+        doc.text(product.name, 14, currentY);
+        currentY += 2;
+
+        const formData: (string | number)[][] = [
+          ["Category", product.category],
+          ["Agent Type", product.agentType || "\u2014"],
+          ["Users", users],
+          ["M365 Copilot Licenses", m365Count],
+          ["Interactions / Month", interactions],
+          ["Knowledge %", product.knowledgePercent || "0"],
+          ["Tenant Graph %", product.tenantGraphPercent || "0"],
+          ["Net Credits (" + timePeriod + ")", (productCredits * timeMultiplier).toLocaleString()],
+          ["Negated Credits (" + timePeriod + ")", (productNegation * timeMultiplier).toLocaleString()],
+        ];
+
+        autoTable(doc, {
+          startY: currentY,
+          head: [["Parameter", "Value"]],
+          body: formData.map(row => [String(row[0]), String(row[1])]),
+          theme: "grid",
+          headStyles: { fillColor: [purple[0], purple[1], purple[2]] },
+        });
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        currentY = (doc as any).lastAutoTable?.finalY ?? currentY + 40;
+      });
+    }
+
+    // Legal
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const finalY = (doc as any).lastAutoTable?.finalY ?? 200;
+    if (finalY > 250) doc.addPage();
+    const legalY = finalY > 250 ? 20 : finalY + 10;
+    doc.setFontSize(7);
+    doc.setTextColor(150, 150, 150);
+    const legalText = "The Copilot Studio estimator is not a binding offer nor a guarantee of the final cost or availability of the product. This estimate should be regarded only as guidance.";
+    doc.text(legalText, 14, legalY, { maxWidth: 180 });
+
+    doc.save("copilot-credit-estimate.pdf");
+  };
+
   return (
     <FluentProvider theme={customTheme}>
       <div className={styles.appContainer}>
@@ -967,11 +1087,21 @@ function App() {
                     </div>
                   </div>
 
-                  <div className={styles.navContainer} style={{ marginTop: "24px" }}>
-                    <Button appearance="primary" size="large" icon={<ArrowSyncRegular />}>Reset</Button>
-                    <Button appearance="outline" size="large" icon={<ArrowDownloadRegular />}>Download Results</Button>
-                    <Button appearance="outline" size="large">Buy Copilot Credits</Button>
-                    <Button appearance="outline" size="large">Free Copilot Chat</Button>
+                  <div
+                    ref={navRef}
+                    className={`${styles.stickyNav}`}
+                    style={{
+                      backgroundColor: isScrolled ? tokens.colorNeutralBackground1 : "transparent",
+                      boxShadow: isScrolled ? "0 2px 8px rgba(0,0,0,0.1)" : "none",
+                      borderRadius: isScrolled ? "0 0 12px 12px" : "0",
+                    }}
+                  >
+                    <div className={styles.navContainer}>
+                      <Button appearance="primary" size="large" icon={<ArrowSyncRegular />} onClick={handleReset}>Reset</Button>
+                      <Button appearance="outline" size="large" icon={<ArrowDownloadRegular />} onClick={handleDownloadPDF}>Download Results</Button>
+                      <Button appearance="outline" size="large" onClick={() => window.open("https://signup.microsoft.com/get-started/signup?products=25a8ddb8-34ca-4a93-828d-95a68d02e3a9&mproducts=CFQ7TTC0LH1F:000P&fmproducts=CFQ7TTC0LH1F:000P&culture=en-us&country=us&ali=1", "_blank")}>Buy Copilot Credits</Button>
+                      <Button appearance="outline" size="large" onClick={() => window.open("https://www.microsoft.com/en-us/microsoft-365-copilot", "_blank")}>Free Copilot Chat</Button>
+                    </div>
                   </div>
                 </div>
               </div>
