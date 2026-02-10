@@ -40,3 +40,17 @@
 .read-the-docs {
   color: #888;
 }
+
+/* Remove Fluent UI focus indicator from plus buttons */
+.fui-Button:focus-visible::after {
+  display: none !important;
+}
+
+/* Checkbox hover state */
+.fui-Checkbox:hover .fui-Checkbox__indicator {
+  border-color: #464feb;
+}
+
+.fui-Checkbox:hover .fui-Checkbox__indicator svg {
+  color: #464feb;
+}

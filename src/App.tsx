@@ -1,7 +1,7 @@
 import { useState } from "react";
 import {
   FluentProvider,
-  webLightTheme,
+  createLightTheme,
   makeStyles,
   tokens,
   Button,
@@ -11,6 +11,7 @@ import {
   Checkbox,
   Badge,
 } from "@fluentui/react-components";
+import type { BrandVariants } from "@fluentui/react-components";
 import { 
   AddRegular,
   DeleteRegular,
@@ -24,6 +25,27 @@ import {
   AppGenericRegular,
 } from "@fluentui/react-icons";
 
+const customBrand: BrandVariants = {
+  10: "#050520",
+  20: "#0a0b3d",
+  30: "#12135c",
+  40: "#1a1b7a",
+  50: "#232498",
+  60: "#2c2db5",
+  70: "#3638d1",
+  80: "#464feb",
+  90: "#5b63f0",
+  100: "#7178f3",
+  110: "#878df5",
+  120: "#9da2f7",
+  130: "#b3b7f9",
+  140: "#c9ccfb",
+  150: "#dfe1fd",
+  160: "#f0f0fe",
+};
+
+const customTheme = createLightTheme(customBrand);
+
 const useStyles = makeStyles({
   appContainer: {
     backgroundColor: tokens.colorNeutralBackground2,
@@ -31,7 +53,6 @@ const useStyles = makeStyles({
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "flex-start",
-    overflow: "auto",
     width: "100%",
     minHeight: "100vh",
   },
@@ -61,7 +82,6 @@ const useStyles = makeStyles({
     gap: "24px",
     flex: "1 1 0",
     minWidth: 0,
-    overflow: "auto",
   },
   productCategorySection: {
     display: "flex",
@@ -89,8 +109,8 @@ const useStyles = makeStyles({
     cursor: "pointer",
   },
   categoryCatalogItemSelected: {
-    border: `2px solid ${tokens.colorBrandBackground}`,
-    padding: "15px",
+    border: `1.5px solid ${tokens.colorBrandBackground}`,
+    padding: "14.5px",
   },
   categoryGrid: {
     display: "grid",
@@ -129,6 +149,10 @@ const useStyles = makeStyles({
     border: `1px solid ${tokens.colorNeutralStroke2}`,
     borderRadius: "8px",
     position: "relative" as const,
+  },
+  productChipSelected: {
+    border: `1.5px solid ${tokens.colorBrandBackground}`,
+    padding: "15.5px",
   },
   chipTopRow: {
     display: "flex",
@@ -397,6 +421,7 @@ const useStyles = makeStyles({
     height: "fit-content",
     position: "sticky" as const,
     top: "24px",
+    alignSelf: "flex-start",
     borderRadius: "16px",
   },
   totalHeading: {
@@ -594,10 +619,11 @@ const useStyles = makeStyles({
     alignItems: "center",
     justifyContent: "center",
     maxWidth: "1200px",
-    width: "800px",
+    width: "100%",
     paddingBottom: "96px",
     paddingLeft: "56px",
     paddingRight: "56px",
+    margin: "0 auto",
   },
   legalText: {
     flex: "1 0 0",
@@ -732,6 +758,7 @@ function App() {
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<ProductCategory[]>([]);
   const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
+  const [timePeriod, setTimePeriod] = useState<"month" | "year">("month");
 
   const toggleCategory = (category: ProductCategory) => {
     setSelectedCategories(prev =>
@@ -864,8 +891,61 @@ function App() {
 
   const totalCredits = products.reduce((sum, product) => sum + calculateProductCredits(product), 0);
 
+  const calculateProductNegation = (product: Product): number => {
+    const users = parseInt(product.users) || 0;
+    const m365Count = parseInt(product.m365LicenseCount) || 0;
+    if (users === 0 || m365Count === 0) return 0;
+    const interactions = parseInt(product.interactionsPerMonth) || 0;
+    const knowledgePct = (parseInt(product.knowledgePercent) || 0) / 100;
+    const tenantGraphPct = (parseInt(product.tenantGraphPercent) || 0) / 100;
+    const otherKnowledgePct = 1 - tenantGraphPct;
+
+    // Gross credits (all users, no zero-rating)
+    const grossTraffic = users * interactions;
+    const grossKnowledge = grossTraffic * knowledgePct;
+    const grossTtg = grossKnowledge * tenantGraphPct * 12;
+    const grossOther = grossKnowledge * otherKnowledgePct * 2;
+    const grossKnowledgeCredits = Math.round(grossTtg) + Math.round(grossOther);
+
+    const promptToolCount = parseInt(product.promptCount) || 0;
+    const computerUseCount = parseInt(product.computerUseCount) || 0;
+    const customConnectorCount = parseInt(product.customConnectorCount) || 0;
+    const mcpCount = parseInt(product.mcpCount) || 0;
+    const restApiCount = parseInt(product.restApiCount) || 0;
+    const totalToolInvocations = promptToolCount + computerUseCount + customConnectorCount + mcpCount + restApiCount;
+    const grossToolsCredits = Math.round(grossTraffic * totalToolInvocations * 5);
+
+    const flowsConfigured = parseInt(product.agentFlowConfiguredCount) || 0;
+    const flowActionsCount = parseInt(product.agentFlowActionsCount) || 0;
+    const grossFlowsCredits = Math.round(flowsConfigured * flowActionsCount * 0.13 * interactions);
+
+    const basicCount = parseInt(product.promptBasicCount) || 0;
+    const basicFreq = parseFloat(product.promptBasicFreq) || 0;
+    const standardCount = parseInt(product.promptStandardCount) || 0;
+    const standardFreq = parseFloat(product.promptStandardFreq) || 0;
+    const premiumCount = parseInt(product.promptPremiumCount) || 0;
+    const premiumFreq = parseFloat(product.promptPremiumFreq) || 0;
+    // Gross modifiers (copilotRatio = 1, no zero-rating)
+    const grossModifiers = Math.round(basicCount * basicFreq * 0.1 * 3.073) + Math.round(standardCount * standardFreq * 1.5 * 4.945) + Math.round(premiumCount * premiumFreq * 10 * 7.091);
+
+    const isB2C = product.category === "Customer facing custom";
+    const grossTotal = isB2C
+      ? Math.round(grossOther) + grossToolsCredits + grossFlowsCredits + grossModifiers
+      : grossKnowledgeCredits + grossToolsCredits + grossFlowsCredits + grossModifiers;
+
+    // Net credits are already calculated by calculateProductCredits
+    const netTotal = calculateProductCredits(product);
+    return grossTotal - netTotal;
+  };
+
+  const totalNegated = products.reduce((sum, product) => sum + calculateProductNegation(product), 0);
+
+  const timeMultiplier = timePeriod === "year" ? 12 : 1;
+  const displayCredits = totalCredits * timeMultiplier;
+  const displayNegated = totalNegated * timeMultiplier;
+
   return (
-    <FluentProvider theme={webLightTheme}>
+    <FluentProvider theme={customTheme}>
       <div className={styles.appContainer}>
         <div className={styles.bodyContainer}>
               {/* Header */}
@@ -961,8 +1041,10 @@ function App() {
                     </div>
 
                     <div className={styles.productChipsGrid}>
-                      {visibleProducts.map(product => (
-                        <div key={product.id} className={styles.productChip}>
+                      {visibleProducts.map(product => {
+                        const hasAdded = products.some(p => p.productId === product.id);
+                        return (
+                        <div key={product.id} className={`${styles.productChip} ${hasAdded ? styles.productChipSelected : ''}`}>
                           <div className={styles.chipTopRow}>
                           <div className={styles.chipIcon}>
                             {product.category.startsWith("Dynamics 365") ? (
@@ -1001,12 +1083,35 @@ function App() {
                           </div>
                           <div className={styles.chipActions}>
                             <div className={styles.badgeWrapper}>
-                              <Button
-                                appearance="primary"
-                                size="small"
-                                icon={<AddRegular />}
+                              <button
                                 onClick={() => addProduct(product.id, product.name, product.category)}
-                              />
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.backgroundColor = tokens.colorNeutralBackground4;
+                                  const svg = e.currentTarget.querySelector("svg");
+                                  if (svg) svg.style.color = "#464feb";
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.backgroundColor = "transparent";
+                                  const svg = e.currentTarget.querySelector("svg");
+                                  if (svg) svg.style.color = tokens.colorNeutralForeground1;
+                                }}
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  width: "32px",
+                                  height: "32px",
+                                  borderRadius: "50%",
+                                  border: "none",
+                                  backgroundColor: "transparent",
+                                  cursor: "pointer",
+                                  outline: "none",
+                                  padding: 0,
+                                  transition: "background-color 0.15s ease",
+                                }}
+                              >
+                                <AddRegular style={{ color: tokens.colorNeutralForeground1, fontSize: "20px", transition: "color 0.15s ease" }} />
+                              </button>
                               {products.filter(p => p.productId === product.id).length > 0 && (
                                 <Badge 
                                   appearance="filled" 
@@ -1031,7 +1136,8 @@ function App() {
                             {product.category}
                           </span>
                         </div>
-                      ))}
+                      );
+                      })}
                     </div>
                   </div>
                 </div>
@@ -1338,15 +1444,74 @@ function App() {
                   {/* Calculation Column */}
                   <div className={styles.calculationPanel}>
                     <div style={{
+                      display: "inline-flex",
+                      border: `1px solid ${tokens.colorNeutralStroke2}`,
+                      borderRadius: "8px",
+                      overflow: "hidden",
+                      marginBottom: "16px",
+                      alignSelf: "center",
+                    }}>
+                      {[
+                        { period: "month" as const, label: "Per month", radiusLeft: "8px", radiusRight: "0" },
+                        { period: "year" as const, label: "Per year", radiusLeft: "0", radiusRight: "8px" },
+                      ].map(({ period, label, radiusLeft, radiusRight }, index) => (
+                        <button
+                          key={period}
+                          onClick={() => setTimePeriod(period)}
+                          onMouseEnter={(e) => {
+                            if (timePeriod !== period) {
+                              e.currentTarget.style.background = "#e0e0e0";
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background = timePeriod === period ? tokens.colorNeutralBackground1 : tokens.colorNeutralBackground3;
+                          }}
+                          style={{
+                            padding: "10px 20px",
+                            fontSize: "15px",
+                            fontWeight: 600,
+                            color: timePeriod === period ? "#464feb" : tokens.colorNeutralForeground3,
+                            background: timePeriod === period ? tokens.colorNeutralBackground1 : tokens.colorNeutralBackground3,
+                            border: "none",
+                            borderLeft: index > 0 ? `1px solid ${tokens.colorNeutralStroke2}` : "none",
+                            cursor: "pointer",
+                            borderRadius: `${radiusLeft} ${radiusRight} ${radiusRight} ${radiusLeft}`,
+                            outline: "none",
+                          }}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                    <div style={{
                       display: "flex",
-                      flexDirection: "column",
+                      flexDirection: "row",
                       alignItems: "center",
-                      gap: "8px",
+                      gap: "0px",
                       paddingBottom: "16px",
                       marginBottom: "0px",
                     }}>
-                      <p style={{ fontSize: "14px", fontWeight: 600, letterSpacing: "1px", textTransform: "uppercase", color: tokens.colorNeutralForeground3, margin: 0 }}>Total estimated Copilot credits</p>
-                      <p style={{ fontSize: "40px", fontWeight: 700, color: tokens.colorBrandBackground, margin: 0 }}>{totalCredits.toLocaleString()}</p>
+                      <div style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        gap: "16px",
+                        flex: 1,
+                      }}>
+                        <p style={{ fontSize: "14px", fontWeight: 600, letterSpacing: "1px", textTransform: "uppercase", color: tokens.colorNeutralForeground3, margin: 0, textAlign: "center" }}>Total estimated<br />Copilot credits</p>
+                        <p style={{ fontSize: "40px", fontWeight: 700, color: tokens.colorBrandBackground, margin: 0 }}>{displayCredits.toLocaleString()}</p>
+                      </div>
+                      <div style={{ width: "1px", alignSelf: "stretch", backgroundColor: tokens.colorNeutralStroke2, margin: "0 16px" }} />
+                      <div style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        gap: "16px",
+                        flex: 1,
+                      }}>
+                        <p style={{ fontSize: "14px", fontWeight: 600, letterSpacing: "1px", textTransform: "uppercase", color: tokens.colorNeutralForeground3, margin: 0, textAlign: "center" }}>Credits negated with<br />Microsoft 365 Copilot</p>
+                        <p style={{ fontSize: "40px", fontWeight: 700, color: tokens.colorPaletteGreenForeground1, margin: 0 }}>{displayNegated.toLocaleString()}</p>
+                      </div>
                     </div>
 
                     <div className={styles.expandedSection}>
@@ -1435,7 +1600,7 @@ function App() {
                               <div className={styles.calcNegationRow}>
                                 <p className={styles.calcNegationLabel}>Copilot credits negated for {m365Count} users with Microsoft 365 Copilot licenses</p>
                                 <span className={styles.calcLeader} />
-                                <p className={styles.calcNegationValue}>-{knowledgeNegation}</p>
+                                <p className={styles.calcNegationValue}>{knowledgeNegation}</p>
                               </div>
                             </div>
 
@@ -1450,7 +1615,7 @@ function App() {
                               <div className={styles.calcNegationRow}>
                                 <p className={styles.calcNegationLabel}>Copilot credits negated for {m365Count} users with Microsoft 365 Copilot licenses</p>
                                 <span className={styles.calcLeader} />
-                                <p className={styles.calcNegationValue}>-{toolsNegation}</p>
+                                <p className={styles.calcNegationValue}>{toolsNegation}</p>
                               </div>
                             </div>
 
@@ -1465,7 +1630,7 @@ function App() {
                               <div className={styles.calcNegationRow}>
                                 <p className={styles.calcNegationLabel}>Copilot credits negated for {m365Count} users with Microsoft 365 Copilot licenses</p>
                                 <span className={styles.calcLeader} />
-                                <p className={styles.calcNegationValue}>-{flowsNegation}</p>
+                                <p className={styles.calcNegationValue}>{flowsNegation}</p>
                               </div>
                             </div>
 
@@ -1500,7 +1665,7 @@ function App() {
                               <div className={styles.calcNegationRow}>
                                 <p className={styles.calcNegationLabel}>Copilot credits negated for {m365Count} users with Microsoft 365 Copilot licenses</p>
                                 <span className={styles.calcLeader} />
-                                <p className={styles.calcNegationValue}>-{modifiersNegation}</p>
+                                <p className={styles.calcNegationValue}>{modifiersNegation}</p>
                               </div>
                             </div>
                           </div>
@@ -1518,7 +1683,7 @@ function App() {
               {/* Legal */}
               <div className={styles.legalContainer} style={{ marginTop: "48px", marginBottom: "64px" }}>
                 <p className={styles.legalText}>
-                  The Copilot Studio estimator tool is not a binding offer nor a guarantee of the final cost or availability of any Microsoft product. The estimates are purely informational, should be regarded only as guidance, and are not incorporated into any contractual agreement.
+                  The Copilot Studio estimator is not a binding offer nor a guarantee of the final cost or availability of the product. This estimate should be regarded only as guidance and not incorporated into a contractual agreement. The actual amount of message consumption and associated cost may vary depending on the region, availability, workload usage, number of users, and other factors. You may contact your Microsoft representative before making any customer recommendations or purchase decisions. Microsoft reserves the right to modify or discontinue the Copilot Studio estimator at any time without notice.
                 </p>
               </div>
             </div>
