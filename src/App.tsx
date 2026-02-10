@@ -7,8 +7,6 @@ import {
   Button,
   Input,
   Label,
-  Radio,
-  RadioGroup,
   Link,
   Checkbox,
   Badge,
@@ -19,8 +17,6 @@ import {
   ArrowSyncRegular,
   ArrowDownloadRegular,
   CartRegular,
-  ChatRegular,
-  CheckmarkRegular,
   PeopleRegular,
   PersonRegular,
   ShoppingBagRegular,
@@ -93,8 +89,7 @@ const useStyles = makeStyles({
     cursor: "pointer",
   },
   categoryCatalogItemSelected: {
-    borderColor: tokens.colorBrandBackground,
-    borderWidth: "2px",
+    border: `2px solid ${tokens.colorBrandBackground}`,
     padding: "15px",
   },
   categoryGrid: {
@@ -822,7 +817,7 @@ function App() {
     const trafficRequiringKnowledge = agentTraffic * knowledgePct;
     const ttgMessages = trafficRequiringKnowledge * tenantGraphPct * 12;
     const otherKnowledgeMessages = trafficRequiringKnowledge * otherKnowledgePct * 2;
-    const knowledgeMessages = ttgMessages + otherKnowledgeMessages;
+    // knowledgeMessages = ttgMessages + otherKnowledgeMessages (used individually below)
 
     // Agent tools/actions messages (generative): billableUsers * interactions * toolInvocations * 5 messages per tool
     const promptToolCount = parseInt(product.promptCount) || 0;
