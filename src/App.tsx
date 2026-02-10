@@ -117,7 +117,7 @@ const useStyles = makeStyles({
   },
   productChipsGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+    gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
     gap: "16px",
   },
   productChip: {
@@ -168,6 +168,7 @@ const useStyles = makeStyles({
   categoryPill: {
     display: "inline-flex",
     alignItems: "center",
+    gap: "4px",
     padding: "2px 8px",
     borderRadius: "9999px",
     fontSize: "12px",
@@ -1020,7 +1021,15 @@ function App() {
                             </div>
                           </div>
                           </div>
-                          <span className={styles.categoryPill}>{product.category}</span>
+                          <span className={styles.categoryPill}>
+                            {product.category === "Employee facing custom" && <PeopleRegular style={{ fontSize: 12 }} />}
+                            {product.category === "Customer facing custom" && <PersonRegular style={{ fontSize: 12 }} />}
+                            {product.category === "Dynamics 365 Sales" && <ShoppingBagRegular style={{ fontSize: 12 }} />}
+                            {product.category === "Dynamics 365 Service" && <BuildingRegular style={{ fontSize: 12 }} />}
+                            {product.category === "Business Central" && <CartRegular style={{ fontSize: 12 }} />}
+                            {product.category === "M365" && <AppGenericRegular style={{ fontSize: 12 }} />}
+                            {product.category}
+                          </span>
                         </div>
                       ))}
                     </div>
