@@ -322,10 +322,11 @@ const useStyles = makeStyles({
     position: "sticky" as const,
     top: 0,
     zIndex: 100,
-    padding: "12px 24px",
+    padding: "12px 24px 24px 24px",
     transition: "background-color 0.2s ease, box-shadow 0.2s ease",
     marginLeft: "-24px",
     marginRight: "-24px",
+    width: "calc(100% + 48px)",
   },
   section: {
     display: "flex",
@@ -428,27 +429,27 @@ const useStyles = makeStyles({
     gap: "0px",
     flex: "1 1 0",
     minWidth: 0,
-    maxHeight: "calc(100vh - 48px)",
+    maxHeight: "calc(100vh - 76px)",
     position: "sticky" as const,
-    top: "24px",
+    top: "76px",
     alignSelf: "flex-start",
     borderRadius: "16px",
-    overflow: "hidden" as const,
   },
   calcStickyHeader: {
-    position: "sticky" as const,
-    top: 0,
-    zIndex: 10,
+    flexShrink: 0,
     backgroundColor: tokens.colorNeutralBackground1,
-    padding: "32px 32px 16px 32px",
+    padding: "32px 32px 20px 32px",
     display: "flex",
     flexDirection: "column",
     gap: "20px",
     alignItems: "center",
     borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,
+    borderRadius: "16px 16px 0 0",
   },
   calcScrollArea: {
     overflowY: "auto" as const,
+    flex: "1 1 0%",
+    minHeight: "0px",
     padding: "20px 32px 32px 32px",
     display: "flex",
     flexDirection: "column",
@@ -1084,7 +1085,7 @@ function App() {
   };
 
   return (
-    <FluentProvider theme={customTheme}>
+    <FluentProvider theme={customTheme} style={{ overflow: "visible" }}>
       <div className={styles.appContainer}>
         <div className={styles.bodyContainer}>
               {/* Header */}
@@ -1593,7 +1594,7 @@ function App() {
 
                   {/* Calculation Column */}
                   <div className={styles.calculationPanel}>
-                    <div className={styles.calcStickyHeader}>
+                   <div className={styles.calcStickyHeader}>
                     <div style={{
                       display: "inline-flex",
                       border: `1px solid ${tokens.colorNeutralStroke2}`,
@@ -1668,9 +1669,9 @@ function App() {
                         <p style={{ fontSize: "40px", fontWeight: 700, color: tokens.colorPaletteGreenForeground1, margin: 0 }}>{displayNegated.toLocaleString()}</p>
                       </div>
                     </div>
-                    </div>
+                   </div>
 
-                    <div className={styles.calcScrollArea}>
+                   <div className={styles.calcScrollArea}>
                     <div className={styles.expandedSection}>
                       {products.map(product => {
                         const users = parseInt(product.users) || 0;
@@ -1833,7 +1834,7 @@ function App() {
                     <p style={{ fontSize: "12px", lineHeight: "16px", color: tokens.colorNeutralForeground3, margin: 0, textAlign: "center" as const }}>
                       *Estimates are for planning purposes only. Actual credit consumption may vary based on usage patterns.
                     </p>
-                    </div>
+                   </div>
                   </div>
                 </div>
               )}
