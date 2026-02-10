@@ -425,15 +425,34 @@ const useStyles = makeStyles({
     border: `1px solid ${tokens.colorNeutralStroke2}`,
     display: "flex",
     flexDirection: "column",
-    gap: "20px",
-    padding: "32px",
+    gap: "0px",
     flex: "1 1 0",
     minWidth: 0,
-    height: "fit-content",
+    maxHeight: "calc(100vh - 48px)",
     position: "sticky" as const,
     top: "24px",
     alignSelf: "flex-start",
     borderRadius: "16px",
+    overflow: "hidden" as const,
+  },
+  calcStickyHeader: {
+    position: "sticky" as const,
+    top: 0,
+    zIndex: 10,
+    backgroundColor: tokens.colorNeutralBackground1,
+    padding: "32px 32px 16px 32px",
+    display: "flex",
+    flexDirection: "column",
+    gap: "20px",
+    alignItems: "center",
+    borderBottom: `1px solid ${tokens.colorNeutralStroke2}`,
+  },
+  calcScrollArea: {
+    overflowY: "auto" as const,
+    padding: "20px 32px 32px 32px",
+    display: "flex",
+    flexDirection: "column",
+    gap: "20px",
   },
   totalHeading: {
     display: "flex",
@@ -560,8 +579,8 @@ const useStyles = makeStyles({
     marginBottom: "4px",
   },
   calcNegationValue: {
-    fontSize: "20px",
-    lineHeight: "28px",
+    fontSize: "14px",
+    lineHeight: "20px",
     fontWeight: 600,
     color: "#107c41",
     margin: 0,
@@ -601,8 +620,8 @@ const useStyles = makeStyles({
     margin: 0,
   },
   calcItemValue: {
-    fontSize: "20px",
-    lineHeight: "28px",
+    fontSize: "14px",
+    lineHeight: "20px",
     fontWeight: 600,
     color: tokens.colorNeutralForeground1,
     margin: 0,
@@ -1087,22 +1106,23 @@ function App() {
                     </div>
                   </div>
 
-                  <div
-                    ref={navRef}
-                    className={`${styles.stickyNav}`}
-                    style={{
-                      backgroundColor: isScrolled ? tokens.colorNeutralBackground1 : "transparent",
-                      boxShadow: isScrolled ? "0 2px 8px rgba(0,0,0,0.1)" : "none",
-                      borderRadius: isScrolled ? "0 0 12px 12px" : "0",
-                    }}
-                  >
-                    <div className={styles.navContainer}>
-                      <Button appearance="primary" size="large" icon={<ArrowSyncRegular />} onClick={handleReset}>Reset</Button>
-                      <Button appearance="outline" size="large" icon={<ArrowDownloadRegular />} onClick={handleDownloadPDF}>Download Results</Button>
-                      <Button appearance="outline" size="large" onClick={() => window.open("https://signup.microsoft.com/get-started/signup?products=25a8ddb8-34ca-4a93-828d-95a68d02e3a9&mproducts=CFQ7TTC0LH1F:000P&fmproducts=CFQ7TTC0LH1F:000P&culture=en-us&country=us&ali=1", "_blank")}>Buy Copilot Credits</Button>
-                      <Button appearance="outline" size="large" onClick={() => window.open("https://www.microsoft.com/en-us/microsoft-365-copilot", "_blank")}>Free Copilot Chat</Button>
-                    </div>
-                  </div>
+                </div>
+              </div>
+
+              <div
+                ref={navRef}
+                className={`${styles.stickyNav}`}
+                style={{
+                  backgroundColor: isScrolled ? tokens.colorNeutralBackground1 : "transparent",
+                  boxShadow: isScrolled ? "0 2px 8px rgba(0,0,0,0.1)" : "none",
+                  borderRadius: isScrolled ? "0 0 12px 12px" : "0",
+                }}
+              >
+                <div className={styles.navContainer}>
+                  <Button appearance="primary" size="large" icon={<ArrowSyncRegular />} onClick={handleReset}>Reset</Button>
+                  <Button appearance="outline" size="large" icon={<ArrowDownloadRegular />} onClick={handleDownloadPDF}>Download Results</Button>
+                  <Button appearance="outline" size="large" onClick={() => window.open("https://signup.microsoft.com/get-started/signup?products=25a8ddb8-34ca-4a93-828d-95a68d02e3a9&mproducts=CFQ7TTC0LH1F:000P&fmproducts=CFQ7TTC0LH1F:000P&culture=en-us&country=us&ali=1", "_blank")}>Buy Copilot Credits</Button>
+                  <Button appearance="outline" size="large" onClick={() => window.open("https://www.microsoft.com/en-us/microsoft-365-copilot", "_blank")}>Free Copilot Chat</Button>
                 </div>
               </div>
 
@@ -1573,12 +1593,12 @@ function App() {
 
                   {/* Calculation Column */}
                   <div className={styles.calculationPanel}>
+                    <div className={styles.calcStickyHeader}>
                     <div style={{
                       display: "inline-flex",
                       border: `1px solid ${tokens.colorNeutralStroke2}`,
                       borderRadius: "8px",
                       overflow: "hidden",
-                      marginBottom: "16px",
                       alignSelf: "center",
                     }}>
                       {[
@@ -1616,34 +1636,41 @@ function App() {
                     <div style={{
                       display: "flex",
                       flexDirection: "row",
-                      alignItems: "center",
+                      alignItems: "stretch",
                       gap: "0px",
                       paddingBottom: "16px",
                       marginBottom: "0px",
+                      width: "100%",
                     }}>
                       <div style={{
                         display: "flex",
                         flexDirection: "column",
                         alignItems: "center",
-                        gap: "16px",
+                        justifyContent: "space-between",
+                        gap: "12px",
                         flex: 1,
+                        minWidth: 0,
                       }}>
-                        <p style={{ fontSize: "14px", fontWeight: 600, letterSpacing: "1px", textTransform: "uppercase", color: tokens.colorNeutralForeground3, margin: 0, textAlign: "center" }}>Total estimated<br />Copilot credits</p>
+                        <p style={{ fontSize: "12px", fontWeight: 600, letterSpacing: "0.5px", textTransform: "uppercase", color: tokens.colorNeutralForeground3, margin: 0, textAlign: "center", lineHeight: "18px" }}>Total estimated<br />Copilot credits</p>
                         <p style={{ fontSize: "40px", fontWeight: 700, color: tokens.colorBrandBackground, margin: 0 }}>{displayCredits.toLocaleString()}</p>
                       </div>
-                      <div style={{ width: "1px", alignSelf: "stretch", backgroundColor: tokens.colorNeutralStroke2, margin: "0 16px" }} />
+                      <div style={{ width: "1px", flexShrink: 0, backgroundColor: tokens.colorNeutralStroke2, margin: "0 12px" }} />
                       <div style={{
                         display: "flex",
                         flexDirection: "column",
                         alignItems: "center",
-                        gap: "16px",
+                        justifyContent: "space-between",
+                        gap: "12px",
                         flex: 1,
+                        minWidth: 0,
                       }}>
-                        <p style={{ fontSize: "14px", fontWeight: 600, letterSpacing: "1px", textTransform: "uppercase", color: tokens.colorNeutralForeground3, margin: 0, textAlign: "center" }}>Credits negated with<br />Microsoft 365 Copilot</p>
+                        <p style={{ fontSize: "12px", fontWeight: 600, letterSpacing: "0.5px", textTransform: "uppercase", color: tokens.colorNeutralForeground3, margin: 0, textAlign: "center", lineHeight: "18px" }}>Total Copilot credits negated<br />with Microsoft 365 Copilot</p>
                         <p style={{ fontSize: "40px", fontWeight: 700, color: tokens.colorPaletteGreenForeground1, margin: 0 }}>{displayNegated.toLocaleString()}</p>
                       </div>
                     </div>
+                    </div>
 
+                    <div className={styles.calcScrollArea}>
                     <div className={styles.expandedSection}>
                       {products.map(product => {
                         const users = parseInt(product.users) || 0;
@@ -1712,7 +1739,7 @@ function App() {
                               <div style={{ display: "flex", alignItems: "baseline", gap: "8px", width: "100%" }}>
                                 <h3 className={styles.h4Title}>Copilot credits driven by knowledge</h3>
                                 <span className={styles.calcLeader} />
-                                <p style={{ fontSize: "20px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{knowledgeCredits}</p>
+                                <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{knowledgeCredits}</p>
                               </div>
 
                               <div className={styles.calcItemRow}>
@@ -1739,7 +1766,7 @@ function App() {
                               <div style={{ display: "flex", alignItems: "baseline", gap: "8px", width: "100%" }}>
                                 <h3 className={styles.h4Title}>Copilot credits driven by agent tools</h3>
                                 <span className={styles.calcLeader} />
-                                <p style={{ fontSize: "20px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{toolsCredits}</p>
+                                <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{toolsCredits}</p>
                               </div>
 
                               <div className={styles.calcNegationRow}>
@@ -1754,7 +1781,7 @@ function App() {
                               <div style={{ display: "flex", alignItems: "baseline", gap: "8px", width: "100%" }}>
                                 <h3 className={styles.h4Title}>Copilot credits driven by agent flows</h3>
                                 <span className={styles.calcLeader} />
-                                <p style={{ fontSize: "20px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{flowsCredits}</p>
+                                <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{flowsCredits}</p>
                               </div>
 
                               <div className={styles.calcNegationRow}>
@@ -1769,7 +1796,7 @@ function App() {
                               <div style={{ display: "flex", alignItems: "baseline", gap: "8px", width: "100%" }}>
                                 <h3 className={styles.h4Title}>Copilot credits driven by optional modifiers</h3>
                                 <span className={styles.calcLeader} />
-                                <p style={{ fontSize: "20px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{modifiersCredits}</p>
+                                <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{modifiersCredits}</p>
                               </div>
 
                               <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, paddingLeft: "15px" }}>Prompts</p>
@@ -1806,6 +1833,7 @@ function App() {
                     <p style={{ fontSize: "12px", lineHeight: "16px", color: tokens.colorNeutralForeground3, margin: 0, textAlign: "center" as const }}>
                       *Estimates are for planning purposes only. Actual credit consumption may vary based on usage patterns.
                     </p>
+                    </div>
                   </div>
                 </div>
               )}
