@@ -260,7 +260,7 @@ const useStyles = makeStyles({
     alignItems: "center",
     justifyContent: "center",
     width: "100%",
-    padding: "48px 48px 20px",
+    padding: "48px 48px 24px",
     boxSizing: "border-box" as const,
   },
   headline: {
@@ -1089,7 +1089,7 @@ function App() {
       <div className={styles.appContainer}>
         <div className={styles.bodyContainer}>
               {/* Header */}
-              <div style={{ width: "100%", marginBottom: "32px" }}>
+              <div style={{ width: "100%", marginBottom: "20px" }}>
                 <div className={styles.headerSection}>
                   <div className={styles.headerCard}>
                     <p className={styles.headline}>Microsoft agent usage estimator</p>
@@ -1098,7 +1098,7 @@ function App() {
                     </p>
                   </div>
 
-                  <div className={styles.creditCard} style={{ marginTop: "6px" }}>
+                  <div className={styles.creditCard}>
                     <div className={styles.creditContent}>
                       <p className={styles.creditTitle}>1 Copilot credit = $.01</p>
                       <p className={styles.creditLink}>
@@ -1120,10 +1120,36 @@ function App() {
                 }}
               >
                 <div className={styles.navContainer}>
-                  <Button appearance="primary" size="large" icon={<ArrowSyncRegular />} onClick={handleReset}>Reset</Button>
-                  <Button appearance="outline" size="large" icon={<ArrowDownloadRegular />} onClick={handleDownloadPDF}>Download Results</Button>
-                  <Button appearance="outline" size="large" onClick={() => window.open("https://signup.microsoft.com/get-started/signup?products=25a8ddb8-34ca-4a93-828d-95a68d02e3a9&mproducts=CFQ7TTC0LH1F:000P&fmproducts=CFQ7TTC0LH1F:000P&culture=en-us&country=us&ali=1", "_blank")}>Buy Copilot Credits</Button>
-                  <Button appearance="outline" size="large" onClick={() => window.open("https://www.microsoft.com/en-us/microsoft-365-copilot", "_blank")}>Free Copilot Chat</Button>
+                  <Button
+                    appearance="primary"
+                    size="large"
+                    icon={<ArrowSyncRegular />}
+                    onClick={handleReset}
+                    onMouseEnter={(e) => { e.currentTarget.style.filter = "brightness(0.85)"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.filter = "none"; }}
+                  >Reset</Button>
+                  <Button
+                    appearance="outline"
+                    size="large"
+                    icon={<ArrowDownloadRegular />}
+                    onClick={handleDownloadPDF}
+                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#ebebeb"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = ""; }}
+                  >Download Results</Button>
+                  <Button
+                    appearance="outline"
+                    size="large"
+                    onClick={() => window.open("https://signup.microsoft.com/get-started/signup?products=25a8ddb8-34ca-4a93-828d-95a68d02e3a9&mproducts=CFQ7TTC0LH1F:000P&fmproducts=CFQ7TTC0LH1F:000P&culture=en-us&country=us&ali=1", "_blank")}
+                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#ebebeb"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = ""; }}
+                  >Buy Copilot Credits</Button>
+                  <Button
+                    appearance="outline"
+                    size="large"
+                    onClick={() => window.open("https://www.microsoft.com/en-us/microsoft-365-copilot", "_blank")}
+                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#ebebeb"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = ""; }}
+                  >Free Copilot Chat</Button>
                 </div>
               </div>
 

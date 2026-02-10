@@ -41,9 +41,21 @@
   color: #888;
 }
 
-/* Remove Fluent UI focus indicator from plus buttons */
+/* Remove Fluent UI focus indicators */
 .fui-Button:focus-visible::after {
   display: none !important;
+}
+.fui-Button:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Button hover states */
+.fui-Button[class*="primary"]:hover {
+  filter: brightness(0.9);
+}
+.fui-Button[class*="outline"]:hover {
+  background-color: #f0f0f0 !important;
 }
 
 /* Checkbox hover state */
