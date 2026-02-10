@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - v3-calculations-ui
   workflow_dispatch:
 
 permissions:
