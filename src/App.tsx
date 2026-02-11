@@ -112,8 +112,10 @@ const useStyles = makeStyles({
     transition: "background-color 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease",
   },
   categoryCatalogItemSelected: {
-    border: `1.5px solid ${tokens.colorBrandBackground}`,
-    padding: "14.5px",
+    borderTopColor: tokens.colorBrandBackground,
+    borderRightColor: tokens.colorBrandBackground,
+    borderBottomColor: tokens.colorBrandBackground,
+    borderLeftColor: tokens.colorBrandBackground,
   },
   categoryGrid: {
     display: "grid",
@@ -156,8 +158,10 @@ const useStyles = makeStyles({
     transition: "background-color 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease",
   },
   productChipSelected: {
-    border: `1.5px solid ${tokens.colorBrandBackground}`,
-    padding: "15.5px",
+    borderTopColor: tokens.colorBrandBackground,
+    borderRightColor: tokens.colorBrandBackground,
+    borderBottomColor: tokens.colorBrandBackground,
+    borderLeftColor: tokens.colorBrandBackground,
   },
   chipTopRow: {
     display: "flex",
@@ -1241,6 +1245,7 @@ function App() {
                         <div key={product.id}
                           className={`${styles.productChip} ${hasAdded ? styles.productChipSelected : ''}`}
                           onClick={() => addProduct(product.id, product.name, product.category)}
+                          style={hasAdded ? { borderColor: tokens.colorBrandBackground } : undefined}
                           onMouseEnter={(e) => {
                             e.currentTarget.style.backgroundColor = '#f5f5f5';
                             e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
@@ -1250,6 +1255,7 @@ function App() {
                             e.currentTarget.style.backgroundColor = '';
                             e.currentTarget.style.boxShadow = 'none';
                             if (!hasAdded) e.currentTarget.style.borderColor = '';
+                            else e.currentTarget.style.borderColor = tokens.colorBrandBackground;
                           }}
                         >
                           <div className={styles.chipTopRow}>
