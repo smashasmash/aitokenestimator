@@ -109,6 +109,7 @@ const useStyles = makeStyles({
     borderRadius: "8px",
     position: "relative" as const,
     cursor: "pointer",
+    transition: "background-color 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease",
   },
   categoryCatalogItemSelected: {
     border: `1.5px solid ${tokens.colorBrandBackground}`,
@@ -151,6 +152,8 @@ const useStyles = makeStyles({
     border: `1px solid ${tokens.colorNeutralStroke2}`,
     borderRadius: "8px",
     position: "relative" as const,
+    cursor: "pointer",
+    transition: "background-color 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease",
   },
   productChipSelected: {
     border: `1.5px solid ${tokens.colorBrandBackground}`,
@@ -218,12 +221,12 @@ const useStyles = makeStyles({
   },
   countBadge: {
     position: "absolute" as const,
-    top: "-6px",
-    right: "-6px",
-    minWidth: "16px",
-    height: "16px",
+    top: "-8px",
+    right: "-8px",
+    minWidth: "14px",
+    height: "14px",
     borderRadius: "50%",
-    fontSize: "10px",
+    fontSize: "9px",
     fontWeight: 600,
     display: "flex",
     alignItems: "center",
@@ -1180,6 +1183,20 @@ function App() {
                           key={cat.name}
                           className={`${styles.categoryCatalogItem} ${isSelected ? styles.categoryCatalogItemSelected : ''}`}
                           onClick={() => toggleCategory(cat.name)}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#f5f5f5';
+                            e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
+                            if (!isSelected) e.currentTarget.style.borderColor = '#c0c0c0';
+                            const indicator = e.currentTarget.querySelector('.fui-Checkbox__indicator') as HTMLElement;
+                            if (indicator) indicator.style.borderColor = '#464feb';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = '';
+                            e.currentTarget.style.boxShadow = 'none';
+                            if (!isSelected) e.currentTarget.style.borderColor = '';
+                            const indicator = e.currentTarget.querySelector('.fui-Checkbox__indicator') as HTMLElement;
+                            if (indicator && !isSelected) indicator.style.borderColor = '';
+                          }}
                         >
                           <div className={styles.chipTopRow}>
                             <div className={styles.chipIcon}>
@@ -1221,7 +1238,20 @@ function App() {
                       {visibleProducts.map(product => {
                         const hasAdded = products.some(p => p.productId === product.id);
                         return (
-                        <div key={product.id} className={`${styles.productChip} ${hasAdded ? styles.productChipSelected : ''}`}>
+                        <div key={product.id}
+                          className={`${styles.productChip} ${hasAdded ? styles.productChipSelected : ''}`}
+                          onClick={() => addProduct(product.id, product.name, product.category)}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#f5f5f5';
+                            e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
+                            if (!hasAdded) e.currentTarget.style.borderColor = '#c0c0c0';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = '';
+                            e.currentTarget.style.boxShadow = 'none';
+                            if (!hasAdded) e.currentTarget.style.borderColor = '';
+                          }}
+                        >
                           <div className={styles.chipTopRow}>
                           <div className={styles.chipIcon}>
                             {product.category.startsWith("Dynamics 365") ? (
@@ -1264,11 +1294,13 @@ function App() {
                                 onClick={() => addProduct(product.id, product.name, product.category)}
                                 onMouseEnter={(e) => {
                                   e.currentTarget.style.backgroundColor = tokens.colorNeutralBackground4;
+                                  e.currentTarget.style.borderColor = "#464feb";
                                   const svg = e.currentTarget.querySelector("svg");
                                   if (svg) svg.style.color = "#464feb";
                                 }}
                                 onMouseLeave={(e) => {
                                   e.currentTarget.style.backgroundColor = "transparent";
+                                  e.currentTarget.style.borderColor = tokens.colorNeutralForeground3;
                                   const svg = e.currentTarget.querySelector("svg");
                                   if (svg) svg.style.color = tokens.colorNeutralForeground1;
                                 }}
@@ -1276,18 +1308,18 @@ function App() {
                                   display: "flex",
                                   alignItems: "center",
                                   justifyContent: "center",
-                                  width: "32px",
-                                  height: "32px",
-                                  borderRadius: "50%",
-                                  border: "none",
+                                  width: "20px",
+                                  height: "20px",
+                                  borderRadius: "3px",
+                                  border: `1px solid ${tokens.colorNeutralForeground3}`,
                                   backgroundColor: "transparent",
                                   cursor: "pointer",
                                   outline: "none",
                                   padding: 0,
-                                  transition: "background-color 0.15s ease",
+                                  transition: "background-color 0.15s ease, border-radius 0.15s ease, border 0.15s ease",
                                 }}
                               >
-                                <AddRegular style={{ color: tokens.colorNeutralForeground1, fontSize: "20px", transition: "color 0.15s ease" }} />
+                                <AddRegular style={{ color: tokens.colorNeutralForeground1, fontSize: "14px", transition: "color 0.15s ease" }} />
                               </button>
                               {products.filter(p => p.productId === product.id).length > 0 && (
                                 <Badge 
