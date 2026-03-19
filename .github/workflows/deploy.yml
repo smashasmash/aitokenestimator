@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - v3-calculations-ui
+      - v3-design-session-0217
   workflow_dispatch:
 
 permissions:
