@@ -12,7 +12,6 @@ import {
   Link,
   Checkbox,
   Badge,
-  Tooltip,
   Select,
   MessageBar,
   MessageBarBody,
@@ -2653,7 +2652,6 @@ function AppV2({ currentVersion, onVersionChange, versions }: VersionProps) {
                         const cmGenAnswersCredits = isCaseMgmt ? (cmCreateGen + cmUpdateGen + cmFollowUpGen + cmCloseGen + cmResolutionGen) * 2 : 0;
                         const cmClassicAnswersCredits = isCaseMgmt ? (cmCreateClassic + cmUpdateClassic + cmFollowUpClassic + cmCloseClassic + cmResolutionClassic) : 0;
                         const cmTextToolsCredits = isCaseMgmt ? Math.round((cmFollowUpTextAI + cmCloseTextAI) * 1.5) : 0;
-                        const cmTotalCredits = cmGenAnswersCredits + cmClassicAnswersCredits + cmTextToolsCredits;
 
                         return (
                           <div key={product.id} style={{

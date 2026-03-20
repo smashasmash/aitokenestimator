@@ -30,7 +30,6 @@ import {
   CopyRegular,
   EditRegular,
   PeopleRegular,
-  MoreHorizontalRegular,
   InfoRegular,
   CheckmarkRegular,
   ColorRegular,
@@ -844,8 +843,8 @@ function AppV3({ currentVersion, onVersionChange, versions }: VersionProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [viewMode, setViewMode] = useState<"selection" | "focused">("selection");
   const [expandedSummaries, setExpandedSummaries] = useState<Set<number>>(new Set());
-  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
-  const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 });
+  const [_openMenuId, _setOpenMenuId] = useState<number | null>(null);
+  const [_menuPosition, _setMenuPosition] = useState({ top: 0, right: 0 });
   const [editingProductId, setEditingProductId] = useState<number | null>(null);
   const [versionMenuOpen, setVersionMenuOpen] = useState(false);
   const [showDesignSystem, setShowDesignSystem] = useState(false);
@@ -2637,7 +2636,6 @@ function AppV3({ currentVersion, onVersionChange, versions }: VersionProps) {
                         const cmGenAnswersCredits = isCaseMgmt ? (cmCreateGen + cmUpdateGen + cmFollowUpGen + cmCloseGen + cmResolutionGen) * 2 : 0;
                         const cmClassicAnswersCredits = isCaseMgmt ? (cmCreateClassic + cmUpdateClassic + cmFollowUpClassic + cmCloseClassic + cmResolutionClassic) : 0;
                         const cmTextToolsCredits = isCaseMgmt ? Math.round((cmFollowUpTextAI + cmCloseTextAI) * 1.5) : 0;
-                        const cmTotalCredits = cmGenAnswersCredits + cmClassicAnswersCredits + cmTextToolsCredits;
 
                         return (
                           <div key={product.id} style={{
