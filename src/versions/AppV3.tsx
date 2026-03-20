@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import DesignSystem from "../components/DesignSystem";
 import {
   FluentProvider,
   createLightTheme,
@@ -13,6 +14,9 @@ import {
   Checkbox,
   Badge,
   Tooltip,
+  Select,
+  MessageBar,
+  MessageBarBody,
 } from "@fluentui/react-components";
 import type { BrandVariants } from "@fluentui/react-components";
 import { 
@@ -26,8 +30,10 @@ import {
   CopyRegular,
   EditRegular,
   PeopleRegular,
+  MoreHorizontalRegular,
   InfoRegular,
   CheckmarkRegular,
+  ColorRegular,
 } from "@fluentui/react-icons";
 
 const customBrand: BrandVariants = {
@@ -782,9 +788,23 @@ interface Product {
   agentFlowConfiguredCount: string;
   agentFlowActionsCount: string;
   leadsPerMonth: string;
-  leadsEngagedPercent: string;
-  leadsResearchedNotEngaged: string;
-  leadsResearchedAndEngaged: string;
+  salesQualMode: string;
+  leadsLowComplexity: string;
+  leadsMedComplexity: string;
+  leadsHighComplexity: string;
+  leadsReplyPercent: string;
+  // Case Management fields
+  cmNewEmails: string;
+  cmFollowupEmailsPerCase: string;
+  cmRealTimeConversations: string;
+  cmManualUpdatesPerConversation: string;
+  cmAutoCaseCreationPercent: string;
+  cmFollowupsPerCase: string;
+  cmFollowupTemplatePercent: string;
+  cmResolutionEmails: string;
+  cmKnowledgeArticlePercent: string;
+  cmToolCallsPerEmail: string;
+  cmResolutionTemplatePercent: string;
 }
 
 interface ProductDefinition {
@@ -796,10 +816,7 @@ interface ProductDefinition {
 
 const AllProducts: ProductDefinition[] = [
   // Dynamics 365 Service
-  { id: "customer-intent", name: "Customer intent agent", description: "Present your services, products and yourself in professional way.", category: "Dynamics 365 Service" },
-  { id: "customer-knowledge", name: "Customer knowledge management agent", description: "Manage and organize customer knowledge effectively.", category: "Dynamics 365 Service" },
   { id: "case-management", name: "Case management agent", description: "Streamline case management workflows.", category: "Dynamics 365 Service" },
-  { id: "quality-eval", name: "Quality evaluation agent", description: "Evaluate and improve service quality.", category: "Dynamics 365 Service" },
   // Dynamics 365 Sales
   { id: "sales-qualification", name: "Sales qualification agent", description: "Qualify leads and prioritize sales opportunities.", category: "Dynamics 365 Sales" },
   // Copilot Studio Custom
@@ -827,8 +844,11 @@ function AppV3({ currentVersion, onVersionChange, versions }: VersionProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [viewMode, setViewMode] = useState<"selection" | "focused">("selection");
   const [expandedSummaries, setExpandedSummaries] = useState<Set<number>>(new Set());
+  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  const [menuPosition, setMenuPosition] = useState({ top: 0, right: 0 });
   const [editingProductId, setEditingProductId] = useState<number | null>(null);
   const [versionMenuOpen, setVersionMenuOpen] = useState(false);
+  const [showDesignSystem, setShowDesignSystem] = useState(false);
 
   const navRef = useRef<HTMLDivElement>(null);
   const navSentinelRef = useRef<HTMLDivElement>(null);
@@ -909,9 +929,23 @@ function AppV3({ currentVersion, onVersionChange, versions }: VersionProps) {
       agentFlowConfiguredCount: "",
       agentFlowActionsCount: "",
       leadsPerMonth: "",
-      leadsEngagedPercent: "",
-      leadsResearchedNotEngaged: "",
-      leadsResearchedAndEngaged: "",
+      salesQualMode: "research-only",
+      leadsLowComplexity: "",
+      leadsMedComplexity: "",
+      leadsHighComplexity: "",
+      leadsReplyPercent: "",
+      // Case Management defaults
+      cmNewEmails: "0",
+      cmFollowupEmailsPerCase: "0",
+      cmRealTimeConversations: "0",
+      cmManualUpdatesPerConversation: "0",
+      cmAutoCaseCreationPercent: "0",
+      cmFollowupsPerCase: "0",
+      cmFollowupTemplatePercent: "0",
+      cmResolutionEmails: "0",
+      cmKnowledgeArticlePercent: "0",
+      cmToolCallsPerEmail: "0",
+      cmResolutionTemplatePercent: "0",
     };
     
     setProducts([...products, newProduct]);
@@ -947,119 +981,187 @@ function AppV3({ currentVersion, onVersionChange, versions }: VersionProps) {
   };
 
   const calculateProductCredits = (product: Product): number => {
+    // Sales Qualification Agent
+    if (product.productId === "sales-qualification") {
+      const leads = parseInt(product.leadsPerMonth) || 0;
+      const lowPct = (parseInt(product.leadsLowComplexity) || 0) / 100;
+      const medPct = (parseInt(product.leadsMedComplexity) || 0) / 100;
+      const highPct = (parseInt(product.leadsHighComplexity) || 0) / 100;
+      const lowLeads = Math.round(leads * lowPct);
+      const medLeads = Math.round(leads * medPct);
+      const highLeads = Math.round(leads * highPct);
+      const researchCredits = lowLeads * 174 + medLeads * 209 + highLeads * 349;
+      let engagementCredits = 0;
+      if (product.salesQualMode === "research-outreach-engage") {
+        const replyPct = (parseInt(product.leadsReplyPercent) || 0) / 100;
+        const leadsWhoRespond = Math.round(leads * replyPct);
+        const leadsDontRespond = leads - leadsWhoRespond;
+        engagementCredits = 142 * leadsWhoRespond + 9 * leadsDontRespond;
+      }
+      return researchCredits + engagementCredits;
+    }
+
+    // Case Management Agent
+    if (product.productId === "case-management") {
+      const newEmails = parseInt(product.cmNewEmails) || 0;
+      const followUpByUsers = parseInt(product.cmFollowupEmailsPerCase) || 0;
+      const rtConversations = parseInt(product.cmRealTimeConversations) || 0;
+      const agentUpdates = parseInt(product.cmManualUpdatesPerConversation) || 0;
+      const autoCasePct = (parseInt(product.cmAutoCaseCreationPercent) || 0) / 100;
+      const avgFollowUps = parseInt(product.cmFollowupsPerCase) || 0;
+      const templateFollowUpPct = (parseInt(product.cmFollowupTemplatePercent) || 0) / 100;
+      const resolutionEmails = parseInt(product.cmResolutionEmails) || 0;
+      const knowledgeArticlePct = (parseInt(product.cmKnowledgeArticlePercent) || 0) / 100;
+      const toolCallsPerEmail = parseInt(product.cmToolCallsPerEmail) || 0;
+      const templateResponsePct = (parseInt(product.cmResolutionTemplatePercent) || 0) / 100;
+
+      const createGen = newEmails + rtConversations;
+      const createClassic = Math.round(autoCasePct * (newEmails + rtConversations));
+      const updateGen = (rtConversations * agentUpdates) + (newEmails * followUpByUsers);
+      const updateClassic = newEmails * followUpByUsers;
+      const followUpGen = Math.round((newEmails + rtConversations) * avgFollowUps * templateFollowUpPct * 3);
+      const followUpClassic = Math.round((newEmails + rtConversations) * avgFollowUps * (1 - templateFollowUpPct));
+      const followUpTextAI = Math.round((newEmails + rtConversations) * avgFollowUps * (1 - templateFollowUpPct) * 8);
+      const closeGen = rtConversations;
+      const closeClassic = newEmails + rtConversations;
+      const closeTextAI = newEmails * 2;
+      const resolutionGen = Math.round(
+        resolutionEmails * knowledgeArticlePct * 3 + resolutionEmails * toolCallsPerEmail +
+        resolutionEmails * templateResponsePct * 3 + resolutionEmails * (1 - templateResponsePct)
+      );
+      const resolutionClassic = resolutionEmails;
+
+      const totalGen = (createGen + updateGen + followUpGen + closeGen + resolutionGen) * 2;
+      const totalClassic = createClassic + updateClassic + followUpClassic + closeClassic + resolutionClassic;
+      const totalTextAI = (followUpTextAI + closeTextAI) * 1.5;
+      return Math.round(totalGen + totalClassic + totalTextAI);
+    }
+
+    // Generic Copilot Studio agents
     const users = parseInt(product.users) || 0;
     const m365Count = parseInt(product.m365LicenseCount) || 0;
     const interactions = parseInt(product.interactionsPerMonth) || 0;
     const knowledgePct = (parseInt(product.knowledgePercent) || 0) / 100;
     const tenantGraphPct = (parseInt(product.tenantGraphPercent) || 0) / 100;
-    const otherKnowledgePct = 1 - tenantGraphPct;
-
-    // Billable users (zero-rated for Microsoft 365 Copilot license holders)
     const billableUsers = Math.max(users - m365Count, 0);
-    const agentTraffic = billableUsers * interactions;
+    const billableMessages = billableUsers * interactions;
 
-    // Knowledge messages
-    const trafficRequiringKnowledge = agentTraffic * knowledgePct;
-    const ttgMessages = trafficRequiringKnowledge * tenantGraphPct * 12;
-    const otherKnowledgeMessages = trafficRequiringKnowledge * otherKnowledgePct * 2;
-    // knowledgeMessages = ttgMessages + otherKnowledgeMessages (used individually below)
+    // Knowledge credits
+    const knowledgeMessages = Math.round(billableMessages * knowledgePct);
+    let tggMessages = Math.round(knowledgeMessages * tenantGraphPct);
+    if (tenantGraphPct > 0 && knowledgeMessages > 0 && tggMessages === 0) tggMessages = 1;
+    const nonTggMessages = knowledgeMessages - tggMessages;
+    const tggCredits = tggMessages * 12;
+    const nonTggCredits = nonTggMessages * 2;
+    const isB2C = product.productId === "custom-customer-facing";
+    const knowledgeCredits = isB2C ? (knowledgeMessages * 2) : (tggCredits + nonTggCredits);
 
-    // Agent tools/actions messages (generative): billableUsers * interactions * toolInvocations * 5 messages per tool
+    // Agent tools credits
+    const actionMessages = Math.round(billableMessages * (1 - knowledgePct));
     const promptToolCount = parseInt(product.promptCount) || 0;
+    const promptToolFreq = parseFloat(product.promptFreq) || 0;
     const computerUseCount = parseInt(product.computerUseCount) || 0;
+    const computerUseFreq = parseFloat(product.computerUseFreq) || 0;
     const customConnectorCount = parseInt(product.customConnectorCount) || 0;
+    const customConnectorFreq = parseFloat(product.customConnectorFreq) || 0;
     const mcpCount = parseInt(product.mcpCount) || 0;
+    const mcpFreq = parseFloat(product.mcpFreq) || 0;
     const restApiCount = parseInt(product.restApiCount) || 0;
-    const totalToolInvocations = promptToolCount + computerUseCount + customConnectorCount + mcpCount + restApiCount;
-    const actionsMessages = agentTraffic * totalToolInvocations * 5;
+    const restApiFreq = parseFloat(product.restApiFreq) || 0;
+    const totalToolInvocations = promptToolCount * promptToolFreq + computerUseCount * computerUseFreq +
+      customConnectorCount * customConnectorFreq + mcpCount * mcpFreq + restApiCount * restApiFreq;
+    const toolsCredits = Math.round(totalToolInvocations * actionMessages * 5);
 
-    // Agent flows: # of flows x # runs per month x 1.69
+    // Agent flows credits
     const flowsConfigured = parseInt(product.agentFlowConfiguredCount) || 0;
     const flowActionsCount = parseInt(product.agentFlowActionsCount) || 0;
-    // Using 0.13 per action (13 messages per 100 actions)
-    const flowsMessages = flowsConfigured * flowActionsCount * 0.13 * interactions;
+    const flowsCredits = Math.round(flowsConfigured * flowActionsCount * 0.13);
 
-    // Optional modifiers (prompts) with Copilot license zero-rating
-    const copilotRatio = users > 0 ? (users - m365Count) / users : 1;
+    // Modifiers credits
+    const promptUserCount = Math.max(users - m365Count, 0);
     const basicCount = parseInt(product.promptBasicCount) || 0;
     const basicFreq = parseFloat(product.promptBasicFreq) || 0;
     const standardCount = parseInt(product.promptStandardCount) || 0;
     const standardFreq = parseFloat(product.promptStandardFreq) || 0;
     const premiumCount = parseInt(product.promptPremiumCount) || 0;
     const premiumFreq = parseFloat(product.promptPremiumFreq) || 0;
+    const basicCredits = Math.round(basicCount * basicFreq * promptUserCount * interactions * (5 + 0.1) / 10);
+    const standardCredits = Math.round(standardCount * standardFreq * promptUserCount * interactions * (5 + 1.5) / 10);
+    const premiumCredits = Math.round(premiumCount * premiumFreq * promptUserCount * interactions * (5 + 10) / 10);
+    const modifiersCredits = basicCredits + standardCredits + premiumCredits;
 
-    // Basic: # prompts x 0.1 message x 3.073 x copilotRatio
-    const basicMessages = basicCount * basicFreq * 0.1 * 3.073 * copilotRatio;
-    // Standard: # prompts x 1.5 messages x 4.945 x copilotRatio
-    const standardMessages = standardCount * standardFreq * 1.5 * 4.945 * copilotRatio;
-    // Premium: # prompts x 10 messages x 7.091 x copilotRatio
-    const premiumMessages = premiumCount * premiumFreq * 10 * 7.091 * copilotRatio;
-    const modifierMessages = basicMessages + standardMessages + premiumMessages;
-
-    // Determine agent type from category
-    const isB2C = product.productId === "custom-customer-facing";
-    // B2C excludes TTG messages
-    const totalMessages = isB2C
-      ? otherKnowledgeMessages + actionsMessages + flowsMessages + modifierMessages
-      : ttgMessages + otherKnowledgeMessages + actionsMessages + flowsMessages + modifierMessages;
-
-    return Math.round(totalMessages);
+    return knowledgeCredits + toolsCredits + flowsCredits + modifiersCredits;
   };
 
   const totalCredits = products.reduce((sum, product) => sum + calculateProductCredits(product), 0);
 
   const calculateProductNegation = (product: Product): number => {
+    if (product.productId === "sales-qualification" || product.productId === "case-management") return 0;
     const users = parseInt(product.users) || 0;
     const m365Count = parseInt(product.m365LicenseCount) || 0;
     if (users === 0 || m365Count === 0) return 0;
     const interactions = parseInt(product.interactionsPerMonth) || 0;
     const knowledgePct = (parseInt(product.knowledgePercent) || 0) / 100;
     const tenantGraphPct = (parseInt(product.tenantGraphPercent) || 0) / 100;
-    const otherKnowledgePct = 1 - tenantGraphPct;
 
-    // Gross credits (all users, no zero-rating)
-    const grossTraffic = users * interactions;
-    const grossKnowledge = grossTraffic * knowledgePct;
-    const grossTtg = grossKnowledge * tenantGraphPct * 12;
-    const grossOther = grossKnowledge * otherKnowledgePct * 2;
-    const grossKnowledgeCredits = Math.round(grossTtg) + Math.round(grossOther);
+    // Knowledge negation
+    const licensedMessages = m365Count * interactions;
+    const licensedKnowledgeMessages = Math.round(licensedMessages * knowledgePct);
+    let licensedTggMessages = Math.round(licensedKnowledgeMessages * tenantGraphPct);
+    if (tenantGraphPct > 0 && licensedKnowledgeMessages > 0 && licensedTggMessages === 0) licensedTggMessages = 1;
+    const licensedNonTggMessages = licensedKnowledgeMessages - licensedTggMessages;
+    const isB2C = product.productId === "custom-customer-facing";
+    const knowledgeNegated = isB2C ? (licensedKnowledgeMessages * 2) : (licensedTggMessages * 12 + licensedNonTggMessages * 2);
 
+    // Actions negation
+    const licensedActionMessages = licensedMessages - licensedKnowledgeMessages;
     const promptToolCount = parseInt(product.promptCount) || 0;
+    const promptToolFreq = parseFloat(product.promptFreq) || 0;
     const computerUseCount = parseInt(product.computerUseCount) || 0;
+    const computerUseFreq = parseFloat(product.computerUseFreq) || 0;
     const customConnectorCount = parseInt(product.customConnectorCount) || 0;
+    const customConnectorFreq = parseFloat(product.customConnectorFreq) || 0;
     const mcpCount = parseInt(product.mcpCount) || 0;
+    const mcpFreq = parseFloat(product.mcpFreq) || 0;
     const restApiCount = parseInt(product.restApiCount) || 0;
-    const totalToolInvocations = promptToolCount + computerUseCount + customConnectorCount + mcpCount + restApiCount;
-    const grossToolsCredits = Math.round(grossTraffic * totalToolInvocations * 5);
+    const restApiFreq = parseFloat(product.restApiFreq) || 0;
+    const totalToolInvocations = promptToolCount * promptToolFreq + computerUseCount * computerUseFreq +
+      customConnectorCount * customConnectorFreq + mcpCount * mcpFreq + restApiCount * restApiFreq;
+    const actionsNegated = Math.round(totalToolInvocations * licensedActionMessages * 5);
 
+    // Flows negation (proportional)
     const flowsConfigured = parseInt(product.agentFlowConfiguredCount) || 0;
     const flowActionsCount = parseInt(product.agentFlowActionsCount) || 0;
-    const grossFlowsCredits = Math.round(flowsConfigured * flowActionsCount * 0.13 * interactions);
+    const totalFlowsCredits = Math.round(flowsConfigured * flowActionsCount * 0.13);
+    const m365Ratio = m365Count / users;
+    const flowsNegated = Math.round(totalFlowsCredits * m365Ratio);
 
+    // Modifiers negation
     const basicCount = parseInt(product.promptBasicCount) || 0;
     const basicFreq = parseFloat(product.promptBasicFreq) || 0;
     const standardCount = parseInt(product.promptStandardCount) || 0;
     const standardFreq = parseFloat(product.promptStandardFreq) || 0;
     const premiumCount = parseInt(product.promptPremiumCount) || 0;
     const premiumFreq = parseFloat(product.promptPremiumFreq) || 0;
-    // Gross modifiers (copilotRatio = 1, no zero-rating)
-    const grossModifiers = Math.round(basicCount * basicFreq * 0.1 * 3.073) + Math.round(standardCount * standardFreq * 1.5 * 4.945) + Math.round(premiumCount * premiumFreq * 10 * 7.091);
+    const basicNegated = Math.round(basicCount * basicFreq * m365Count * interactions * (5 + 0.1) / 10);
+    const standardNegated = Math.round(standardCount * standardFreq * m365Count * interactions * (5 + 1.5) / 10);
+    const premiumNegated = Math.round(premiumCount * premiumFreq * m365Count * interactions * (5 + 10) / 10);
+    const modifiersNegated = basicNegated + standardNegated + premiumNegated;
 
-    const isB2C = product.productId === "custom-customer-facing";
-    const grossTotal = isB2C
-      ? Math.round(grossOther) + grossToolsCredits + grossFlowsCredits + grossModifiers
-      : grossKnowledgeCredits + grossToolsCredits + grossFlowsCredits + grossModifiers;
-
-    // Net credits are already calculated by calculateProductCredits
-    const netTotal = calculateProductCredits(product);
-    return grossTotal - netTotal;
+    return knowledgeNegated + actionsNegated + flowsNegated + modifiersNegated;
   };
 
   const totalNegated = products.reduce((sum, product) => sum + calculateProductNegation(product), 0);
 
   const timeMultiplier = timePeriod === "year" ? 12 : 1;
-  const displayCredits = totalCredits * timeMultiplier;
-  const displayNegated = totalNegated * timeMultiplier;
+  const focusedAgentCredits = viewMode === "focused" && editingProductId
+    ? (products.find(p => p.id === editingProductId) ? calculateProductCredits(products.find(p => p.id === editingProductId)!) : totalCredits)
+    : totalCredits;
+  const focusedAgentNegated = viewMode === "focused" && editingProductId
+    ? (products.find(p => p.id === editingProductId) ? calculateProductNegation(products.find(p => p.id === editingProductId)!) : totalNegated)
+    : totalNegated;
+  const displayCredits = focusedAgentCredits * timeMultiplier;
+  const displayNegated = focusedAgentNegated * timeMultiplier;
 
   const handleDownloadPDF = () => {
     const doc = new jsPDF();
@@ -1222,6 +1324,10 @@ function AppV3({ currentVersion, onVersionChange, versions }: VersionProps) {
     return null;
   };
 
+  if (showDesignSystem) {
+    return <DesignSystem onClose={() => setShowDesignSystem(false)} />;
+  }
+
   return (
     <FluentProvider theme={customTheme} style={{ overflow: "visible" }}>
       <div className={styles.appContainer}>
@@ -1351,7 +1457,7 @@ function AppV3({ currentVersion, onVersionChange, versions }: VersionProps) {
                     {[
                       { name: "Copilot Studio Custom" as ProductCategory, description: "Build custom agents for employee or customer-facing scenarios.", icon: <svg width="28" height="28" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><g clipPath="url(#cs_clip)"><path d="M31.8232 6.0311C26.8849 4.38497 24.4153 3.56235 22.708 4.79281C21.0007 6.02337 21.001 8.62627 21.001 13.8319V18.3788L15.8223 16.6532C10.8839 15.007 8.41432 14.1843 6.70703 15.4149C4.99999 16.6455 5 19.2486 5 24.4539V31.786C5 34.6462 5.00036 36.0765 5.77637 37.1532C6.55238 38.2298 7.90874 38.6823 10.6221 39.5868L18.3555 42.1649C21.1836 43.1076 22.598 43.5788 24.0205 43.3846C25.4432 43.1902 26.6795 42.3563 29.1514 40.6893L37.5654 35.0145C40.2278 33.219 41.5593 32.3214 42.2812 30.9637C43.003 29.6062 43.0029 28.0007 43.0029 24.7899V18.6034H43V15.6834C43 12.8233 42.9996 11.3929 42.2236 10.3163C41.4476 9.23982 40.0911 8.78704 37.3779 7.88266L31.8232 6.0311Z" fill="url(#cs_p0)"/><path d="M31.8232 6.0311C26.8849 4.38497 24.4153 3.56235 22.708 4.79281C21.0007 6.02337 21.001 8.62627 21.001 13.8319V18.3788L15.8223 16.6532C10.8839 15.007 8.41432 14.1843 6.70703 15.4149C4.99999 16.6455 5 19.2486 5 24.4539V31.786C5 34.6462 5.00036 36.0765 5.77637 37.1532C6.55238 38.2298 7.90874 38.6823 10.6221 39.5868L18.3555 42.1649C21.1836 43.1076 22.598 43.5788 24.0205 43.3846C25.4432 43.1902 26.6795 42.3563 29.1514 40.6893L37.5654 35.0145C40.2278 33.219 41.5593 32.3214 42.2812 30.9637C43.003 29.6062 43.0029 28.0007 43.0029 24.7899V18.6034H43V15.6834C43 12.8233 42.9996 11.3929 42.2236 10.3163C41.4476 9.23982 40.0911 8.78704 37.3779 7.88266L31.8232 6.0311Z" fill="url(#cs_p1)"/><path d="M31.8232 6.0311C26.8849 4.38497 24.4153 3.56235 22.708 4.79281C21.0007 6.02337 21.001 8.62627 21.001 13.8319V18.3788L15.8223 16.6532C10.8839 15.007 8.41432 14.1843 6.70703 15.4149C4.99999 16.6455 5 19.2486 5 24.4539V31.786C5 34.6462 5.00036 36.0765 5.77637 37.1532C6.55238 38.2298 7.90874 38.6823 10.6221 39.5868L18.3555 42.1649C21.1836 43.1076 22.598 43.5788 24.0205 43.3846C25.4432 43.1902 26.6795 42.3563 29.1514 40.6893L37.5654 35.0145C40.2278 33.219 41.5593 32.3214 42.2812 30.9637C43.003 29.6062 43.0029 28.0007 43.0029 24.7899V18.6034H43V15.6834C43 12.8233 42.9996 11.3929 42.2236 10.3163C41.4476 9.23982 40.0911 8.78704 37.3779 7.88266L31.8232 6.0311Z" fill="url(#cs_p2)"/><path d="M26.9986 26.3054C26.9986 23.4453 26.9986 22.0152 26.2226 20.9385C25.4466 19.8619 24.0899 19.4096 21.3765 18.5052L15.8223 16.6538C10.8838 15.0076 8.4146 14.1845 6.7073 15.4151C5 16.6456 5 19.2484 5 24.454V31.7867C5 34.6469 5 36.077 5.776 37.1537C6.55201 38.2303 7.90872 38.6826 10.6221 39.587L16.1763 41.4384C21.1148 43.0846 23.584 43.9077 25.2913 42.6771C26.9986 41.4466 26.9986 38.8438 26.9986 33.6381V26.3054Z" fill="url(#cs_p3)"/><path d="M26.9986 26.3054C26.9986 23.4453 26.9986 22.0152 26.2226 20.9385C25.4466 19.8619 24.0899 19.4096 21.3765 18.5052L15.8223 16.6538C10.8838 15.0076 8.4146 14.1845 6.7073 15.4151C5 16.6456 5 19.2484 5 24.454V31.7867C5 34.6469 5 36.077 5.776 37.1537C6.55201 38.2303 7.90872 38.6826 10.6221 39.587L16.1763 41.4384C21.1148 43.0846 23.584 43.9077 25.2913 42.6771C26.9986 41.4466 26.9986 38.8438 26.9986 33.6381V26.3054Z" fill="url(#cs_p4)"/><path d="M42.9956 31.296V18.5515L27.2 29.2853L5.00002 22.9129V37.7129L24.1167 44.0853L42.9956 31.296Z" fill="url(#cs_p5)"/><path d="M21.028 10.3942C17.883 9.40833 16.0572 9.09759 14.7076 10.07C13.418 10.9995 13.1032 12.7123 13.026 15.738C13.8601 15.9994 14.7874 16.3079 15.8229 16.653L21.0006 18.3786V13.8317C21.0006 12.5294 21.0011 11.39 21.028 10.3942Z" fill="url(#cs_p6)"/><path d="M21.028 10.3942C17.883 9.40833 16.0572 9.09759 14.7076 10.07C13.418 10.9995 13.1032 12.7123 13.026 15.738C13.8601 15.9994 14.7874 16.3079 15.8229 16.653L21.0006 18.3786V13.8317C21.0006 12.5294 21.0011 11.39 21.028 10.3942Z" fill="url(#cs_p7)" fillOpacity="0.7"/><path d="M21.0277 10.3945C21.001 11.3903 21.0004 12.5298 21.0004 13.832V21.165C21.0004 24.0249 21.0008 25.4547 21.7767 26.5312C22.5527 27.6079 23.9091 28.0604 26.6224 28.9648C26.8447 29.0389 27.3184 29.1968 27.9336 29.4016C31.0918 30.453 32.6709 30.9786 33.833 30.1414C34.9952 29.3041 34.9965 27.6414 34.9991 24.3161C35.0003 22.74 35.0004 21.4148 35.0004 20.9609C35.0004 18.1012 34.9998 16.6713 34.224 15.5947C33.448 14.5181 32.0914 14.0655 29.3783 13.1611L23.8226 11.3086C22.788 10.9637 21.8613 10.6558 21.0277 10.3945Z" fill="url(#cs_p8)"/><path d="M21.0277 10.3945C21.001 11.3903 21.0004 12.5298 21.0004 13.832V21.165C21.0004 24.0249 21.0008 25.4547 21.7767 26.5312C22.5527 27.6079 23.9091 28.0604 26.6224 28.9648C26.8447 29.0389 27.3184 29.1968 27.9336 29.4016C31.0918 30.453 32.6709 30.9786 33.833 30.1414C34.9952 29.3041 34.9965 27.6414 34.9991 24.3161C35.0003 22.74 35.0004 21.4148 35.0004 20.9609C35.0004 18.1012 34.9998 16.6713 34.224 15.5947C33.448 14.5181 32.0914 14.0655 29.3783 13.1611L23.8226 11.3086C22.788 10.9637 21.8613 10.6558 21.0277 10.3945Z" fill="url(#cs_p9)"/><path d="M13.0262 15.738C13.0012 16.718 12.9998 17.8357 12.9998 19.1091V26.4421C12.9998 29.3023 13.0002 30.7327 13.7762 31.8093C14.5522 32.8857 15.9089 33.3376 18.6219 34.2419C18.8431 34.3157 19.3132 34.4723 19.9238 34.6756C23.0879 35.7288 24.6699 36.2554 25.832 35.418C26.9942 34.5807 26.9953 32.9149 26.9977 29.5834C26.9988 28.0375 26.9988 26.7445 26.9988 26.3054C26.9988 23.4452 26.9985 22.0149 26.2225 20.9382C25.4465 19.8617 24.09 19.409 21.3768 18.5046L15.8221 16.6531C14.7869 16.308 13.8601 15.9994 13.0262 15.738Z" fill="url(#cs_p10)"/><path d="M21.0008 21.165C21.0008 24.0246 21.0005 25.4547 21.7762 26.5312C22.5522 27.6079 23.9095 28.0604 26.6229 28.9648L26.9988 29.0898V26.3057C26.9988 23.4455 26.9985 22.0151 26.2225 20.9385C25.4465 19.8619 24.09 19.4093 21.3768 18.5049L21.0008 18.3789V21.165Z" fill="url(#cs_p11)"/></g><defs><linearGradient id="cs_p0" x1="26.7461" y1="35.7058" x2="37.8257" y2="7.96439" gradientUnits="userSpaceOnUse"><stop stopColor="#2764E7"/><stop offset="0.307475" stopColor="#8B52F4"/><stop offset="0.544627" stopColor="#BB45EA"/><stop offset="0.803866" stopColor="#DB56C6"/><stop offset="1" stopColor="#F462AB"/></linearGradient><radialGradient id="cs_p1" cx="0" cy="0" r="1" gradientTransform="matrix(10.3452 9.65562 6.27421 -6.36495 26.3239 22.5577)" gradientUnits="userSpaceOnUse"><stop offset="0.549399" stopColor="#5B2AB5"/><stop offset="1" stopColor="#A931D8" stopOpacity="0"/></radialGradient><radialGradient id="cs_p2" cx="0" cy="0" r="1" gradientTransform="matrix(19.846 6.16317 3.15774 -9.62767 22.7347 18.0381)" gradientUnits="userSpaceOnUse"><stop offset="0.527929" stopColor="#9529C2"/><stop offset="1" stopColor="#DD3CE2" stopOpacity="0"/></radialGradient><radialGradient id="cs_p3" cx="0" cy="0" r="1" gradientTransform="matrix(-19.1297 -27.618 -27.432 19.2594 29.1953 40.6685)" gradientUnits="userSpaceOnUse"><stop stopColor="#2764E7"/><stop offset="0.225228" stopColor="#0094F0"/><stop offset="0.443437" stopColor="#19B2CE"/><stop offset="0.6999" stopColor="#52D17C"/><stop offset="1" stopColor="#FFD638"/></radialGradient><linearGradient id="cs_p4" x1="12.1473" y1="37.9502" x2="26.1208" y2="37.9502" gradientUnits="userSpaceOnUse"><stop stopColor="#16BBDA" stopOpacity="0"/><stop offset="0.535279" stopColor="#0094F0"/><stop offset="1" stopColor="#2764E7"/></linearGradient><radialGradient id="cs_p5" cx="0" cy="0" r="1" gradientTransform="matrix(8.85681 4.54903 3.15823 -5.04838 22.4543 32.7527)" gradientUnits="userSpaceOnUse"><stop stopColor="#1B44B1"/><stop offset="1" stopColor="#367AF2" stopOpacity="0"/></radialGradient><linearGradient id="cs_p6" x1="18.9946" y1="17.7329" x2="19.203" y2="9.33928" gradientUnits="userSpaceOnUse"><stop stopColor="#FF9C70"/><stop offset="1" stopColor="#FFD394"/></linearGradient><linearGradient id="cs_p7" x1="16.7719" y1="14.2895" x2="15.9357" y2="17.9602" gradientUnits="userSpaceOnUse"><stop stopColor="#FFB357" stopOpacity="0"/><stop offset="1" stopColor="#F24A9D"/></linearGradient><linearGradient id="cs_p8" x1="28.7781" y1="12.488" x2="29.0132" y2="31.5134" gradientUnits="userSpaceOnUse"><stop stopColor="#FFB357"/><stop offset="0.380259" stopColor="#FB6F7B"/><stop offset="0.659779" stopColor="#F24A9D"/><stop offset="1" stopColor="#DD3CE2"/></linearGradient><radialGradient id="cs_p9" cx="0" cy="0" r="1" gradientTransform="matrix(9.13889 2.26464 -2.05987 10.0474 21.7781 27.0246)" gradientUnits="userSpaceOnUse"><stop offset="0.567938" stopColor="#D7257D"/><stop offset="1" stopColor="#F462AB" stopOpacity="0"/></radialGradient><linearGradient id="cs_p10" x1="24.6773" y1="36.7373" x2="11.3263" y2="15.7738" gradientUnits="userSpaceOnUse"><stop stopColor="#0FAFFF"/><stop offset="0.54828" stopColor="#2BDABE"/><stop offset="0.765945" stopColor="#88E06C"/><stop offset="1" stopColor="#FFD638"/></linearGradient><linearGradient id="cs_p11" x1="20.3343" y1="22.3955" x2="26.1547" y2="24.1849" gradientUnits="userSpaceOnUse"><stop stopColor="#76EB95"/><stop offset="1" stopColor="#3BD5FF" stopOpacity="0"/></linearGradient><clipPath id="cs_clip"><rect width="48" height="48" fill="white"/></clipPath></defs></svg> },
                       { name: "Dynamics 365 Sales" as ProductCategory, description: "Pre-built agents for Dynamics 365 Sales workflows.", icon: <svg width="28" height="28" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg"><g clipPath="url(#d365s_cat_c0)"><g clipPath="url(#d365s_cat_c1)"><path d="M0 127.998C0 110.325 14.3269 95.998 32 95.998H42.6667V159.998H32C14.3269 159.998 0 145.671 0 127.998Z" fill="url(#d365s_cat_p0)"/><path d="M0 127.998C0 110.325 14.3269 95.998 32 95.998H42.6667V159.998H32C14.3269 159.998 0 145.671 0 127.998Z" fill="url(#d365s_cat_p1)"/><path d="M42.6665 79.998C42.6665 62.3249 56.9934 47.998 74.6665 47.998H85.3332V159.998H42.6665V79.998Z" fill="url(#d365s_cat_p2)"/><path d="M42.6665 79.998C42.6665 62.3249 56.9934 47.998 74.6665 47.998H85.3332V159.998H42.6665V79.998Z" fill="url(#d365s_cat_p3)" fillOpacity="0.6"/><path d="M85.3335 31.998C85.3335 14.3249 99.6604 -0.00195312 117.333 -0.00195312H128C146.667 -0.00195312 160 4.13124 160 4.13124V143.998C160 152.835 152.837 159.998 144 159.998H85.3335V31.998Z" fill="url(#d365s_cat_p4)"/><path d="M85.3335 31.998C85.3335 14.3249 99.6604 -0.00195312 117.333 -0.00195312H128C146.667 -0.00195312 160 4.13124 160 4.13124V143.998C160 152.835 152.837 159.998 144 159.998H85.3335V31.998Z" fill="url(#d365s_cat_p5)" fillOpacity="0.5"/><path d="M143.959 0.996549C163.62 3.46713 182.516 10.48 199.113 21.5698C220.163 35.6346 236.569 55.6255 246.257 79.0145C255.945 102.403 258.479 128.14 253.541 152.97C248.602 177.799 236.411 200.607 218.51 218.508C200.608 236.409 177.801 248.6 152.971 253.538C128.142 258.477 102.405 255.942 79.0163 246.254C55.6274 236.566 35.6366 220.16 21.5718 199.111C7.50698 178.061 -4.88895e-05 153.314 2.38288e-10 127.998C2.38288e-10 145.671 14.3269 159.998 32 159.998H42.6667H74.6667H112C120.837 159.998 128 152.834 128 143.998V15.9979C128 7.16134 135.191 -0.105173 143.959 0.996549Z" fill="url(#d365s_cat_p6)"/><path d="M143.959 0.996549C163.62 3.46713 182.516 10.48 199.113 21.5698C220.163 35.6346 236.569 55.6255 246.257 79.0145C255.945 102.403 258.479 128.14 253.541 152.97C248.602 177.799 236.411 200.607 218.51 218.508C200.608 236.409 177.801 248.6 152.971 253.538C128.142 258.477 102.405 255.942 79.0163 246.254C55.6274 236.566 35.6366 220.16 21.5718 199.111C7.50698 178.061 -4.88895e-05 153.314 2.38288e-10 127.998C2.38288e-10 145.671 14.3269 159.998 32 159.998H42.6667H74.6667H112C120.837 159.998 128 152.834 128 143.998V15.9979C128 7.16134 135.191 -0.105173 143.959 0.996549Z" fill="url(#d365s_cat_p7)"/><g opacity="0.6" style={{mixBlendMode: "soft-light"}}><path d="M256 127.998C256 110.325 241.673 95.998 224 95.998H128V143.998C128 152.835 120.837 159.998 112 159.998H106.667H224C241.673 159.998 256 145.671 256 127.998Z" fill="url(#d365s_cat_p8)"/></g></g></g><defs><linearGradient id="d365s_cat_p0" x1="0.608505" y1="139.96" x2="42.4696" y2="143.599" gradientUnits="userSpaceOnUse"><stop stopColor="#1B44B1"/><stop offset="1" stopColor="#102784"/></linearGradient><radialGradient id="d365s_cat_p1" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(14.6667 95.9981) rotate(90) scale(64 47.1506)"><stop offset="0.57876" stopColor="#102784" stopOpacity="0"/><stop offset="1" stopColor="#102784"/></radialGradient><linearGradient id="d365s_cat_p2" x1="63.9998" y1="47.998" x2="63.9998" y2="159.998" gradientUnits="userSpaceOnUse"><stop stopColor="#0094F0"/><stop offset="0.775536" stopColor="#2052CB"/><stop offset="1" stopColor="#163697"/></linearGradient><linearGradient id="d365s_cat_p3" x1="63.9998" y1="119.998" x2="85.347" y2="118.944" gradientUnits="userSpaceOnUse"><stop stopColor="#0078D4" stopOpacity="0"/><stop offset="1" stopColor="#2052CB"/></linearGradient><linearGradient id="d365s_cat_p4" x1="106.667" y1="-0.00195312" x2="106.667" y2="159.998" gradientUnits="userSpaceOnUse"><stop stopColor="#26CFE8"/><stop offset="0.409431" stopColor="#0FAFFF"/><stop offset="0.809746" stopColor="#367AF2"/><stop offset="1" stopColor="#2052CB"/></linearGradient><linearGradient id="d365s_cat_p5" x1="109.037" y1="91.998" x2="130.371" y2="91.998" gradientUnits="userSpaceOnUse"><stop stopColor="#0094F0" stopOpacity="0"/><stop offset="1" stopColor="#2764E7"/></linearGradient><radialGradient id="d365s_cat_p6" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(168.833 37.2047) rotate(90) scale(237.736 237.736)"><stop offset="0.062127" stopColor="#6FE8F5"/><stop offset="0.288121" stopColor="#3BD5FF"/><stop offset="0.68128" stopColor="#0094F0"/><stop offset="1" stopColor="#2052CB"/></radialGradient><radialGradient id="d365s_cat_p7" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(109.333 170.665) rotate(-90) scale(181.333 181.333)"><stop offset="0.542484" stopColor="#29C3FF" stopOpacity="0"/><stop offset="1" stopColor="#73EDD8"/></radialGradient><linearGradient id="d365s_cat_p8" x1="191.91" y1="159.998" x2="191.91" y2="100.601" gradientUnits="userSpaceOnUse"><stop stopColor="white"/><stop offset="1" stopColor="white" stopOpacity="0"/></linearGradient><clipPath id="d365s_cat_c0"><rect width="256" height="256" fill="white"/></clipPath><clipPath id="d365s_cat_c1"><rect width="256" height="256" fill="white"/></clipPath></defs></svg> },
-                      { name: "Dynamics 365 Service" as ProductCategory, description: "Pre-built agents for Dynamics 365 Service workflows.", comingSoon: true, icon: <svg width="28" height="28" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M179.763 32H240C248.837 32 256 39.1634 256 48V94.2509C256 106.386 251.645 118.118 243.726 127.313L168.414 214.768C147.136 239.477 108.864 239.476 87.5865 214.768L50.1536 171.3L167.743 37.4404C170.78 33.9823 175.16 32 179.763 32Z" fill="url(#d365cs_cat_p0)"/><path d="M179.763 32H240C248.837 32 256 39.1634 256 48V94.2509C256 106.386 251.645 118.118 243.726 127.313L168.414 214.768C147.136 239.477 108.864 239.476 87.5865 214.768L50.1536 171.3L167.743 37.4404C170.78 33.9823 175.16 32 179.763 32Z" fill="url(#d365cs_cat_p1)"/><path d="M76.2378 32H16C7.16344 32 0 39.1634 0 48V107.121C0 110.953 1.37524 114.657 3.87565 117.561L87.5826 214.77C108.861 239.481 147.137 239.479 168.414 214.767L205.854 171.281L88.2574 37.4393C85.2196 33.9819 80.8401 32 76.2378 32Z" fill="url(#d365cs_cat_p2)"/><path d="M167.42 127.538C187.502 150.394 222.976 150.478 243.185 127.941L168.414 214.768C147.136 239.476 108.864 239.476 87.5864 214.768L50.1538 171.299L128.003 82.6771L167.42 127.538Z" fill="url(#d365cs_cat_p3)"/><path d="M167.42 127.538C187.502 150.394 222.976 150.478 243.185 127.941L168.414 214.768C147.136 239.476 108.864 239.476 87.5864 214.768L50.1538 171.299L128.003 82.6771L167.42 127.538Z" fill="url(#d365cs_cat_p4)"/><defs><linearGradient id="d365cs_cat_p0" x1="249.422" y1="29.6103" x2="242.825" y2="146.849" gradientUnits="userSpaceOnUse"><stop stopColor="#9C6CFE"/><stop offset="0.550303" stopColor="#7A41DC"/><stop offset="1" stopColor="#5B2AB5"/></linearGradient><radialGradient id="d365cs_cat_p1" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(188 22.6667) rotate(90) scale(124 167.663)"><stop offset="0.631434" stopColor="#4B20A0" stopOpacity="0"/><stop offset="1" stopColor="#4B20A0"/></radialGradient><linearGradient id="d365cs_cat_p2" x1="1.86997e-06" y1="50.8857" x2="153.695" y2="231.589" gradientUnits="userSpaceOnUse"><stop stopColor="#F8C4FA"/><stop offset="0.468701" stopColor="#E4A7FE"/><stop offset="1" stopColor="#AC80FF"/></linearGradient><linearGradient id="d365cs_cat_p3" x1="178.044" y1="139.026" x2="95.8605" y2="220.606" gradientUnits="userSpaceOnUse"><stop stopColor="#AC80FF"/><stop offset="0.699029" stopColor="#CC75FD" stopOpacity="0.190939"/><stop offset="1" stopColor="#D373FC" stopOpacity="0"/></linearGradient><linearGradient id="d365cs_cat_p4" x1="142.666" y1="151.793" x2="185.22" y2="194.035" gradientUnits="userSpaceOnUse"><stop stopColor="#9C6CFE" stopOpacity="0"/><stop offset="0.50385" stopColor="#9C6CFE" stopOpacity="0.282283"/><stop offset="1" stopColor="#9C6CFE"/></linearGradient></defs></svg> },
+                      { name: "Dynamics 365 Service" as ProductCategory, description: "Pre-built agents for Dynamics 365 Service workflows.", icon: <svg width="28" height="28" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M179.763 32H240C248.837 32 256 39.1634 256 48V94.2509C256 106.386 251.645 118.118 243.726 127.313L168.414 214.768C147.136 239.477 108.864 239.476 87.5865 214.768L50.1536 171.3L167.743 37.4404C170.78 33.9823 175.16 32 179.763 32Z" fill="url(#d365cs_cat_p0)"/><path d="M179.763 32H240C248.837 32 256 39.1634 256 48V94.2509C256 106.386 251.645 118.118 243.726 127.313L168.414 214.768C147.136 239.477 108.864 239.476 87.5865 214.768L50.1536 171.3L167.743 37.4404C170.78 33.9823 175.16 32 179.763 32Z" fill="url(#d365cs_cat_p1)"/><path d="M76.2378 32H16C7.16344 32 0 39.1634 0 48V107.121C0 110.953 1.37524 114.657 3.87565 117.561L87.5826 214.77C108.861 239.481 147.137 239.479 168.414 214.767L205.854 171.281L88.2574 37.4393C85.2196 33.9819 80.8401 32 76.2378 32Z" fill="url(#d365cs_cat_p2)"/><path d="M167.42 127.538C187.502 150.394 222.976 150.478 243.185 127.941L168.414 214.768C147.136 239.476 108.864 239.476 87.5864 214.768L50.1538 171.299L128.003 82.6771L167.42 127.538Z" fill="url(#d365cs_cat_p3)"/><path d="M167.42 127.538C187.502 150.394 222.976 150.478 243.185 127.941L168.414 214.768C147.136 239.476 108.864 239.476 87.5864 214.768L50.1538 171.299L128.003 82.6771L167.42 127.538Z" fill="url(#d365cs_cat_p4)"/><defs><linearGradient id="d365cs_cat_p0" x1="249.422" y1="29.6103" x2="242.825" y2="146.849" gradientUnits="userSpaceOnUse"><stop stopColor="#9C6CFE"/><stop offset="0.550303" stopColor="#7A41DC"/><stop offset="1" stopColor="#5B2AB5"/></linearGradient><radialGradient id="d365cs_cat_p1" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(188 22.6667) rotate(90) scale(124 167.663)"><stop offset="0.631434" stopColor="#4B20A0" stopOpacity="0"/><stop offset="1" stopColor="#4B20A0"/></radialGradient><linearGradient id="d365cs_cat_p2" x1="1.86997e-06" y1="50.8857" x2="153.695" y2="231.589" gradientUnits="userSpaceOnUse"><stop stopColor="#F8C4FA"/><stop offset="0.468701" stopColor="#E4A7FE"/><stop offset="1" stopColor="#AC80FF"/></linearGradient><linearGradient id="d365cs_cat_p3" x1="178.044" y1="139.026" x2="95.8605" y2="220.606" gradientUnits="userSpaceOnUse"><stop stopColor="#AC80FF"/><stop offset="0.699029" stopColor="#CC75FD" stopOpacity="0.190939"/><stop offset="1" stopColor="#D373FC" stopOpacity="0"/></linearGradient><linearGradient id="d365cs_cat_p4" x1="142.666" y1="151.793" x2="185.22" y2="194.035" gradientUnits="userSpaceOnUse"><stop stopColor="#9C6CFE" stopOpacity="0"/><stop offset="0.50385" stopColor="#9C6CFE" stopOpacity="0.282283"/><stop offset="1" stopColor="#9C6CFE"/></linearGradient></defs></svg> },
                       { name: "Dynamics ERP" as ProductCategory, description: "Pre-built agents for Dynamics ERP workflows.", comingSoon: true, icon: <svg width="28" height="28" viewBox="0 0 340 340" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="d365_cat_grad0" x1="134.743" y1="-3.542" x2="200.665" y2="169.02" gradientUnits="userSpaceOnUse"><stop stopColor="#0B53CE"/><stop offset="1" stopColor="#7252AA"/></linearGradient><linearGradient id="d365_cat_grad1" x1="227.154" y1="331.118" x2="227.154" y2="125.429" gradientUnits="userSpaceOnUse"><stop stopColor="#2266E3"/><stop offset="1" stopColor="#AE7FE2"/></linearGradient><linearGradient id="d365_cat_grad2" x1="290.417" y1="201.116" x2="219.854" y2="201.116" gradientUnits="userSpaceOnUse"><stop stopColor="#94B9FF"/><stop offset="0.2878" stopColor="#94B9FF" stopOpacity="0.524"/><stop offset="1" stopColor="#538FFF" stopOpacity="0"/></linearGradient></defs><path d="M42.5 -3.542L290.417 85V206.566C290.417 216.362 280.713 223.202 271.487 219.908L219.583 201.377V132.544C219.583 117.789 210.436 104.58 196.623 99.39L172.491 90.323C167.86 88.583 162.917 92.006 162.917 96.954V181.131L42.5 138.125V-3.542Z" fill="url(#d365_cat_grad0)"/><path d="M290.417 109.791C290.417 124.664 281.124 137.978 267.155 143.082L106.25 201.875V343.541L290.417 276.249V109.791Z" fill="url(#d365_cat_grad1)"/><path opacity="0.5" d="M290.417 109.791C290.417 124.664 281.124 137.978 267.155 143.082L106.25 201.875V343.541L290.417 276.249V109.791Z" fill="url(#d365_cat_grad2)"/><path opacity="0.5" d="M219.588 160.509L162.889 181.251L162.89 264.332C162.89 269.281 167.836 272.705 172.468 270.961L196.648 261.86C210.45 256.664 219.588 243.461 219.588 228.713V160.509Z" fill="#B0ADFF"/></svg> },
                       { name: "Microsoft 365" as ProductCategory, description: "Pre-built agents for Microsoft 365 scenarios.", comingSoon: true, icon: <svg width="28" height="28" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M34.142 7.82501C33.5631 5.85387 31.7544 4.5 29.7 4.5L28.3484 4.5C26.1139 4.5 24.1982 6.09611 23.7949 8.29398L21.4802 20.9072L22.0546 18.9419C22.6316 16.9679 24.4416 15.6111 26.4983 15.6111H34.3521L37.6458 16.8942L40.8209 15.6111H39.8942C37.8398 15.6111 36.0312 14.2572 35.4522 12.2861L34.142 7.82501Z" fill="url(#m365_p0)"/><path d="M14.3304 41.156C14.9029 43.1367 16.7162 44.5 18.7779 44.5H21.6483C24.1588 44.5 26.2119 42.499 26.2764 39.9893L26.5889 27.8271L25.9351 30.0603C25.3573 32.0332 23.5478 33.3889 21.492 33.3889L13.5728 33.3889L10.7496 31.8573L7.69302 33.3889H8.60427C10.666 33.3889 12.4793 34.7523 13.0518 36.7329L14.3304 41.156Z" fill="url(#m365_p1)"/><path d="M29.4993 4.5H13.46C8.87732 4.5 6.12772 10.5566 4.29466 16.6132C2.12296 23.7886 -0.718769 33.3852 7.50252 33.3852H14.4282C16.4978 33.3852 18.3147 32.0168 18.8835 30.0269C20.0876 25.8143 22.1978 18.4655 23.8554 12.8712C24.6977 10.0283 25.3993 7.58673 26.4762 6.06628C27.0799 5.21385 28.086 4.5 29.4993 4.5Z" fill="url(#m365_p2)"/><path d="M29.4993 4.5H13.46C8.87732 4.5 6.12772 10.5566 4.29466 16.6132C2.12296 23.7886 -0.718769 33.3852 7.50252 33.3852H14.4282C16.4978 33.3852 18.3147 32.0168 18.8835 30.0269C20.0876 25.8143 22.1978 18.4655 23.8554 12.8712C24.6977 10.0283 25.3993 7.58673 26.4762 6.06628C27.0799 5.21385 28.086 4.5 29.4993 4.5Z" fill="url(#m365_p3)"/><path d="M18.4977 44.5H34.537C39.1196 44.5 41.8692 38.4424 43.7023 32.3847C45.874 25.208 48.7157 15.6098 40.4944 15.6098H33.5689C31.4992 15.6098 29.6823 16.9784 29.1136 18.9684C27.9094 23.1816 25.7992 30.5319 24.1416 36.1273C23.2992 38.9707 22.5976 41.4127 21.5208 42.9334C20.9171 43.786 19.9109 44.5 18.4977 44.5Z" fill="url(#m365_p4)"/><path d="M18.4977 44.5H34.537C39.1196 44.5 41.8692 38.4424 43.7023 32.3847C45.874 25.208 48.7157 15.6098 40.4944 15.6098H33.5689C31.4992 15.6098 29.6823 16.9784 29.1136 18.9684C27.9094 23.1816 25.7992 30.5319 24.1416 36.1273C23.2992 38.9707 22.5976 41.4127 21.5208 42.9334C20.9171 43.786 19.9109 44.5 18.4977 44.5Z" fill="url(#m365_p5)"/><rect x="14" y="32" width="34" height="15" rx="2.55247" fill="black"/><path d="M35.9209 34.9951C36.718 34.9952 37.3568 35.2081 37.8369 35.6338C38.317 36.055 38.6156 36.6602 38.7334 37.4482H37.0625C36.9946 37.1041 36.8626 36.8483 36.668 36.6807C36.4778 36.5086 36.2288 36.4219 35.9209 36.4219C35.4227 36.4219 35.0374 36.6847 34.7656 37.21C34.5338 37.6619 34.4028 38.3271 34.3721 39.2051C34.4013 39.1763 34.4303 39.1471 34.46 39.1191C34.6954 38.9018 34.9652 38.728 35.2686 38.5967C35.5765 38.4653 35.9342 38.3994 36.3418 38.3994C36.8264 38.3994 37.2615 38.5059 37.6465 38.7188C38.0359 38.9271 38.3439 39.2373 38.5703 39.6494C38.7967 40.057 38.9101 40.5618 38.9102 41.1641C38.9102 41.7438 38.7945 42.2586 38.5635 42.707C38.3325 43.1506 37.993 43.4994 37.5449 43.7529C37.1011 44.0066 36.5572 44.1338 35.9141 44.1338C35.2756 44.1338 34.7048 43.982 34.2021 43.6787C33.704 43.3707 33.3094 42.8858 33.0195 42.2246C32.7296 41.5588 32.585 40.691 32.585 39.6221C32.585 38.5579 32.7275 37.6862 33.0127 37.0068C33.2981 36.3229 33.6925 35.8173 34.1953 35.4912C34.698 35.1607 35.2733 34.9951 35.9209 34.9951ZM45.2217 36.5986H41.8184L41.6553 38.6904C41.7911 38.5366 41.9905 38.4032 42.2529 38.29C42.5201 38.1723 42.835 38.1133 43.1973 38.1133C43.6683 38.1133 44.1103 38.2128 44.5225 38.4121C44.9344 38.6068 45.2669 38.9173 45.5205 39.3428C45.7787 39.7685 45.9082 40.3285 45.9082 41.0215C45.9082 41.7144 45.7717 42.2919 45.5 42.7539C45.2282 43.2112 44.859 43.5552 44.3926 43.7861C43.9306 44.0171 43.4098 44.1328 42.8301 44.1328C42.2459 44.1328 41.7158 44.0333 41.2402 43.834C40.7648 43.6347 40.3862 43.3337 40.1055 42.9307C39.8292 42.523 39.6914 42.0128 39.6914 41.4014H41.4238C41.4238 41.809 41.5557 42.1307 41.8184 42.3662C42.081 42.5971 42.418 42.7128 42.8301 42.7129C43.2195 42.7129 43.5321 42.5772 43.7676 42.3057C44.0076 42.0339 44.1279 41.6057 44.1279 41.0215C44.1279 40.4825 44.0007 40.0926 43.7471 39.8525C43.4981 39.6082 43.1746 39.4854 42.7764 39.4854C42.4956 39.4854 42.2572 39.5375 42.0625 39.6416C41.8677 39.7458 41.7069 39.8776 41.5801 40.0361H40.0244L40.4111 35.1104H45.2217V36.5986ZM28.7119 34.9883C29.2237 34.9883 29.697 35.0727 30.1318 35.2402C30.5667 35.4078 30.916 35.6636 31.1787 36.0078C31.4457 36.3519 31.579 36.7934 31.5791 37.332C31.5791 37.8799 31.4481 38.3152 31.1855 38.6367C30.9274 38.9583 30.578 39.1851 30.1387 39.3164C30.6233 39.4161 31.0247 39.6428 31.3418 39.9961C31.6631 40.3448 31.8241 40.836 31.8242 41.4697C31.8242 42.3303 31.5453 42.9898 30.9883 43.4473C30.4357 43.9002 29.6836 44.127 28.7324 44.127C27.7269 44.1269 26.9435 43.8864 26.3818 43.4062C25.8248 42.9261 25.5459 42.204 25.5459 41.2393H27.2178C27.2178 41.6966 27.3487 42.0543 27.6113 42.3125C27.8786 42.5707 28.25 42.7002 28.7256 42.7002C29.1513 42.7002 29.4776 42.5914 29.7041 42.374C29.9351 42.1566 30.0508 41.8119 30.0508 41.3408C30.0507 40.888 29.9097 40.5593 29.6289 40.3555C29.3527 40.1473 28.9925 40.043 28.5488 40.043H27.999V38.6709H28.5967C28.9952 38.6709 29.3123 38.5621 29.5479 38.3447C29.7832 38.1274 29.9013 37.84 29.9014 37.4824C29.9014 37.1203 29.7947 36.8528 29.582 36.6807C29.3737 36.5085 29.0856 36.4219 28.7188 36.4219C28.3157 36.4219 28.0032 36.5353 27.7812 36.7617C27.5594 36.9836 27.4483 37.2893 27.4482 37.6787H25.7842C25.7842 37.0675 25.9106 36.5649 26.1641 36.1709C26.4222 35.7768 26.7739 35.4819 27.2178 35.2871C27.6615 35.088 28.1596 34.9883 28.7119 34.9883ZM20.2568 39.1094L22.376 34.8662H24.3262V44.0107H22.5801V37.4199L20.7666 41.0762H19.6387L17.7832 37.4209V44.0107H16.0918V34.8662H18.1504L20.2568 39.1094ZM36.0225 39.8125C35.5605 39.8125 35.1462 39.9374 34.7793 40.1865C34.6317 40.2849 34.4974 40.3923 34.377 40.5098C34.4033 40.9577 34.4719 41.3298 34.582 41.626C34.7315 42.011 34.9246 42.2898 35.1602 42.4619C35.4002 42.6294 35.6514 42.7139 35.9141 42.7139C36.3216 42.7138 36.625 42.5682 36.8242 42.2783C37.028 41.9885 37.1299 41.6238 37.1299 41.1846C37.1298 40.7545 37.0325 40.4197 36.8379 40.1797C36.6431 39.9351 36.3712 39.8125 36.0225 39.8125Z" fill="white"/><defs><radialGradient id="m365_p0" cx="0" cy="0" r="1" gradientTransform="matrix(-10.9604 -13.3893 -11.8337 11.2305 38.0047 21.0144)" gradientUnits="userSpaceOnUse"><stop offset="0.0955758" stopColor="#00AEFF"/><stop offset="0.773185" stopColor="#2253CE"/><stop offset="1" stopColor="#0736C4"/></radialGradient><radialGradient id="m365_p1" cx="0" cy="0" r="1" gradientTransform="matrix(9.88029 12.5737 11.6634 -10.2629 11.1211 33.3171)" gradientUnits="userSpaceOnUse"><stop stopColor="#FFB657"/><stop offset="0.633728" stopColor="#FF5F3D"/><stop offset="0.923392" stopColor="#C02B3C"/></radialGradient><linearGradient id="m365_p2" x1="12.5" y1="8" x2="14.7884" y2="34.4751" gradientUnits="userSpaceOnUse"><stop offset="0.156162" stopColor="#0D91E1"/><stop offset="0.487484" stopColor="#52B471"/><stop offset="0.652394" stopColor="#98BD42"/><stop offset="0.937361" stopColor="#FFC800"/></linearGradient><linearGradient id="m365_p3" x1="14.5" y1="4.5" x2="15.7496" y2="33.3852" gradientUnits="userSpaceOnUse"><stop stopColor="#3DCBFF"/><stop offset="0.246674" stopColor="#0588F7" stopOpacity="0"/></linearGradient><radialGradient id="m365_p4" cx="0" cy="0" r="1" gradientTransform="matrix(-12.6712 36.2356 -43.1249 -15.9926 41.3183 12.7812)" gradientUnits="userSpaceOnUse"><stop offset="0.0661714" stopColor="#8C48FF"/><stop offset="0.5" stopColor="#F2598A"/><stop offset="0.895833" stopColor="#FFB152"/></radialGradient><linearGradient id="m365_p5" x1="42.5855" y1="13.846" x2="42.5691" y2="21.7147" gradientUnits="userSpaceOnUse"><stop offset="0.0581535" stopColor="#F8ADFA"/><stop offset="0.708063" stopColor="#A86EDD" stopOpacity="0"/></linearGradient></defs></svg> },
                     ].map(cat => {
@@ -1390,7 +1496,7 @@ function AppV3({ currentVersion, onVersionChange, versions }: VersionProps) {
                             <div className={styles.chipContent}>
                               <h4 className={styles.chipTitle}>{cat.name}</h4>
                               {isDisabled ? (
-                                <span style={{ fontSize: "11px", fontWeight: 600, color: tokens.colorNeutralForeground3, backgroundColor: tokens.colorNeutralBackground4, padding: "2px 8px", borderRadius: "10px", whiteSpace: "nowrap", alignSelf: "flex-start", marginTop: "4px" }}>Coming Soon</span>
+                                <span style={{ fontSize: "11px", fontWeight: 600, color: tokens.colorNeutralForeground3, backgroundColor: tokens.colorNeutralBackground4, padding: "2px 8px", borderRadius: "10px", whiteSpace: "nowrap", alignSelf: "flex-start", marginTop: "4px" }}>Coming soon</span>
                               ) : (
                                 <p className={styles.chipDescription} style={{ marginRight: "-48px" }}>{cat.description}</p>
                               )}
@@ -1567,8 +1673,14 @@ function AppV3({ currentVersion, onVersionChange, versions }: VersionProps) {
                       <div key={product.id} className={styles.productCard}>
                         {/* Agent description for Sales Qualification */}
                         {product.productId === "sales-qualification" && (
-                          <p style={{ fontSize: "14px", lineHeight: "20px", color: tokens.colorNeutralForeground2, margin: 0 }}>
-                            Estimate co-pilot credit consumption for the sales qualification agent based on lead research and engagement.
+                          <p style={{ fontSize: "16px", lineHeight: "24px", color: tokens.colorNeutralForeground2, margin: 0 }}>
+                            Estimate Copilot credit consumption for the Sales Qualification Agent based on lead research and engagement.
+                          </p>
+                        )}
+                        {/* Agent description for Case Management */}
+                        {product.productId === "case-management" && (
+                          <p style={{ fontSize: "16px", lineHeight: "24px", color: tokens.colorNeutralForeground2, margin: 0 }}>
+                            Estimate Copilot credit consumption for the Case Management Agent based on case creation, updates, follow-ups, and resolution.
                           </p>
                         )}
                         {/* Agent Name */}
@@ -1595,13 +1707,18 @@ function AppV3({ currentVersion, onVersionChange, versions }: VersionProps) {
                         </div>
 
                         {/* Leads Research - Sales Qualification only */}
-                        {product.productId === "sales-qualification" && (
+                        {product.productId === "sales-qualification" && (() => {
+                          const lowVal = parseFloat(product.leadsLowComplexity) || 0;
+                          const medVal = parseFloat(product.leadsMedComplexity) || 0;
+                          const highVal = parseFloat(product.leadsHighComplexity) || 0;
+                          const complexitySum = lowVal + medVal + highVal;
+                          return (
                         <div className={styles.section}>
                           <div className={styles.sectionHeader}>
-                            <h3 className={styles.h4Title}>Leads Research</h3>
+                            <h3 className={styles.h4Title}>Leads researched</h3>
                           </div>
 
-                          <div className={styles.inputsRow}>
+                          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
                             <div className={styles.inputColumn}>
                               <Label required>Number of leads per month</Label>
                               <Input
@@ -1611,42 +1728,198 @@ function AppV3({ currentVersion, onVersionChange, versions }: VersionProps) {
                               />
                             </div>
                             <div className={styles.inputColumn}>
-                              <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                                <Label required>Percentage of leads engaged</Label>
-                                <Tooltip content="The percentage of total leads that are actively engaged by the sales qualification agent." relationship="description">
-                                  <InfoRegular style={{ fontSize: "14px", color: tokens.colorNeutralForeground3, cursor: "help" }} />
-                                </Tooltip>
-                              </div>
+                              <Label required>Sales qualification agent mode</Label>
+                              <Select
+                                value={product.salesQualMode}
+                                onChange={(_, data) => updateProduct(product.id, { salesQualMode: data.value })}
+                              >
+                                <option value="research-only">Research only (Autonomous)</option>
+                                <option value="research-outreach-engage">Research, outreach, and engage (Autonomous)</option>
+                                <option value="assistive" disabled>Assistive (Coming soon)</option>
+                              </Select>
+                            </div>
+                            <div className={styles.inputColumn}>
+                              <Label required><strong>A</strong>: Percentage of leads with low complexity of research</Label>
                               <Input
-                                value={product.leadsEngagedPercent}
-                                onChange={(_, data) => updateProduct(product.id, { leadsEngagedPercent: data.value })}
-                                placeholder="e.g. 50"
+                                value={product.leadsLowComplexity}
+                                onChange={(_, data) => updateProduct(product.id, { leadsLowComplexity: data.value })}
+                                placeholder="e.g. 30%"
+                              />
+                            </div>
+                            <div className={styles.inputColumn}>
+                              <Label required><strong>B</strong>: Percentage of leads with high complexity of research</Label>
+                              <Input
+                                value={product.leadsHighComplexity}
+                                onChange={(_, data) => updateProduct(product.id, { leadsHighComplexity: data.value })}
+                                placeholder="e.g. 20%"
+                              />
+                            </div>
+                            <div className={styles.inputColumn}>
+                              <Label required><strong>C</strong>: Percentage of leads with medium complexity of research</Label>
+                              <Input
+                                value={product.leadsMedComplexity}
+                                onChange={(_, data) => updateProduct(product.id, { leadsMedComplexity: data.value })}
+                                placeholder="e.g. 50%"
                               />
                             </div>
                           </div>
 
-                          <div className={styles.inputsRow}>
+                          <MessageBar intent={complexitySum === 100 ? "success" : "warning"} style={{ marginTop: "8px" }}>
+                            <MessageBarBody>
+                              {complexitySum === 100
+                                ? "Valid: A + B + C = 100%"
+                                : `A + B + C must equal 100% (current sum ${complexitySum}%).`}
+                            </MessageBarBody>
+                          </MessageBar>
+
+                          <div style={{ marginTop: "8px" }}>
                             <div className={styles.inputColumn}>
-                              <Label required>Number of leads researched but not engaged</Label>
+                              <Label required>Percentage of leads that reply to initial outreach</Label>
                               <Input
-                                value={product.leadsResearchedNotEngaged}
-                                onChange={(_, data) => updateProduct(product.id, { leadsResearchedNotEngaged: data.value })}
-                                placeholder="e.g. 30"
+                                value={product.leadsReplyPercent}
+                                onChange={(_, data) => updateProduct(product.id, { leadsReplyPercent: data.value })}
+                                placeholder="e.g. 25%"
                               />
                             </div>
+                          </div>
+                        </div>
+                          );
+                        })()}
+
+                        {/* Case Management form */}
+                        {product.productId === "case-management" && (
+                        <div className={styles.section}>
+                          <div className={styles.sectionHeader}>
+                            <h3 className={styles.h4Title}>Case create and update inputs</h3>
+                          </div>
+
+                          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                            <div className={styles.inputsRow}>
+                              <div className={styles.inputColumn}>
+                                <Label required>Number of new emails (excluding follow-ups) from end users per month</Label>
+                                <Input
+                                  value={product.cmNewEmails}
+                                  onChange={(_, data) => updateProduct(product.id, { cmNewEmails: data.value })}
+                                  placeholder="0"
+                                />
+                              </div>
+                              <div className={styles.inputColumn}>
+                                <Label required>Average number of follow-up emails sent by end users per case</Label>
+                                <Input
+                                  value={product.cmFollowupEmailsPerCase}
+                                  onChange={(_, data) => updateProduct(product.id, { cmFollowupEmailsPerCase: data.value })}
+                                  placeholder="0"
+                                />
+                              </div>
+                            </div>
+
+                            <div className={styles.inputsRow}>
+                              <div className={styles.inputColumn}>
+                                <Label required>Number of real-time assisted-service conversations per month</Label>
+                                <Input
+                                  value={product.cmRealTimeConversations}
+                                  onChange={(_, data) => updateProduct(product.id, { cmRealTimeConversations: data.value })}
+                                  placeholder="0"
+                                />
+                              </div>
+                              <div className={styles.inputColumn}>
+                                <Label required>Average number of Agent case updates manually triggered by Customer Service Reps per conversation</Label>
+                                <Input
+                                  value={product.cmManualUpdatesPerConversation}
+                                  onChange={(_, data) => updateProduct(product.id, { cmManualUpdatesPerConversation: data.value })}
+                                  placeholder="0"
+                                />
+                              </div>
+                            </div>
+
                             <div className={styles.inputColumn}>
-                              <Label required>Number of leads researched and engaged</Label>
+                              <Label required>Percentage of cases created by the Agent through "auto case creation" (versus "manual case creation"), per month</Label>
                               <Input
-                                value={product.leadsResearchedAndEngaged}
-                                onChange={(_, data) => updateProduct(product.id, { leadsResearchedAndEngaged: data.value })}
-                                placeholder="e.g. 70"
+                                value={product.cmAutoCaseCreationPercent}
+                                onChange={(_, data) => updateProduct(product.id, { cmAutoCaseCreationPercent: data.value })}
+                                placeholder="0"
                               />
                             </div>
                           </div>
                         </div>
                         )}
 
-                        {product.productId !== "sales-qualification" && (<>
+                        {product.productId === "case-management" && (
+                        <div className={styles.section}>
+                          <div className={styles.sectionHeader}>
+                            <h3 className={styles.h4Title}>Case follow-up and close inputs</h3>
+                          </div>
+
+                          <div className={styles.inputsRow}>
+                            <div className={styles.inputColumn}>
+                              <Label required>Average number of follow-ups with end user per case, after case status is marked as 'waiting for customer confirmation'</Label>
+                              <Input
+                                value={product.cmFollowupsPerCase}
+                                onChange={(_, data) => updateProduct(product.id, { cmFollowupsPerCase: data.value })}
+                                placeholder="0"
+                              />
+                            </div>
+                            <div className={styles.inputColumn}>
+                              <Label required>Percentage of follow-ups sent by Agent using customer-defined email template</Label>
+                              <Input
+                                value={product.cmFollowupTemplatePercent}
+                                onChange={(_, data) => updateProduct(product.id, { cmFollowupTemplatePercent: data.value })}
+                                placeholder="0"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        )}
+
+                        {product.productId === "case-management" && (
+                        <div className={styles.section}>
+                          <div className={styles.sectionHeader}>
+                            <h3 className={styles.h4Title}>Case resolution agent</h3>
+                          </div>
+
+                          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                            <div className={styles.inputsRow}>
+                              <div className={styles.inputColumn}>
+                                <Label required>Number of emails (including follow-ups) from end users per month</Label>
+                                <Input
+                                  value={product.cmResolutionEmails}
+                                  onChange={(_, data) => updateProduct(product.id, { cmResolutionEmails: data.value })}
+                                  placeholder="0"
+                                />
+                              </div>
+                              <div className={styles.inputColumn}>
+                                <Label required>Percentage of emails from end users that trigger Knowledge Article retrievals</Label>
+                                <Input
+                                  value={product.cmKnowledgeArticlePercent}
+                                  onChange={(_, data) => updateProduct(product.id, { cmKnowledgeArticlePercent: data.value })}
+                                  placeholder="0"
+                                />
+                              </div>
+                            </div>
+
+                            <div className={styles.inputsRow}>
+                              <div className={styles.inputColumn}>
+                                <Label required>Average number of Tool calls (plugin or custom connector) per email from end users</Label>
+                                <Input
+                                  value={product.cmToolCallsPerEmail}
+                                  onChange={(_, data) => updateProduct(product.id, { cmToolCallsPerEmail: data.value })}
+                                  placeholder="0"
+                                />
+                              </div>
+                              <div className={styles.inputColumn}>
+                                <Label required>Percentage of responses sent by Agent using customer-defined email template</Label>
+                                <Input
+                                  value={product.cmResolutionTemplatePercent}
+                                  onChange={(_, data) => updateProduct(product.id, { cmResolutionTemplatePercent: data.value })}
+                                  placeholder="0"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        )}
+
+                        {product.productId !== "sales-qualification" && product.productId !== "case-management" && (<>
                         <div className={`${styles.section} ${styles.sectionBorder}`}>
                           <div className={styles.sectionHeader}>
                             <h3 className={styles.h4Title}>Microsoft 365 Copilot licenses</h3>
@@ -1970,6 +2243,10 @@ function AppV3({ currentVersion, onVersionChange, versions }: VersionProps) {
                         </button>
                       ))}
                     </div>
+                    {(() => {
+                      const focusedProduct = viewMode === "focused" ? products.find(p => p.id === editingProductId) : null;
+                      const showNegated = viewMode === "selection" || (focusedProduct && focusedProduct.productId !== "sales-qualification" && focusedProduct.productId !== "case-management");
+                      return (
                     <div style={{
                       display: "flex",
                       flexDirection: "row",
@@ -1991,7 +2268,8 @@ function AppV3({ currentVersion, onVersionChange, versions }: VersionProps) {
                         <p style={{ fontSize: "14px", fontWeight: 600, letterSpacing: "0.5px", textTransform: "uppercase", color: tokens.colorNeutralForeground3, margin: 0, textAlign: "center", lineHeight: "20px" }}>Total estimated<br />Copilot credits</p>
                         <p style={{ fontSize: "40px", fontWeight: 700, color: tokens.colorBrandBackground, margin: 0 }}>{displayCredits.toLocaleString()}</p>
                       </div>
-                      <div style={{ width: "1px", flexShrink: 0, backgroundColor: tokens.colorNeutralStroke2, margin: "0 12px" }} />
+                      {showNegated && (<>
+                      <div style={{ width: "1px", backgroundColor: tokens.colorNeutralStroke2, alignSelf: "stretch" }} />
                       <div style={{
                         display: "flex",
                         flexDirection: "column",
@@ -2002,9 +2280,12 @@ function AppV3({ currentVersion, onVersionChange, versions }: VersionProps) {
                         minWidth: 0,
                       }}>
                         <p style={{ fontSize: "14px", fontWeight: 600, letterSpacing: "0.5px", textTransform: "uppercase", color: tokens.colorNeutralForeground3, margin: 0, textAlign: "center", lineHeight: "20px" }}>Total Copilot credits negated<br />with Microsoft 365 Copilot</p>
-                        <p style={{ fontSize: "40px", fontWeight: 700, color: tokens.colorPaletteGreenForeground1, margin: 0 }}>{displayNegated.toLocaleString()}</p>
+                        <p style={{ fontSize: "40px", fontWeight: 700, color: "#107c41", margin: 0 }}>{displayNegated.toLocaleString()}</p>
                       </div>
+                      </>)}
                     </div>
+                      );
+                    })()}
                    </div>
 
                    {/* Configured Agent Cards */}
@@ -2021,38 +2302,57 @@ function AppV3({ currentVersion, onVersionChange, versions }: VersionProps) {
                        const interactions = parseInt(product.interactionsPerMonth) || 0;
                        const knowledgePct = (parseInt(product.knowledgePercent) || 0) / 100;
                        const tenantGraphPct = (parseInt(product.tenantGraphPercent) || 0) / 100;
-                       const otherKnowledgePct = 1 - tenantGraphPct;
                        const billableUsers = Math.max(users - m365Count, 0);
-                       const agentTraffic = billableUsers * interactions;
-                       const trafficRequiringKnowledge = agentTraffic * knowledgePct;
-                       const ttgMessages = Math.round(trafficRequiringKnowledge * tenantGraphPct * 12);
-                       const otherKnowledgeMessages = Math.round(trafficRequiringKnowledge * otherKnowledgePct * 2);
-                       const knowledgeCredits = ttgMessages + otherKnowledgeMessages;
+                       const billableMessages = billableUsers * interactions;
+                       const knowledgeMessages = Math.round(billableMessages * knowledgePct);
+                       let ttgMessages = Math.round(knowledgeMessages * tenantGraphPct);
+                       if (tenantGraphPct > 0 && knowledgeMessages > 0 && ttgMessages === 0) ttgMessages = 1;
+                       const nonTggMessages = knowledgeMessages - ttgMessages;
+                       const tggCredits = ttgMessages * 12;
+                       const nonTggCredits = nonTggMessages * 2;
+                       const knowledgeCredits = tggCredits + nonTggCredits;
+                       const actionMessages = Math.round(billableMessages * (1 - knowledgePct));
                        const promptToolCount = parseInt(product.promptCount) || 0;
+                       const promptToolFreq = parseFloat(product.promptFreq) || 0;
                        const computerUseCount = parseInt(product.computerUseCount) || 0;
+                       const computerUseFreq = parseFloat(product.computerUseFreq) || 0;
                        const customConnectorCount = parseInt(product.customConnectorCount) || 0;
+                       const customConnectorFreq = parseFloat(product.customConnectorFreq) || 0;
                        const mcpCount = parseInt(product.mcpCount) || 0;
+                       const mcpFreq = parseFloat(product.mcpFreq) || 0;
                        const restApiCount = parseInt(product.restApiCount) || 0;
-                       const totalToolInvocations = promptToolCount + computerUseCount + customConnectorCount + mcpCount + restApiCount;
-                       const toolsCredits = Math.round(agentTraffic * totalToolInvocations * 5);
+                       const restApiFreq = parseFloat(product.restApiFreq) || 0;
+                       const totalToolInvocations = promptToolCount * promptToolFreq + computerUseCount * computerUseFreq +
+                         customConnectorCount * customConnectorFreq + mcpCount * mcpFreq + restApiCount * restApiFreq;
+                       const toolsCredits = Math.round(totalToolInvocations * actionMessages * 5);
                        const flowsConfigured = parseInt(product.agentFlowConfiguredCount) || 0;
                        const flowActionsCount = parseInt(product.agentFlowActionsCount) || 0;
-                       const flowsCredits = Math.round(flowsConfigured * flowActionsCount * 0.13 * interactions);
-                       const copilotRatio = users > 0 ? Math.max((users - m365Count) / users, 0) : 1;
+                       const flowsCredits = Math.round(flowsConfigured * flowActionsCount * 0.13);
+                       const promptUserCount = Math.max(users - m365Count, 0);
                        const basicCount = parseInt(product.promptBasicCount) || 0;
                        const basicFreq = parseFloat(product.promptBasicFreq) || 0;
                        const standardCount = parseInt(product.promptStandardCount) || 0;
                        const standardFreq = parseFloat(product.promptStandardFreq) || 0;
                        const premiumCount = parseInt(product.promptPremiumCount) || 0;
                        const premiumFreq = parseFloat(product.promptPremiumFreq) || 0;
-                       const basicCredits = Math.round(basicCount * basicFreq * 0.1 * 3.073 * copilotRatio);
-                       const standardCredits = Math.round(standardCount * standardFreq * 1.5 * 4.945 * copilotRatio);
-                       const premiumCredits = Math.round(premiumCount * premiumFreq * 10 * 7.091 * copilotRatio);
+                       const basicCredits = Math.round(basicCount * basicFreq * promptUserCount * interactions * (5 + 0.1) / 10);
+                       const standardCredits = Math.round(standardCount * standardFreq * promptUserCount * interactions * (5 + 1.5) / 10);
+                       const premiumCredits = Math.round(premiumCount * premiumFreq * promptUserCount * interactions * (5 + 10) / 10);
                        const modifiersCredits = basicCredits + standardCredits + premiumCredits;
-                       const knowledgeNegation = users > 0 ? Math.round(knowledgeCredits * (m365Count / users)) : 0;
-                       const toolsNegation = users > 0 ? Math.round(toolsCredits * (m365Count / users)) : 0;
-                       const flowsNegation = users > 0 ? Math.round(flowsCredits * (m365Count / users)) : 0;
-                       const modifiersNegation = users > 0 ? Math.round(modifiersCredits * (m365Count / users)) : 0;
+                       // Negation per component
+                       const licensedMessages = m365Count * interactions;
+                       const licensedKnowledgeMessages = Math.round(licensedMessages * knowledgePct);
+                       const licensedTggMessages = Math.round(licensedKnowledgeMessages * tenantGraphPct);
+                       const licensedNonTggMessages = licensedKnowledgeMessages - licensedTggMessages;
+                       const knowledgeNegation = (users === 0 || m365Count === 0) ? 0 : (licensedTggMessages * 12 + licensedNonTggMessages * 2);
+                       const licensedActionMessages = licensedMessages - licensedKnowledgeMessages;
+                       const toolsNegation = (users === 0 || m365Count === 0) ? 0 : Math.round(totalToolInvocations * licensedActionMessages * 5);
+                       const m365Ratio = users > 0 ? m365Count / users : 0;
+                       const flowsNegation = Math.round(flowsCredits * m365Ratio);
+                       const modifiersNegation = (users === 0 || m365Count === 0) ? 0 :
+                         Math.round(basicCount * basicFreq * m365Count * interactions * (5 + 0.1) / 10) +
+                         Math.round(standardCount * standardFreq * m365Count * interactions * (5 + 1.5) / 10) +
+                         Math.round(premiumCount * premiumFreq * m365Count * interactions * (5 + 10) / 10);
 
                        return (
                          <div key={product.id} style={{ display: "flex", flexDirection: "column", padding: "20px 32px", borderTop: index > 0 ? `1px solid ${tokens.colorNeutralStroke2}` : "none" }}>
@@ -2079,35 +2379,38 @@ function AppV3({ currentVersion, onVersionChange, versions }: VersionProps) {
                                    {renderCategoryPillContent(product.category)}
                                    {product.category}
                                  </span>
-                                 {/* Agent card nav */}
+                                 {/* Inline action buttons */}
                                  <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-                                   <button
-                                     onClick={() => { setEditingProductId(product.id); setViewMode("focused"); }}
-                                     onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = tokens.colorNeutralBackground4; }}
-                                     onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; }}
-                                     style={{ display: "flex", alignItems: "center", gap: "4px", padding: "4px 10px", borderRadius: "6px", border: `1px solid ${tokens.colorNeutralStroke2}`, backgroundColor: "transparent", cursor: "pointer", outline: "none", fontSize: "12px", fontWeight: 500, color: tokens.colorNeutralForeground2, transition: "background-color 0.15s ease" }}
-                                   >
-                                     <EditRegular style={{ fontSize: "14px" }} />
-                                     Edit
-                                   </button>
-                                   <button
-                                     onClick={() => removeProduct(product.id, product.productId)}
-                                     onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = tokens.colorNeutralBackground4; }}
-                                     onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; }}
-                                     style={{ display: "flex", alignItems: "center", gap: "4px", padding: "4px 10px", borderRadius: "6px", border: `1px solid ${tokens.colorNeutralStroke2}`, backgroundColor: "transparent", cursor: "pointer", outline: "none", fontSize: "12px", fontWeight: 500, color: tokens.colorNeutralForeground2, transition: "background-color 0.15s ease" }}
-                                   >
-                                     <DeleteRegular style={{ fontSize: "14px" }} />
-                                     Delete
-                                   </button>
-                                   <button
-                                     onClick={() => duplicateProduct(product)}
-                                     onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = tokens.colorNeutralBackground4; }}
-                                     onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; }}
-                                     style={{ display: "flex", alignItems: "center", gap: "4px", padding: "4px 10px", borderRadius: "6px", border: `1px solid ${tokens.colorNeutralStroke2}`, backgroundColor: "transparent", cursor: "pointer", outline: "none", fontSize: "12px", fontWeight: 500, color: tokens.colorNeutralForeground2, transition: "background-color 0.15s ease" }}
-                                   >
-                                     <CopyRegular style={{ fontSize: "14px" }} />
-                                     Duplicate
-                                   </button>
+                                   <Tooltip content="Edit" relationship="label">
+                                     <button
+                                       onClick={() => { setEditingProductId(product.id); setViewMode("focused"); }}
+                                       onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = tokens.colorNeutralBackground4; }}
+                                       onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; }}
+                                       style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "28px", height: "28px", borderRadius: "4px", border: "none", backgroundColor: "transparent", cursor: "pointer", outline: "none", color: tokens.colorNeutralForeground2, transition: "background-color 0.15s ease" }}
+                                     >
+                                       <EditRegular style={{ fontSize: "16px" }} />
+                                     </button>
+                                   </Tooltip>
+                                   <Tooltip content="Duplicate" relationship="label">
+                                     <button
+                                       onClick={() => duplicateProduct(product)}
+                                       onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = tokens.colorNeutralBackground4; }}
+                                       onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; }}
+                                       style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "28px", height: "28px", borderRadius: "4px", border: "none", backgroundColor: "transparent", cursor: "pointer", outline: "none", color: tokens.colorNeutralForeground2, transition: "background-color 0.15s ease" }}
+                                     >
+                                       <CopyRegular style={{ fontSize: "16px" }} />
+                                     </button>
+                                   </Tooltip>
+                                   <Tooltip content="Delete" relationship="label">
+                                     <button
+                                       onClick={() => removeProduct(product.id, product.productId)}
+                                       onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = tokens.colorNeutralBackground4; e.currentTarget.style.color = "#d13438"; }}
+                                       onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = tokens.colorNeutralForeground2; }}
+                                       style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "28px", height: "28px", borderRadius: "4px", border: "none", backgroundColor: "transparent", cursor: "pointer", outline: "none", color: tokens.colorNeutralForeground2, transition: "background-color 0.15s ease, color 0.15s ease" }}
+                                     >
+                                       <DeleteRegular style={{ fontSize: "16px" }} />
+                                     </button>
+                                   </Tooltip>
                                  </div>
                                </div>
                              </div>
@@ -2138,12 +2441,12 @@ function AppV3({ currentVersion, onVersionChange, versions }: VersionProps) {
                                  <div className={styles.calcItemRow}>
                                    <p className={styles.calcItemLabel}>Copilot credits consumed for tenant graph grounding</p>
                                    <span className={styles.calcLeader} />
-                                   <p className={styles.calcItemValue}>{ttgMessages}</p>
+                                   <p className={styles.calcItemValue}>{tggCredits}</p>
                                  </div>
                                  <div className={styles.calcItemRow}>
                                    <p className={styles.calcItemLabel}>Copilot credits consumed for non-tenant graph grounding: Dataverse, web, files</p>
                                    <span className={styles.calcLeader} />
-                                   <p className={styles.calcItemValue}>{otherKnowledgeMessages}</p>
+                                   <p className={styles.calcItemValue}>{nonTggCredits}</p>
                                  </div>
                                  <div className={styles.calcNegationRow}>
                                    <p className={styles.calcNegationLabel}>Copilot credits negated for {m365Count} users with Microsoft 365 Copilot licenses</p>
@@ -2223,29 +2526,38 @@ function AppV3({ currentVersion, onVersionChange, versions }: VersionProps) {
                         const interactions = parseInt(product.interactionsPerMonth) || 0;
                         const knowledgePct = (parseInt(product.knowledgePercent) || 0) / 100;
                         const tenantGraphPct = (parseInt(product.tenantGraphPercent) || 0) / 100;
-                        const otherKnowledgePct = 1 - tenantGraphPct;
 
                         const billableUsers = Math.max(users - m365Count, 0);
-                        const agentTraffic = billableUsers * interactions;
-                        const trafficRequiringKnowledge = agentTraffic * knowledgePct;
+                        const billableMessages = billableUsers * interactions;
 
-                        const ttgMessages = Math.round(trafficRequiringKnowledge * tenantGraphPct * 12);
-                        const otherKnowledgeMessages = Math.round(trafficRequiringKnowledge * otherKnowledgePct * 2);
-                        const knowledgeCredits = ttgMessages + otherKnowledgeMessages;
+                        const knowledgeMessages = Math.round(billableMessages * knowledgePct);
+                        let tggMessages_f = Math.round(knowledgeMessages * tenantGraphPct);
+                        if (tenantGraphPct > 0 && knowledgeMessages > 0 && tggMessages_f === 0) tggMessages_f = 1;
+                        const nonTggMessages_f = knowledgeMessages - tggMessages_f;
+                        const tggCredits = tggMessages_f * 12;
+                        const nonTggCredits = nonTggMessages_f * 2;
+                        const knowledgeCredits = tggCredits + nonTggCredits;
 
+                        const actionMessages_f = Math.round(billableMessages * (1 - knowledgePct));
                         const promptToolCount = parseInt(product.promptCount) || 0;
+                        const promptToolFreq = parseFloat(product.promptFreq) || 0;
                         const computerUseCount = parseInt(product.computerUseCount) || 0;
+                        const computerUseFreq = parseFloat(product.computerUseFreq) || 0;
                         const customConnectorCount = parseInt(product.customConnectorCount) || 0;
+                        const customConnectorFreq = parseFloat(product.customConnectorFreq) || 0;
                         const mcpCount = parseInt(product.mcpCount) || 0;
+                        const mcpFreq = parseFloat(product.mcpFreq) || 0;
                         const restApiCount = parseInt(product.restApiCount) || 0;
-                        const totalToolInvocations = promptToolCount + computerUseCount + customConnectorCount + mcpCount + restApiCount;
-                        const toolsCredits = Math.round(agentTraffic * totalToolInvocations * 5);
+                        const restApiFreq = parseFloat(product.restApiFreq) || 0;
+                        const totalToolInvocations = promptToolCount * promptToolFreq + computerUseCount * computerUseFreq +
+                          customConnectorCount * customConnectorFreq + mcpCount * mcpFreq + restApiCount * restApiFreq;
+                        const toolsCredits = Math.round(totalToolInvocations * actionMessages_f * 5);
 
                         const flowsConfigured = parseInt(product.agentFlowConfiguredCount) || 0;
                         const flowActionsCount = parseInt(product.agentFlowActionsCount) || 0;
-                        const flowsCredits = Math.round(flowsConfigured * flowActionsCount * 0.13 * interactions);
+                        const flowsCredits = Math.round(flowsConfigured * flowActionsCount * 0.13);
 
-                        const copilotRatio = users > 0 ? Math.max((users - m365Count) / users, 0) : 1;
+                        const promptUserCount = Math.max(users - m365Count, 0);
                         const basicCount = parseInt(product.promptBasicCount) || 0;
                         const basicFreq = parseFloat(product.promptBasicFreq) || 0;
                         const standardCount = parseInt(product.promptStandardCount) || 0;
@@ -2253,16 +2565,79 @@ function AppV3({ currentVersion, onVersionChange, versions }: VersionProps) {
                         const premiumCount = parseInt(product.promptPremiumCount) || 0;
                         const premiumFreq = parseFloat(product.promptPremiumFreq) || 0;
 
-                        const basicCredits = Math.round(basicCount * basicFreq * 0.1 * 3.073 * copilotRatio);
-                        const standardCredits = Math.round(standardCount * standardFreq * 1.5 * 4.945 * copilotRatio);
-                        const premiumCredits = Math.round(premiumCount * premiumFreq * 10 * 7.091 * copilotRatio);
+                        const basicCredits = Math.round(basicCount * basicFreq * promptUserCount * interactions * (5 + 0.1) / 10);
+                        const standardCredits = Math.round(standardCount * standardFreq * promptUserCount * interactions * (5 + 1.5) / 10);
+                        const premiumCredits = Math.round(premiumCount * premiumFreq * promptUserCount * interactions * (5 + 10) / 10);
                         const modifiersCredits = basicCredits + standardCredits + premiumCredits;
 
                         // Negation values (Microsoft 365 Copilot license zero-rating)
-                        const knowledgeNegation = users > 0 ? Math.round(knowledgeCredits * (m365Count / users)) : 0;
-                        const toolsNegation = users > 0 ? Math.round(toolsCredits * (m365Count / users)) : 0;
-                        const flowsNegation = users > 0 ? Math.round(flowsCredits * (m365Count / users)) : 0;
-                        const modifiersNegation = users > 0 ? Math.round(modifiersCredits * (m365Count / users)) : 0;
+                        const licensedMessages_f = m365Count * interactions;
+                        const licensedKnowledgeMessages_f = Math.round(licensedMessages_f * knowledgePct);
+                        const licensedTggMessages_f = Math.round(licensedKnowledgeMessages_f * tenantGraphPct);
+                        const licensedNonTggMessages_f = licensedKnowledgeMessages_f - licensedTggMessages_f;
+                        const knowledgeNegation = (users === 0 || m365Count === 0) ? 0 : (licensedTggMessages_f * 12 + licensedNonTggMessages_f * 2);
+                        const licensedActionMessages_f = licensedMessages_f - licensedKnowledgeMessages_f;
+                        const toolsNegation = (users === 0 || m365Count === 0) ? 0 : Math.round(totalToolInvocations * licensedActionMessages_f * 5);
+                        const m365Ratio_f = users > 0 ? m365Count / users : 0;
+                        const flowsNegation = Math.round(flowsCredits * m365Ratio_f);
+                        const modifiersNegation = (users === 0 || m365Count === 0) ? 0 :
+                          Math.round(basicCount * basicFreq * m365Count * interactions * (5 + 0.1) / 10) +
+                          Math.round(standardCount * standardFreq * m365Count * interactions * (5 + 1.5) / 10) +
+                          Math.round(premiumCount * premiumFreq * m365Count * interactions * (5 + 10) / 10);
+
+                        const isSalesQual = product.productId === "sales-qualification";
+                        const isCaseMgmt = product.productId === "case-management";
+
+                        // Sales Qualification
+                        const leads = parseInt(product.leadsPerMonth) || 0;
+                        const lowPct_f = (parseInt(product.leadsLowComplexity) || 0) / 100;
+                        const medPct_f = (parseInt(product.leadsMedComplexity) || 0) / 100;
+                        const highPct_f = (parseInt(product.leadsHighComplexity) || 0) / 100;
+                        const lowLeads = Math.round(leads * lowPct_f);
+                        const medLeads = Math.round(leads * medPct_f);
+                        const highLeads = Math.round(leads * highPct_f);
+                        const researchCredits = isSalesQual ? (lowLeads * 174 + medLeads * 209 + highLeads * 349) : 0;
+                        let engagementCredits = 0;
+                        if (isSalesQual && product.salesQualMode === "research-outreach-engage") {
+                          const replyPct_f = (parseInt(product.leadsReplyPercent) || 0) / 100;
+                          const leadsWhoRespond = Math.round(leads * replyPct_f);
+                          const leadsDontRespond = leads - leadsWhoRespond;
+                          engagementCredits = 142 * leadsWhoRespond + 9 * leadsDontRespond;
+                        }
+
+                        // Case Management
+                        const cmNewEmails = parseInt(product.cmNewEmails) || 0;
+                        const cmFollowUpByUsers = parseInt(product.cmFollowupEmailsPerCase) || 0;
+                        const cmRtConversations = parseInt(product.cmRealTimeConversations) || 0;
+                        const cmAgentUpdates = parseInt(product.cmManualUpdatesPerConversation) || 0;
+                        const cmAutoCasePct = (parseInt(product.cmAutoCaseCreationPercent) || 0) / 100;
+                        const cmAvgFollowUps = parseInt(product.cmFollowupsPerCase) || 0;
+                        const cmTemplateFollowUpPct = (parseInt(product.cmFollowupTemplatePercent) || 0) / 100;
+                        const cmResolutionEmails = parseInt(product.cmResolutionEmails) || 0;
+                        const cmKnowledgeArticlePct = (parseInt(product.cmKnowledgeArticlePercent) || 0) / 100;
+                        const cmToolCallsPerEmail = parseInt(product.cmToolCallsPerEmail) || 0;
+                        const cmTemplateResponsePct = (parseInt(product.cmResolutionTemplatePercent) || 0) / 100;
+
+                        const cmCreateGen = cmNewEmails + cmRtConversations;
+                        const cmCreateClassic = Math.round(cmAutoCasePct * (cmNewEmails + cmRtConversations));
+                        const cmUpdateGen = (cmRtConversations * cmAgentUpdates) + (cmNewEmails * cmFollowUpByUsers);
+                        const cmUpdateClassic = cmNewEmails * cmFollowUpByUsers;
+                        const cmFollowUpGen = Math.round((cmNewEmails + cmRtConversations) * cmAvgFollowUps * cmTemplateFollowUpPct * 3);
+                        const cmFollowUpClassic = Math.round((cmNewEmails + cmRtConversations) * cmAvgFollowUps * (1 - cmTemplateFollowUpPct));
+                        const cmFollowUpTextAI = Math.round((cmNewEmails + cmRtConversations) * cmAvgFollowUps * (1 - cmTemplateFollowUpPct) * 8);
+                        const cmCloseGen = cmRtConversations;
+                        const cmCloseClassic = cmNewEmails + cmRtConversations;
+                        const cmCloseTextAI = cmNewEmails * 2;
+                        const cmResolutionGen = Math.round(
+                          cmResolutionEmails * cmKnowledgeArticlePct * 3 + cmResolutionEmails * cmToolCallsPerEmail +
+                          cmResolutionEmails * cmTemplateResponsePct * 3 + cmResolutionEmails * (1 - cmTemplateResponsePct)
+                        );
+                        const cmResolutionClassic = cmResolutionEmails;
+
+                        const cmGenAnswersCredits = isCaseMgmt ? (cmCreateGen + cmUpdateGen + cmFollowUpGen + cmCloseGen + cmResolutionGen) * 2 : 0;
+                        const cmClassicAnswersCredits = isCaseMgmt ? (cmCreateClassic + cmUpdateClassic + cmFollowUpClassic + cmCloseClassic + cmResolutionClassic) : 0;
+                        const cmTextToolsCredits = isCaseMgmt ? Math.round((cmFollowUpTextAI + cmCloseTextAI) * 1.5) : 0;
+                        const cmTotalCredits = cmGenAnswersCredits + cmClassicAnswersCredits + cmTextToolsCredits;
 
                         return (
                           <div key={product.id} style={{
@@ -2277,6 +2652,72 @@ function AppV3({ currentVersion, onVersionChange, versions }: VersionProps) {
                               <p style={{ fontSize: "20px", lineHeight: "28px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{calculateProductCredits(product).toLocaleString()}</p>
                             </div>
 
+                            {isSalesQual ? (<>
+                            {/* Sales Qualification: Research estimate */}
+                            <div className={styles.calcSectionContainer}>
+                              <div style={{ display: "flex", alignItems: "baseline", gap: "8px", width: "100%" }}>
+                                <h3 className={styles.h4Title}>Estimate for research (all leads)</h3>
+                                <span className={styles.calcLeader} />
+                                <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{researchCredits}</p>
+                              </div>
+                              <div className={styles.calcItemRow}>
+                                <p className={styles.calcItemLabel}>Research credits</p>
+                                <span className={styles.calcLeader} />
+                                <p className={styles.calcItemValue}>{researchCredits}</p>
+                              </div>
+                            </div>
+
+                            {/* Sales Qualification: Engage estimate */}
+                            <div className={styles.calcSectionContainer}>
+                              <div style={{ display: "flex", alignItems: "baseline", gap: "8px", width: "100%" }}>
+                                <h3 className={styles.h4Title}>Estimate of engage (all leads)</h3>
+                                <span className={styles.calcLeader} />
+                                <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{engagementCredits}</p>
+                              </div>
+                              <div className={styles.calcItemRow}>
+                                <p className={styles.calcItemLabel}>Engagement credits</p>
+                                <span className={styles.calcLeader} />
+                                <p className={styles.calcItemValue}>{engagementCredits}</p>
+                              </div>
+                            </div>
+                            </>) : isCaseMgmt ? (<>
+                            {/* Case Management: Estimated Costs */}
+                            <div className={styles.calcSectionContainer}>
+                              <div style={{ display: "flex", alignItems: "baseline", gap: "8px", width: "100%" }}>
+                                <h3 className={styles.h4Title}>Estimate for generative answers</h3>
+                                <span className={styles.calcLeader} />
+                              </div>
+                              <div className={styles.calcItemRow}>
+                                <p className={styles.calcItemLabel}>Generative answers credits</p>
+                                <span className={styles.calcLeader} />
+                                <p className={styles.calcItemValue}>{cmGenAnswersCredits}</p>
+                              </div>
+                            </div>
+
+                            <div className={styles.calcSectionContainer}>
+                              <div style={{ display: "flex", alignItems: "baseline", gap: "8px", width: "100%" }}>
+                                <h3 className={styles.h4Title}>Estimate for classic answers</h3>
+                                <span className={styles.calcLeader} />
+                              </div>
+                              <div className={styles.calcItemRow}>
+                                <p className={styles.calcItemLabel}>Classic answers credits</p>
+                                <span className={styles.calcLeader} />
+                                <p className={styles.calcItemValue}>{cmClassicAnswersCredits}</p>
+                              </div>
+                            </div>
+
+                            <div className={styles.calcSectionContainer}>
+                              <div style={{ display: "flex", alignItems: "baseline", gap: "8px", width: "100%" }}>
+                                <h3 className={styles.h4Title}>Estimate for text and generative AI tools (standard)</h3>
+                                <span className={styles.calcLeader} />
+                              </div>
+                              <div className={styles.calcItemRow}>
+                                <p className={styles.calcItemLabel}>Text and AI tools credits</p>
+                                <span className={styles.calcLeader} />
+                                <p className={styles.calcItemValue}>{cmTextToolsCredits}</p>
+                              </div>
+                            </div>
+                            </>) : (<>
                             <div className={styles.calcSectionContainer}>
                               <div style={{ display: "flex", alignItems: "baseline", gap: "8px", width: "100%" }}>
                                 <h3 className={styles.h4Title}>Copilot credits driven by knowledge</h3>
@@ -2287,13 +2728,13 @@ function AppV3({ currentVersion, onVersionChange, versions }: VersionProps) {
                               <div className={styles.calcItemRow}>
                                 <p className={styles.calcItemLabel}>Copilot credits consumed for tenant graph grounding</p>
                                 <span className={styles.calcLeader} />
-                                <p className={styles.calcItemValue}>{ttgMessages}</p>
+                                <p className={styles.calcItemValue}>{tggCredits}</p>
                               </div>
 
                               <div className={styles.calcItemRow}>
                                 <p className={styles.calcItemLabel}>Copilot credits consumed for non-tenant graph grounding: Dataverse, web, files</p>
                                 <span className={styles.calcLeader} />
-                                <p className={styles.calcItemValue}>{otherKnowledgeMessages}</p>
+                                <p className={styles.calcItemValue}>{nonTggCredits}</p>
                               </div>
 
                               <div className={styles.calcNegationRow}>
@@ -2367,6 +2808,7 @@ function AppV3({ currentVersion, onVersionChange, versions }: VersionProps) {
                                 <p className={styles.calcNegationValue}>{modifiersNegation}</p>
                               </div>
                             </div>
+                            </>)}
                           </div>
                         );
                       })}
@@ -2384,21 +2826,44 @@ function AppV3({ currentVersion, onVersionChange, versions }: VersionProps) {
               <div className={styles.legalContainer} style={{ marginTop: "48px", marginBottom: "64px" }}>
                 {/* Version Switcher */}
                 <div style={{ position: "absolute", left: 0, top: 0, flexShrink: 0 }}>
-                  <button
-                    onClick={() => setVersionMenuOpen(!versionMenuOpen)}
-                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#3a3ec5"; e.currentTarget.style.transform = "scale(1.05)"; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "#464feb"; e.currentTarget.style.transform = "scale(1)"; }}
-                    style={{
-                      display: "flex", alignItems: "center", justifyContent: "center",
-                      width: "44px", height: "44px", borderRadius: "50%",
-                      border: "none", backgroundColor: "#464feb",
-                      color: "#ffffff", cursor: "pointer", outline: "none",
-                      boxShadow: "0 2px 8px rgba(70,79,235,0.3), 0 6px 20px rgba(70,79,235,0.15)",
-                      transition: "background-color 0.15s ease, transform 0.15s ease",
-                    }}
-                  >
-                    <InfoRegular style={{ fontSize: "20px" }} />
-                  </button>
+                  <div style={{
+                    display: "flex", flexDirection: "column", gap: "2px",
+                    backgroundColor: "#464feb", borderRadius: "24px",
+                    padding: "4px",
+                    boxShadow: "0 2px 8px rgba(70,79,235,0.3), 0 6px 20px rgba(70,79,235,0.15)",
+                  }}>
+                    <button
+                      onClick={() => setVersionMenuOpen(!versionMenuOpen)}
+                      onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.2)"; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; }}
+                      style={{
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        width: "36px", height: "36px", borderRadius: "50%",
+                        border: "none", backgroundColor: "transparent",
+                        color: "#ffffff", cursor: "pointer", outline: "none",
+                        transition: "background-color 0.15s ease",
+                      }}
+                      title="Design versions"
+                    >
+                      <InfoRegular style={{ fontSize: "18px" }} />
+                    </button>
+                    <div style={{ width: "20px", height: "1px", backgroundColor: "rgba(255,255,255,0.3)", alignSelf: "center" }} />
+                    <button
+                      onClick={() => setShowDesignSystem(true)}
+                      onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.2)"; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = "transparent"; }}
+                      style={{
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        width: "36px", height: "36px", borderRadius: "50%",
+                        border: "none", backgroundColor: "transparent",
+                        color: "#ffffff", cursor: "pointer", outline: "none",
+                        transition: "background-color 0.15s ease",
+                      }}
+                      title="Design system"
+                    >
+                      <ColorRegular style={{ fontSize: "18px" }} />
+                    </button>
+                  </div>
                   {versionMenuOpen && (
                     <>
                       <div onClick={() => setVersionMenuOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 1999 }} />
@@ -2411,7 +2876,7 @@ function AppV3({ currentVersion, onVersionChange, versions }: VersionProps) {
                         display: "flex", flexDirection: "column", gap: "2px",
                       }}>
                         <p style={{ fontSize: "12px", fontWeight: 600, color: tokens.colorNeutralForeground3, margin: 0, padding: "8px 12px 6px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Design versions</p>
-                        {versions.map((v: { id: string; label: string; description: string }) => (
+                        {versions.map(v => (
                           <button
                             key={v.id}
                             onClick={() => { onVersionChange(v.id); setVersionMenuOpen(false); }}
