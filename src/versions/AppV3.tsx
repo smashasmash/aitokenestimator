@@ -1185,7 +1185,6 @@ function AppV3({ currentVersion, onVersionChange, versions }: VersionProps) {
       head: [["Metric", "Value"]],
       body: [
         ["Total Estimated Copilot Credits", displayCredits.toLocaleString()],
-        ["Credits Negated with Microsoft 365 Copilot", displayNegated.toLocaleString()],
         ["Time Period", `Per ${timePeriod}`],
       ],
       theme: "grid",
@@ -1224,7 +1223,6 @@ function AppV3({ currentVersion, onVersionChange, versions }: VersionProps) {
           ["Knowledge %", product.knowledgePercent || "0"],
           ["Tenant Graph %", product.tenantGraphPercent || "0"],
           ["Net Credits (" + timePeriod + ")", (productCredits * timeMultiplier).toLocaleString()],
-          ["Negated Credits (" + timePeriod + ")", (productNegation * timeMultiplier).toLocaleString()],
         ];
 
         autoTable(doc, {
@@ -2244,7 +2242,7 @@ function AppV3({ currentVersion, onVersionChange, versions }: VersionProps) {
                     </div>
                     {(() => {
                       const focusedProduct = viewMode === "focused" ? products.find(p => p.id === editingProductId) : null;
-                      const showNegated = viewMode === "selection" || (focusedProduct && focusedProduct.productId !== "sales-qualification" && focusedProduct.productId !== "case-management");
+                      const showNegated = viewMode === "focused" && focusedProduct && focusedProduct.category === "Copilot Studio Custom";
                       return (
                     <div style={{
                       display: "flex",
@@ -2264,7 +2262,7 @@ function AppV3({ currentVersion, onVersionChange, versions }: VersionProps) {
                         flex: 1,
                         minWidth: 0,
                       }}>
-                        <p style={{ fontSize: "14px", fontWeight: 600, letterSpacing: "0.5px", textTransform: "uppercase", color: tokens.colorNeutralForeground3, margin: 0, textAlign: "center", lineHeight: "20px" }}>Total estimated<br />Copilot credits</p>
+                        <p style={{ fontSize: "14px", fontWeight: 600, letterSpacing: "0.5px", textTransform: "uppercase", color: tokens.colorNeutralForeground3, margin: 0, textAlign: "center", lineHeight: "20px" }}>{showNegated ? <>Total estimated<br />Copilot credits</> : "Total estimated Copilot credits"}</p>
                         <p style={{ fontSize: "40px", fontWeight: 700, color: tokens.colorBrandBackground, margin: 0 }}>{displayCredits.toLocaleString()}</p>
                       </div>
                       {showNegated && (<>
@@ -2435,22 +2433,17 @@ function AppV3({ currentVersion, onVersionChange, versions }: VersionProps) {
                                  <div style={{ display: "flex", alignItems: "baseline", gap: "8px", width: "100%" }}>
                                    <h3 className={styles.h4Title}>Copilot credits driven by knowledge</h3>
                                    <span className={styles.calcLeader} />
-                                   <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{knowledgeCredits}</p>
+                                   <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{(knowledgeCredits * multiplier).toLocaleString()}</p>
                                  </div>
                                  <div className={styles.calcItemRow}>
                                    <p className={styles.calcItemLabel}>Copilot credits consumed for tenant graph grounding</p>
                                    <span className={styles.calcLeader} />
-                                   <p className={styles.calcItemValue}>{tggCredits}</p>
+                                   <p className={styles.calcItemValue}>{(tggCredits * multiplier).toLocaleString()}</p>
                                  </div>
                                  <div className={styles.calcItemRow}>
                                    <p className={styles.calcItemLabel}>Copilot credits consumed for non-tenant graph grounding: Dataverse, web, files</p>
                                    <span className={styles.calcLeader} />
-                                   <p className={styles.calcItemValue}>{nonTggCredits}</p>
-                                 </div>
-                                 <div className={styles.calcNegationRow}>
-                                   <p className={styles.calcNegationLabel}>Copilot credits negated for {m365Count} users with Microsoft 365 Copilot licenses</p>
-                                   <span className={styles.calcLeader} />
-                                   <p className={styles.calcNegationValue}>{knowledgeNegation}</p>
+                                   <p className={styles.calcItemValue}>{(nonTggCredits * multiplier).toLocaleString()}</p>
                                  </div>
                                </div>
 
@@ -2458,12 +2451,7 @@ function AppV3({ currentVersion, onVersionChange, versions }: VersionProps) {
                                  <div style={{ display: "flex", alignItems: "baseline", gap: "8px", width: "100%" }}>
                                    <h3 className={styles.h4Title}>Copilot credits driven by agent tools</h3>
                                    <span className={styles.calcLeader} />
-                                   <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{toolsCredits}</p>
-                                 </div>
-                                 <div className={styles.calcNegationRow}>
-                                   <p className={styles.calcNegationLabel}>Copilot credits negated for {m365Count} users with Microsoft 365 Copilot licenses</p>
-                                   <span className={styles.calcLeader} />
-                                   <p className={styles.calcNegationValue}>{toolsNegation}</p>
+                                   <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{(toolsCredits * multiplier).toLocaleString()}</p>
                                  </div>
                                </div>
 
@@ -2471,12 +2459,7 @@ function AppV3({ currentVersion, onVersionChange, versions }: VersionProps) {
                                  <div style={{ display: "flex", alignItems: "baseline", gap: "8px", width: "100%" }}>
                                    <h3 className={styles.h4Title}>Copilot credits driven by agent flows</h3>
                                    <span className={styles.calcLeader} />
-                                   <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{flowsCredits}</p>
-                                 </div>
-                                 <div className={styles.calcNegationRow}>
-                                   <p className={styles.calcNegationLabel}>Copilot credits negated for {m365Count} users with Microsoft 365 Copilot licenses</p>
-                                   <span className={styles.calcLeader} />
-                                   <p className={styles.calcNegationValue}>{flowsNegation}</p>
+                                   <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{(flowsCredits * multiplier).toLocaleString()}</p>
                                  </div>
                                </div>
 
@@ -2484,28 +2467,23 @@ function AppV3({ currentVersion, onVersionChange, versions }: VersionProps) {
                                  <div style={{ display: "flex", alignItems: "baseline", gap: "8px", width: "100%" }}>
                                    <h3 className={styles.h4Title}>Copilot credits driven by optional modifiers</h3>
                                    <span className={styles.calcLeader} />
-                                   <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{modifiersCredits}</p>
+                                   <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{(modifiersCredits * multiplier).toLocaleString()}</p>
                                  </div>
                                  <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, paddingLeft: "15px" }}>Prompts</p>
                                  <div className={styles.calcItemRow}>
                                    <p className={styles.calcItemLabel} style={{ fontWeight: 600, paddingLeft: "16px" }}>Basic</p>
                                    <span className={styles.calcLeader} />
-                                   <p className={styles.calcItemValue}>{basicCredits}</p>
+                                   <p className={styles.calcItemValue}>{(basicCredits * multiplier).toLocaleString()}</p>
                                  </div>
                                  <div className={styles.calcItemRow}>
                                    <p className={styles.calcItemLabel} style={{ fontWeight: 600, paddingLeft: "16px" }}>Standard</p>
                                    <span className={styles.calcLeader} />
-                                   <p className={styles.calcItemValue}>{standardCredits}</p>
+                                   <p className={styles.calcItemValue}>{(standardCredits * multiplier).toLocaleString()}</p>
                                  </div>
                                  <div className={styles.calcItemRow}>
                                    <p className={styles.calcItemLabel} style={{ fontWeight: 600, paddingLeft: "16px" }}>Premium</p>
                                    <span className={styles.calcLeader} />
-                                   <p className={styles.calcItemValue}>{premiumCredits}</p>
-                                 </div>
-                                 <div className={styles.calcNegationRow}>
-                                   <p className={styles.calcNegationLabel}>Copilot credits negated for {m365Count} users with Microsoft 365 Copilot licenses</p>
-                                   <span className={styles.calcLeader} />
-                                   <p className={styles.calcNegationValue}>{modifiersNegation}</p>
+                                   <p className={styles.calcItemValue}>{(premiumCredits * multiplier).toLocaleString()}</p>
                                  </div>
                                </div>
                              </div>
@@ -2644,11 +2622,6 @@ function AppV3({ currentVersion, onVersionChange, versions }: VersionProps) {
                             gap: "20px",
                             padding: "20px 0",
                           }}>
-                            <div style={{ display: "flex", alignItems: "baseline", gap: "8px", minWidth: 0 }}>
-                              <p style={{ fontSize: "18px", lineHeight: "28px", fontWeight: 600, color: "#464feb", margin: 0 }}>{product.name}</p>
-                              <span className={styles.calcLeader} />
-                              <p style={{ fontSize: "20px", lineHeight: "28px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{calculateProductCredits(product).toLocaleString()}</p>
-                            </div>
 
                             {isSalesQual ? (<>
                             {/* Sales Qualification: Research estimate */}
@@ -2656,12 +2629,12 @@ function AppV3({ currentVersion, onVersionChange, versions }: VersionProps) {
                               <div style={{ display: "flex", alignItems: "baseline", gap: "8px", width: "100%" }}>
                                 <h3 className={styles.h4Title}>Estimate for research (all leads)</h3>
                                 <span className={styles.calcLeader} />
-                                <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{researchCredits}</p>
+                                <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{(researchCredits * timeMultiplier).toLocaleString()}</p>
                               </div>
                               <div className={styles.calcItemRow}>
                                 <p className={styles.calcItemLabel}>Research credits</p>
                                 <span className={styles.calcLeader} />
-                                <p className={styles.calcItemValue}>{researchCredits}</p>
+                                <p className={styles.calcItemValue}>{(researchCredits * timeMultiplier).toLocaleString()}</p>
                               </div>
                             </div>
 
@@ -2670,12 +2643,12 @@ function AppV3({ currentVersion, onVersionChange, versions }: VersionProps) {
                               <div style={{ display: "flex", alignItems: "baseline", gap: "8px", width: "100%" }}>
                                 <h3 className={styles.h4Title}>Estimate of engage (all leads)</h3>
                                 <span className={styles.calcLeader} />
-                                <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{engagementCredits}</p>
+                                <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{(engagementCredits * timeMultiplier).toLocaleString()}</p>
                               </div>
                               <div className={styles.calcItemRow}>
                                 <p className={styles.calcItemLabel}>Engagement credits</p>
                                 <span className={styles.calcLeader} />
-                                <p className={styles.calcItemValue}>{engagementCredits}</p>
+                                <p className={styles.calcItemValue}>{(engagementCredits * timeMultiplier).toLocaleString()}</p>
                               </div>
                             </div>
                             </>) : isCaseMgmt ? (<>
@@ -2688,7 +2661,7 @@ function AppV3({ currentVersion, onVersionChange, versions }: VersionProps) {
                               <div className={styles.calcItemRow}>
                                 <p className={styles.calcItemLabel}>Generative answers credits</p>
                                 <span className={styles.calcLeader} />
-                                <p className={styles.calcItemValue}>{cmGenAnswersCredits}</p>
+                                <p className={styles.calcItemValue}>{(cmGenAnswersCredits * timeMultiplier).toLocaleString()}</p>
                               </div>
                             </div>
 
@@ -2700,7 +2673,7 @@ function AppV3({ currentVersion, onVersionChange, versions }: VersionProps) {
                               <div className={styles.calcItemRow}>
                                 <p className={styles.calcItemLabel}>Classic answers credits</p>
                                 <span className={styles.calcLeader} />
-                                <p className={styles.calcItemValue}>{cmClassicAnswersCredits}</p>
+                                <p className={styles.calcItemValue}>{(cmClassicAnswersCredits * timeMultiplier).toLocaleString()}</p>
                               </div>
                             </div>
 
@@ -2712,7 +2685,7 @@ function AppV3({ currentVersion, onVersionChange, versions }: VersionProps) {
                               <div className={styles.calcItemRow}>
                                 <p className={styles.calcItemLabel}>Text and AI tools credits</p>
                                 <span className={styles.calcLeader} />
-                                <p className={styles.calcItemValue}>{cmTextToolsCredits}</p>
+                                <p className={styles.calcItemValue}>{(cmTextToolsCredits * timeMultiplier).toLocaleString()}</p>
                               </div>
                             </div>
                             </>) : (<>
@@ -2720,25 +2693,25 @@ function AppV3({ currentVersion, onVersionChange, versions }: VersionProps) {
                               <div style={{ display: "flex", alignItems: "baseline", gap: "8px", width: "100%" }}>
                                 <h3 className={styles.h4Title}>Copilot credits driven by knowledge</h3>
                                 <span className={styles.calcLeader} />
-                                <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{knowledgeCredits}</p>
+                                <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{(knowledgeCredits * timeMultiplier).toLocaleString()}</p>
                               </div>
 
                               <div className={styles.calcItemRow}>
                                 <p className={styles.calcItemLabel}>Copilot credits consumed for tenant graph grounding</p>
                                 <span className={styles.calcLeader} />
-                                <p className={styles.calcItemValue}>{tggCredits}</p>
+                                <p className={styles.calcItemValue}>{(tggCredits * timeMultiplier).toLocaleString()}</p>
                               </div>
 
                               <div className={styles.calcItemRow}>
                                 <p className={styles.calcItemLabel}>Copilot credits consumed for non-tenant graph grounding: Dataverse, web, files</p>
                                 <span className={styles.calcLeader} />
-                                <p className={styles.calcItemValue}>{nonTggCredits}</p>
+                                <p className={styles.calcItemValue}>{(nonTggCredits * timeMultiplier).toLocaleString()}</p>
                               </div>
 
                               <div className={styles.calcNegationRow}>
                                 <p className={styles.calcNegationLabel}>Copilot credits negated for {m365Count} users with Microsoft 365 Copilot licenses</p>
                                 <span className={styles.calcLeader} />
-                                <p className={styles.calcNegationValue}>{knowledgeNegation}</p>
+                                <p className={styles.calcNegationValue}>{(knowledgeNegation * timeMultiplier).toLocaleString()}</p>
                               </div>
                             </div>
 
@@ -2747,13 +2720,13 @@ function AppV3({ currentVersion, onVersionChange, versions }: VersionProps) {
                               <div style={{ display: "flex", alignItems: "baseline", gap: "8px", width: "100%" }}>
                                 <h3 className={styles.h4Title}>Copilot credits driven by agent tools</h3>
                                 <span className={styles.calcLeader} />
-                                <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{toolsCredits}</p>
+                                <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{(toolsCredits * timeMultiplier).toLocaleString()}</p>
                               </div>
 
                               <div className={styles.calcNegationRow}>
                                 <p className={styles.calcNegationLabel}>Copilot credits negated for {m365Count} users with Microsoft 365 Copilot licenses</p>
                                 <span className={styles.calcLeader} />
-                                <p className={styles.calcNegationValue}>{toolsNegation}</p>
+                                <p className={styles.calcNegationValue}>{(toolsNegation * timeMultiplier).toLocaleString()}</p>
                               </div>
                             </div>
 
@@ -2762,13 +2735,13 @@ function AppV3({ currentVersion, onVersionChange, versions }: VersionProps) {
                               <div style={{ display: "flex", alignItems: "baseline", gap: "8px", width: "100%" }}>
                                 <h3 className={styles.h4Title}>Copilot credits driven by agent flows</h3>
                                 <span className={styles.calcLeader} />
-                                <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{flowsCredits}</p>
+                                <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{(flowsCredits * timeMultiplier).toLocaleString()}</p>
                               </div>
 
                               <div className={styles.calcNegationRow}>
                                 <p className={styles.calcNegationLabel}>Copilot credits negated for {m365Count} users with Microsoft 365 Copilot licenses</p>
                                 <span className={styles.calcLeader} />
-                                <p className={styles.calcNegationValue}>{flowsNegation}</p>
+                                <p className={styles.calcNegationValue}>{(flowsNegation * timeMultiplier).toLocaleString()}</p>
                               </div>
                             </div>
 
@@ -2777,7 +2750,7 @@ function AppV3({ currentVersion, onVersionChange, versions }: VersionProps) {
                               <div style={{ display: "flex", alignItems: "baseline", gap: "8px", width: "100%" }}>
                                 <h3 className={styles.h4Title}>Copilot credits driven by optional modifiers</h3>
                                 <span className={styles.calcLeader} />
-                                <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{modifiersCredits}</p>
+                                <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{(modifiersCredits * timeMultiplier).toLocaleString()}</p>
                               </div>
 
                               <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, paddingLeft: "15px" }}>Prompts</p>
@@ -2785,25 +2758,25 @@ function AppV3({ currentVersion, onVersionChange, versions }: VersionProps) {
                               <div className={styles.calcItemRow}>
                                 <p className={styles.calcItemLabel} style={{ fontWeight: 600, paddingLeft: "16px" }}>Basic</p>
                                 <span className={styles.calcLeader} />
-                                <p className={styles.calcItemValue}>{basicCredits}</p>
+                                <p className={styles.calcItemValue}>{(basicCredits * timeMultiplier).toLocaleString()}</p>
                               </div>
 
                               <div className={styles.calcItemRow}>
                                 <p className={styles.calcItemLabel} style={{ fontWeight: 600, paddingLeft: "16px" }}>Standard</p>
                                 <span className={styles.calcLeader} />
-                                <p className={styles.calcItemValue}>{standardCredits}</p>
+                                <p className={styles.calcItemValue}>{(standardCredits * timeMultiplier).toLocaleString()}</p>
                               </div>
 
                               <div className={styles.calcItemRow}>
                                 <p className={styles.calcItemLabel} style={{ fontWeight: 600, paddingLeft: "16px" }}>Premium</p>
                                 <span className={styles.calcLeader} />
-                                <p className={styles.calcItemValue}>{premiumCredits}</p>
+                                <p className={styles.calcItemValue}>{(premiumCredits * timeMultiplier).toLocaleString()}</p>
                               </div>
 
                               <div className={styles.calcNegationRow}>
                                 <p className={styles.calcNegationLabel}>Copilot credits negated for {m365Count} users with Microsoft 365 Copilot licenses</p>
                                 <span className={styles.calcLeader} />
-                                <p className={styles.calcNegationValue}>{modifiersNegation}</p>
+                                <p className={styles.calcNegationValue}>{(modifiersNegation * timeMultiplier).toLocaleString()}</p>
                               </div>
                             </div>
                             </>)}
