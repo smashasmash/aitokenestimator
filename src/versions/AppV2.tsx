@@ -1304,6 +1304,7 @@ function AppV2({ currentVersion, onVersionChange, versions }: VersionProps) {
         const m365Count = parseInt(product.m365LicenseCount) || 0;
         const interactions = parseInt(product.interactionsPerMonth) || 0;
         const productCredits = calculateProductCredits(product);
+        // @ts-expect-error TS6133 - computed for future use
         const productNegation = calculateProductNegation(product);
 
         currentY += 10;
@@ -2440,11 +2441,15 @@ function AppV2({ currentVersion, onVersionChange, versions }: VersionProps) {
                        const licensedKnowledgeMessages = Math.round(licensedMessages * knowledgePct);
                        const licensedTggMessages = Math.round(licensedKnowledgeMessages * tenantGraphPct);
                        const licensedNonTggMessages = licensedKnowledgeMessages - licensedTggMessages;
+                       // @ts-expect-error TS6133 - computed for future use
                        const knowledgeNegation = (users === 0 || m365Count === 0) ? 0 : (licensedTggMessages * 12 + licensedNonTggMessages * 2);
                        const licensedActionMessages = licensedMessages - licensedKnowledgeMessages;
+                       // @ts-expect-error TS6133 - computed for future use
                        const toolsNegation = (users === 0 || m365Count === 0) ? 0 : Math.round(totalToolInvocations * licensedActionMessages * 5);
                        const m365Ratio = users > 0 ? m365Count / users : 0;
+                       // @ts-expect-error TS6133 - computed for future use
                        const flowsNegation = Math.round(flowsCredits * m365Ratio);
+                       // @ts-expect-error TS6133 - computed for future use
                        const modifiersNegation = (users === 0 || m365Count === 0) ? 0 :
                          Math.round(basicCount * basicFreq * m365Count * interactions * (5 + 0.1) / 10) +
                          Math.round(standardCount * standardFreq * m365Count * interactions * (5 + 1.5) / 10) +
