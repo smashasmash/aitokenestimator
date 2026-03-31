@@ -77,6 +77,9 @@ const useStyles = makeStyles({
     paddingLeft: "clamp(24px, 5vw, 80px)",
     paddingRight: "clamp(24px, 5vw, 80px)",
     boxSizing: "border-box" as const,
+    '@media (max-width: 1023px)': {
+      paddingTop: "72px",
+    },
   },
   twoColumnLayout: {
     display: "flex",
@@ -84,7 +87,7 @@ const useStyles = makeStyles({
     gap: "clamp(16px, 2vw, 24px)",
     width: "100%",
     alignItems: "flex-start",
-    '@media (max-width: 1100px)': {
+    '@media (max-width: 1023px)': {
       flexDirection: "column" as const,
     },
   },
@@ -94,7 +97,7 @@ const useStyles = makeStyles({
     gap: "24px",
     flex: "1 1 0",
     minWidth: 0,
-    '@media (max-width: 1100px)': {
+    '@media (max-width: 1023px)': {
       flex: "none" as unknown as string,
       width: "100%",
     },
@@ -112,6 +115,12 @@ const useStyles = makeStyles({
     display: "grid",
     gridTemplateColumns: "repeat(auto-fill, minmax(min(240px, 100%), 1fr))",
     gap: "clamp(8px, 1.5vw, 16px)",
+    '@media (max-width: 1365px) and (min-width: 1216px)': {
+      gridTemplateColumns: "1fr 1fr",
+    },
+    '@media (max-width: 1215px)': {
+      gridTemplateColumns: "1fr",
+    },
   },
   categoryCatalogItem: {
     display: "flex",
@@ -135,6 +144,12 @@ const useStyles = makeStyles({
     display: "grid",
     gridTemplateColumns: "1fr 1fr",
     gap: "8px 24px",
+    '@media (max-width: 1365px)': {
+      gap: "8px 16px",
+    },
+    '@media (max-width: 1215px)': {
+      gridTemplateColumns: "1fr",
+    },
   },
   productCard: {
     display: "flex",
@@ -159,6 +174,9 @@ const useStyles = makeStyles({
     gridTemplateColumns: "repeat(auto-fill, minmax(min(240px, 100%), 1fr))",
     gap: "16px",
     alignItems: "start",
+    '@media (max-width: 1215px)': {
+      gridTemplateColumns: "1fr",
+    },
   },
   productChip: {
     display: "flex",
@@ -348,6 +366,20 @@ const useStyles = makeStyles({
     width: "100%",
     gap: "12px",
     flexWrap: "wrap" as const,
+    '@media (max-width: 800px)': {
+      flexWrap: "nowrap" as const,
+      justifyContent: "center",
+      gap: "8px",
+      fontSize: "12px",
+    },
+  },
+  navButtonSmall: {
+    '@media (max-width: 800px)': {
+      minWidth: 0,
+      paddingLeft: "8px",
+      paddingRight: "8px",
+      fontSize: "12px",
+    },
   },
   stickyNav: {
     position: "sticky" as const,
@@ -355,9 +387,17 @@ const useStyles = makeStyles({
     zIndex: 100,
     padding: "12px 24px 24px 24px",
     transition: "background-color 0.2s ease, box-shadow 0.2s ease",
-    marginLeft: "-24px",
-    marginRight: "-24px",
-    width: "calc(100% + 48px)",
+    marginLeft: "calc(-1 * clamp(24px, 5vw, 80px))",
+    marginRight: "calc(-1 * clamp(24px, 5vw, 80px))",
+    width: "calc(100% + 2 * clamp(24px, 5vw, 80px))",
+    paddingLeft: "clamp(24px, 5vw, 80px)",
+    paddingRight: "clamp(24px, 5vw, 80px)",
+    boxSizing: "border-box" as const,
+    '@media (max-width: 1023px)': {
+      top: "68px",
+      paddingTop: "8px",
+      paddingBottom: "16px",
+    },
   },
   section: {
     display: "flex",
@@ -466,7 +506,7 @@ const useStyles = makeStyles({
     top: "76px",
     alignSelf: "flex-start",
     borderRadius: "12px",
-    '@media (max-width: 1100px)': {
+    '@media (max-width: 1023px)': {
       flex: "none" as unknown as string,
       width: "100%",
       minWidth: 0,
@@ -474,8 +514,35 @@ const useStyles = makeStyles({
       top: "auto",
       maxHeight: "none",
       alignSelf: "stretch",
+      order: -1,
+      border: "none",
     },
   },
+  mobileEstimationBar: {
+    display: "none",
+    '@media (max-width: 1023px)': {
+      display: "flex",
+      flexDirection: "column",
+      position: "fixed" as const,
+      top: 0,
+      left: 0,
+      right: 0,
+      zIndex: 200,
+      alignItems: "stretch",
+      padding: "12px 24px",
+      backgroundColor: tokens.colorNeutralBackground1,
+      boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+      borderRadius: "0 0 12px 12px",
+      maxHeight: "80vh",
+      overflowY: "auto" as const,
+    },
+  },
+  mobileCalcHidden: {
+    '@media (max-width: 1023px)': {
+      display: "none",
+    },
+  },
+
   calcStickyHeader: {
     flexShrink: 0,
     backgroundColor: tokens.colorNeutralBackground1,
@@ -734,10 +801,15 @@ const useStyles = makeStyles({
   },
   toolsTableHeader: {
     display: "grid",
-    gridTemplateColumns: "1fr 1fr 1fr",
+    gridTemplateColumns: "1.2fr 1fr 1fr",
     gap: "16px",
     padding: "12px 16px",
     backgroundColor: tokens.colorBrandBackground2,
+    '@media (max-width: 1365px)': {
+      gridTemplateColumns: "1fr minmax(60px, 120px) minmax(60px, 120px)",
+      gap: "12px",
+      padding: "12px",
+    },
   },
   toolsTableHeaderCell: {
     fontSize: "14px",
@@ -748,17 +820,46 @@ const useStyles = makeStyles({
   },
   toolsTableRow: {
     display: "grid",
-    gridTemplateColumns: "1fr 1fr 1fr",
+    gridTemplateColumns: "1.2fr 1fr 1fr",
     gap: "16px",
     padding: "12px 16px",
     alignItems: "center",
     borderTop: `1px solid ${tokens.colorNeutralStroke2}`,
+    '@media (max-width: 1365px)': {
+      gridTemplateColumns: "1fr minmax(60px, 120px) minmax(60px, 120px)",
+      gap: "12px",
+      padding: "12px",
+    },
   },
   toolsTableCell: {
     fontSize: "14px",
     lineHeight: "20px",
     color: tokens.colorNeutralForeground1,
     margin: 0,
+  },
+  calcTotalLabel: {
+    fontSize: "14px",
+    fontWeight: 600,
+    letterSpacing: "0.5px",
+    textTransform: "uppercase" as const,
+    color: tokens.colorNeutralForeground3,
+    margin: 0,
+    textAlign: "center" as const,
+    lineHeight: "20px",
+    '@media (max-width: 1365px)': {
+      fontSize: "11px",
+      lineHeight: "16px",
+      letterSpacing: "0.3px",
+    },
+  },
+  calcTotalValue: {
+    fontSize: "40px",
+    fontWeight: 700,
+    color: tokens.colorBrandBackground,
+    margin: 0,
+    '@media (max-width: 1365px)': {
+      fontSize: "32px",
+    },
   },
 });
 
@@ -865,9 +966,21 @@ function AppV4({ currentVersion, onVersionChange, versions }: VersionProps) {
   const [editingProductId, setEditingProductId] = useState<number | null>(null);
   const [versionMenuOpen, setVersionMenuOpen] = useState(false);
   const [showDesignSystem, setShowDesignSystem] = useState(false);
+  const [categoriesCollapsed, setCategoriesCollapsed] = useState(false);
+  const [mobileEstimationExpanded, setMobileEstimationExpanded] = useState(false);
+  const [isSmallScreen, setIsSmallScreen] = useState(false);
 
   const navRef = useRef<HTMLDivElement>(null);
   const navSentinelRef = useRef<HTMLDivElement>(null);
+  const hasAutoCollapsedRef = useRef(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 800px)");
+    setIsSmallScreen(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsSmallScreen(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -887,15 +1000,23 @@ function AppV4({ currentVersion, onVersionChange, versions }: VersionProps) {
     setViewMode("selection");
     setExpandedSummaries(new Set());
     setEditingProductId(null);
+    setCategoriesCollapsed(false);
+    hasAutoCollapsedRef.current = false;
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const toggleCategory = (category: ProductCategory) => {
-    setSelectedCategories(prev =>
-      prev.includes(category)
+    setSelectedCategories(prev => {
+      const next = prev.includes(category)
         ? prev.filter(c => c !== category)
-        : [...prev, category]
-    );
+        : [...prev, category];
+      // Auto-collapse categories only on the first selection
+      if (next.length > 0 && !hasAutoCollapsedRef.current) {
+        setCategoriesCollapsed(true);
+        hasAutoCollapsedRef.current = true;
+      }
+      return next;
+    });
   };
 
   const visibleProducts = AllProducts.filter(p => selectedCategories.includes(p.category));
@@ -989,6 +1110,8 @@ function AppV4({ currentVersion, onVersionChange, versions }: VersionProps) {
     if (newProducts.length === 0 && viewMode === "focused") {
       setViewMode("selection");
       setEditingProductId(null);
+      setCategoriesCollapsed(false);
+      setMobileEstimationExpanded(false);
     }
   };
 
@@ -1337,6 +1460,658 @@ function AppV4({ currentVersion, onVersionChange, versions }: VersionProps) {
   return (
     <FluentProvider theme={customTheme} style={{ overflow: "visible" }}>
       <div className={styles.appContainer}>
+        {/* Mobile estimation bar - visible only at ≤1023px */}
+        <div className={styles.mobileEstimationBar}>
+          {!mobileEstimationExpanded ? (
+            <div style={{ display: "flex", flexDirection: "column", gap: "0px", width: "100%" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+                <p style={{ fontSize: "13px", fontWeight: 600, letterSpacing: "0.5px", textTransform: "uppercase", color: tokens.colorNeutralForeground3, margin: 0, lineHeight: "16px" }}>Total estimated Copilot credits</p>
+                <p style={{ fontSize: "20px", fontWeight: 700, color: tokens.colorBrandBackground, margin: 0, flexShrink: 0, minWidth: "24px", textAlign: "right" as const }}>{displayCredits.toLocaleString()}</p>
+              </div>
+              {(viewMode === "focused" || (viewMode === "selection" && products.length > 0)) && (
+                <div
+                  onClick={() => setMobileEstimationExpanded(true)}
+                  style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", userSelect: "none", padding: "8px 0 0" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.color = "#464feb"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.color = tokens.colorNeutralForeground3; }}
+                >
+                  <ChevronDownRegular style={{ fontSize: "14px", color: "inherit" }} />
+                  <span style={{ fontSize: "13px", fontWeight: 500, color: "inherit", transition: "color 0.15s ease" }}>
+                    Show estimation details
+                  </span>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: "0px", width: "100%" }}>
+              <div
+                onClick={() => setMobileEstimationExpanded(false)}
+                style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", cursor: "pointer", userSelect: "none", padding: "0 0 16px" }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = "#464feb"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = tokens.colorNeutralForeground3; }}
+              >
+                <ChevronUpRegular style={{ fontSize: "14px", color: "inherit" }} />
+                <span style={{ fontSize: "13px", fontWeight: 500, color: "inherit", transition: "color 0.15s ease" }}>
+                  Hide estimation details
+                </span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "center", paddingBottom: "16px" }}>
+                <div style={{
+                  display: "inline-flex",
+                  border: `1px solid ${tokens.colorNeutralStroke2}`,
+                  borderRadius: "8px",
+                  overflow: "hidden",
+                }}>
+                  {[
+                    { period: "month" as const, label: "Per month", radiusLeft: "8px", radiusRight: "0" },
+                    { period: "year" as const, label: "Per year", radiusLeft: "0", radiusRight: "8px" },
+                  ].map(({ period, label, radiusLeft, radiusRight }, index) => (
+                    <button
+                      key={period}
+                      onClick={() => setTimePeriod(period)}
+                      onMouseEnter={(e) => { if (timePeriod !== period) e.currentTarget.style.background = "#e0e0e0"; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.background = timePeriod === period ? tokens.colorNeutralBackground1 : tokens.colorNeutralBackground3; }}
+                      style={{
+                        padding: "10px 20px",
+                        fontSize: "15px",
+                        fontWeight: 600,
+                        color: timePeriod === period ? "#464feb" : tokens.colorNeutralForeground3,
+                        background: timePeriod === period ? tokens.colorNeutralBackground1 : tokens.colorNeutralBackground3,
+                        border: "none",
+                        borderLeft: index > 0 ? `1px solid ${tokens.colorNeutralStroke2}` : "none",
+                        cursor: "pointer",
+                        borderRadius: `${radiusLeft} ${radiusRight} ${radiusRight} ${radiusLeft}`,
+                        outline: "none",
+                      }}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px", paddingBottom: "16px" }}>
+                <p style={{ fontSize: "14px", fontWeight: 600, letterSpacing: "0.5px", textTransform: "uppercase", color: tokens.colorNeutralForeground3, margin: 0, textAlign: "center", lineHeight: "20px" }}>Total estimated Copilot credits</p>
+                <p style={{ fontSize: "40px", fontWeight: 700, color: tokens.colorBrandBackground, margin: 0 }}>{displayCredits.toLocaleString()}</p>
+              </div>
+              {viewMode === "selection" && products.length > 0 && (
+                <div style={{ display: "flex", flexDirection: "column", borderTop: `1px solid ${tokens.colorNeutralStroke2}` }}>
+                  {products.map((product, index) => {
+                    const credits = calculateProductCredits(product);
+                    const multiplier = timePeriod === "year" ? 12 : 1;
+                    const agentCredits = (credits * multiplier).toLocaleString();
+                    const m365Count = parseInt(product.m365LicenseCount) || 0;
+                    const cardNegation = calculateProductNegation(product);
+                    const showCardNegation = m365Count > 0 && product.category === "Copilot Studio Custom";
+                    const isExpanded = expandedSummaries.has(product.id);
+
+                    const users = parseInt(product.users) || 0;
+                    const interactions = parseInt(product.interactionsPerMonth) || 0;
+                    const knowledgePct = (parseInt(product.knowledgePercent) || 0) / 100;
+                    const tenantGraphPct = (parseInt(product.tenantGraphPercent) || 0) / 100;
+                    const billableUsers = Math.max(users - m365Count, 0);
+                    const billableMessages = billableUsers * interactions;
+                    const knowledgeMessages = Math.round(billableMessages * knowledgePct);
+                    let ttgMessages = Math.round(knowledgeMessages * tenantGraphPct);
+                    if (tenantGraphPct > 0 && knowledgeMessages > 0 && ttgMessages === 0) ttgMessages = 1;
+                    const nonTggMessages = knowledgeMessages - ttgMessages;
+                    const tggCredits = ttgMessages * 12;
+                    const nonTggCredits = nonTggMessages * 2;
+                    const knowledgeCredits = tggCredits + nonTggCredits;
+                    const actionMessages = Math.round(billableMessages * (1 - knowledgePct));
+                    const promptToolCount = parseInt(product.promptCount) || 0;
+                    const promptToolFreq = parseFloat(product.promptFreq) || 0;
+                    const computerUseCount = parseInt(product.computerUseCount) || 0;
+                    const computerUseFreq = parseFloat(product.computerUseFreq) || 0;
+                    const customConnectorCount = parseInt(product.customConnectorCount) || 0;
+                    const customConnectorFreq = parseFloat(product.customConnectorFreq) || 0;
+                    const mcpCount = parseInt(product.mcpCount) || 0;
+                    const mcpFreq = parseFloat(product.mcpFreq) || 0;
+                    const restApiCount = parseInt(product.restApiCount) || 0;
+                    const restApiFreq = parseFloat(product.restApiFreq) || 0;
+                    const totalToolInvocations = promptToolCount * promptToolFreq + computerUseCount * computerUseFreq +
+                      customConnectorCount * customConnectorFreq + mcpCount * mcpFreq + restApiCount * restApiFreq;
+                    const toolsCredits = Math.round(totalToolInvocations * actionMessages * 5);
+                    const flowsConfigured = parseInt(product.agentFlowConfiguredCount) || 0;
+                    const flowActionsCount = parseInt(product.agentFlowActionsCount) || 0;
+                    const flowsCredits = Math.round(flowsConfigured * flowActionsCount * 0.13);
+                    const promptUserCount = Math.max(users - m365Count, 0);
+                    const basicCount = parseInt(product.promptBasicCount) || 0;
+                    const basicFreq = parseFloat(product.promptBasicFreq) || 0;
+                    const standardCount = parseInt(product.promptStandardCount) || 0;
+                    const standardFreq = parseFloat(product.promptStandardFreq) || 0;
+                    const premiumCount = parseInt(product.promptPremiumCount) || 0;
+                    const premiumFreq = parseFloat(product.promptPremiumFreq) || 0;
+                    const basicCredits = Math.round(basicCount * basicFreq * promptUserCount * interactions * (5 + 0.1) / 10);
+                    const standardCredits = Math.round(standardCount * standardFreq * promptUserCount * interactions * (5 + 1.5) / 10);
+                    const premiumCredits = Math.round(premiumCount * premiumFreq * promptUserCount * interactions * (5 + 10) / 10);
+                    const modifiersCredits = basicCredits + standardCredits + premiumCredits;
+
+                    const licensedMessages = m365Count * interactions;
+                    const licensedKnowledgeMessages = Math.round(licensedMessages * knowledgePct);
+                    const licensedTggMessages = Math.round(licensedKnowledgeMessages * tenantGraphPct);
+                    const licensedNonTggMessages = licensedKnowledgeMessages - licensedTggMessages;
+                    const knowledgeNegation = (users === 0 || m365Count === 0) ? 0 : (licensedTggMessages * 12 + licensedNonTggMessages * 2);
+                    const licensedActionMessages = licensedMessages - licensedKnowledgeMessages;
+                    const toolsNegation = (users === 0 || m365Count === 0) ? 0 : Math.round(totalToolInvocations * licensedActionMessages * 5);
+                    const m365Ratio = users > 0 ? m365Count / users : 0;
+                    const flowsNegation = Math.round(flowsCredits * m365Ratio);
+                    const modifiersNegation = (users === 0 || m365Count === 0) ? 0 :
+                      Math.round(basicCount * basicFreq * m365Count * interactions * (5 + 0.1) / 10) +
+                      Math.round(standardCount * standardFreq * m365Count * interactions * (5 + 1.5) / 10) +
+                      Math.round(premiumCount * premiumFreq * m365Count * interactions * (5 + 10) / 10);
+
+                    const isSalesQual = product.productId === "sales-qualification";
+                    const isCaseMgmt = product.productId === "case-management";
+
+                    const leads = parseInt(product.leadsPerMonth) || 0;
+                    const lowPct = (parseInt(product.leadsLowComplexity) || 0) / 100;
+                    const medPct = (parseInt(product.leadsMedComplexity) || 0) / 100;
+                    const highPct = (parseInt(product.leadsHighComplexity) || 0) / 100;
+                    const lowLeads = Math.round(leads * lowPct);
+                    const medLeads = Math.round(leads * medPct);
+                    const highLeads = Math.round(leads * highPct);
+                    const researchCredits2 = isSalesQual ? (lowLeads * 174 + medLeads * 209 + highLeads * 349) : 0;
+                    let engagementCredits2 = 0;
+                    if (isSalesQual && product.salesQualMode === "research-outreach-engage") {
+                      const replyPct = (parseInt(product.leadsReplyPercent) || 0) / 100;
+                      const leadsWhoRespond = Math.round(leads * replyPct);
+                      const leadsDontRespond = leads - leadsWhoRespond;
+                      engagementCredits2 = 142 * leadsWhoRespond + 9 * leadsDontRespond;
+                    }
+
+                    const cmNewEmails = parseInt(product.cmNewEmails) || 0;
+                    const cmFollowUpByUsers = parseInt(product.cmFollowupEmailsPerCase) || 0;
+                    const cmRtConversations = parseInt(product.cmRealTimeConversations) || 0;
+                    const cmAgentUpdates = parseInt(product.cmManualUpdatesPerConversation) || 0;
+                    const cmAutoCasePct = (parseInt(product.cmAutoCaseCreationPercent) || 0) / 100;
+                    const cmAvgFollowUps = parseInt(product.cmFollowupsPerCase) || 0;
+                    const cmTemplateFollowUpPct = (parseInt(product.cmFollowupTemplatePercent) || 0) / 100;
+                    const cmResolutionEmails = parseInt(product.cmResolutionEmails) || 0;
+                    const cmKnowledgeArticlePct = (parseInt(product.cmKnowledgeArticlePercent) || 0) / 100;
+                    const cmToolCallsPerEmail = parseInt(product.cmToolCallsPerEmail) || 0;
+                    const cmTemplateResponsePct = (parseInt(product.cmResolutionTemplatePercent) || 0) / 100;
+
+                    const cmCreateGen = cmNewEmails + cmRtConversations;
+                    const cmCreateClassic = Math.round(cmAutoCasePct * (cmNewEmails + cmRtConversations));
+                    const cmUpdateGen = (cmRtConversations * cmAgentUpdates) + (cmNewEmails * cmFollowUpByUsers);
+                    const cmUpdateClassic = cmNewEmails * cmFollowUpByUsers;
+                    const cmFollowUpGen = Math.round((cmNewEmails + cmRtConversations) * cmAvgFollowUps * cmTemplateFollowUpPct * 3);
+                    const cmFollowUpClassic = Math.round((cmNewEmails + cmRtConversations) * cmAvgFollowUps * (1 - cmTemplateFollowUpPct));
+                    const cmFollowUpTextAI = Math.round((cmNewEmails + cmRtConversations) * cmAvgFollowUps * (1 - cmTemplateFollowUpPct) * 8);
+                    const cmCloseGen = cmRtConversations;
+                    const cmCloseClassic = cmNewEmails + cmRtConversations;
+                    const cmCloseTextAI = cmNewEmails * 2;
+                    const cmResolutionGen = Math.round(
+                      cmResolutionEmails * cmKnowledgeArticlePct * 3 + cmResolutionEmails * cmToolCallsPerEmail +
+                      cmResolutionEmails * cmTemplateResponsePct * 3 + cmResolutionEmails * (1 - cmTemplateResponsePct)
+                    );
+                    const cmResolutionClassic = cmResolutionEmails;
+
+                    const cmGenAnswersCredits = isCaseMgmt ? (cmCreateGen + cmUpdateGen + cmFollowUpGen + cmCloseGen + cmResolutionGen) * 2 : 0;
+                    const cmClassicAnswersCredits = isCaseMgmt ? (cmCreateClassic + cmUpdateClassic + cmFollowUpClassic + cmCloseClassic + cmResolutionClassic) : 0;
+                    const cmTextToolsCredits = isCaseMgmt ? Math.round((cmFollowUpTextAI + cmCloseTextAI) * 1.5) : 0;
+
+                    return (
+                      <div key={product.id} style={{ display: "flex", flexDirection: "column", padding: "20px 8px", borderTop: index > 0 ? `1px solid ${tokens.colorNeutralStroke2}` : "none" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+                          <div className={styles.chipIcon}>
+                            {renderProductIcon(product.productId, product.category)}
+                          </div>
+                          <p style={{ fontSize: "16px", lineHeight: "22px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flex: 1, minWidth: 0 }}>{product.name}</p>
+                          <p style={{ fontSize: "20px", lineHeight: "28px", color: tokens.colorNeutralForeground1, margin: 0, fontWeight: 700, whiteSpace: "nowrap", flexShrink: 0 }}>{agentCredits}</p>
+                        </div>
+                        <div style={{ borderBottom: `1.5px dashed ${tokens.colorNeutralStroke2}`, margin: "16px 0 12px" }} />
+                        {showCardNegation && (
+                          <div className={styles.calcNegationRow} style={{ paddingLeft: 0, paddingBottom: "12px" }}>
+                            <p className={styles.calcNegationLabel}>Copilot credits negated for {m365Count} users with Microsoft 365 Copilot licenses</p>
+                            <span className={styles.calcLeader} />
+                            <p className={styles.calcNegationValue}>{(cardNegation * multiplier).toLocaleString()}</p>
+                          </div>
+                        )}
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                          <div
+                            onClick={() => setExpandedSummaries(prev => { const next = new Set(prev); if (next.has(product.id)) next.delete(product.id); else next.add(product.id); return next; })}
+                            style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", userSelect: "none", padding: "4px 0" }}
+                            onMouseEnter={(e) => { e.currentTarget.style.color = "#464feb"; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.color = tokens.colorNeutralForeground3; }}
+                          >
+                            {isExpanded ? <ChevronUpRegular style={{ fontSize: "14px", color: "inherit" }} /> : <ChevronDownRegular style={{ fontSize: "14px", color: "inherit" }} />}
+                            <span style={{ fontSize: "13px", fontWeight: 500, color: "inherit", transition: "color 0.15s ease" }}>
+                              {isExpanded ? "Hide estimation details" : "Show estimation details"}
+                            </span>
+                          </div>
+                          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+                            <button
+                              onClick={() => { setEditingProductId(product.id); setViewMode("focused"); setMobileEstimationExpanded(false); }}
+                              onMouseEnter={(e) => { e.currentTarget.style.color = "#464feb"; }}
+                              onMouseLeave={(e) => { e.currentTarget.style.color = tokens.colorNeutralForeground2; }}
+                              style={{ display: "flex", alignItems: "center", gap: "6px", border: "none", backgroundColor: "transparent", cursor: "pointer", outline: "none", color: tokens.colorNeutralForeground2, fontSize: "13px", fontWeight: 500, padding: "4px 0", transition: "color 0.15s ease" }}
+                            >
+                              <EditRegular style={{ fontSize: "16px" }} />
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => duplicateProduct(product)}
+                              onMouseEnter={(e) => { e.currentTarget.style.color = "#464feb"; }}
+                              onMouseLeave={(e) => { e.currentTarget.style.color = tokens.colorNeutralForeground2; }}
+                              style={{ display: "flex", alignItems: "center", gap: "6px", border: "none", backgroundColor: "transparent", cursor: "pointer", outline: "none", color: tokens.colorNeutralForeground2, fontSize: "13px", fontWeight: 500, padding: "4px 0", transition: "color 0.15s ease" }}
+                            >
+                              <CopyRegular style={{ fontSize: "16px" }} />
+                              Duplicate
+                            </button>
+                            <button
+                              onClick={() => removeProduct(product.id, product.productId)}
+                              onMouseEnter={(e) => { e.currentTarget.style.color = "#d13438"; }}
+                              onMouseLeave={(e) => { e.currentTarget.style.color = tokens.colorNeutralForeground2; }}
+                              style={{ display: "flex", alignItems: "center", gap: "6px", border: "none", backgroundColor: "transparent", cursor: "pointer", outline: "none", color: tokens.colorNeutralForeground2, fontSize: "13px", fontWeight: 500, padding: "4px 0", transition: "color 0.15s ease" }}
+                            >
+                              <DeleteRegular style={{ fontSize: "16px" }} />
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Expanded estimation details */}
+                        {isExpanded && (
+                          <div style={{ display: "flex", flexDirection: "column", gap: "16px", marginTop: "12px", paddingTop: "12px", borderTop: `1px solid ${tokens.colorNeutralStroke2}` }}>
+                            {isSalesQual ? (<>
+                            <div className={styles.calcSectionContainer}>
+                              <div style={{ display: "flex", alignItems: "baseline", gap: "8px", width: "100%" }}>
+                                <h3 className={styles.h4Title}>Estimate for research (all leads)</h3>
+                                <span className={styles.calcLeader} />
+                                <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{(researchCredits2 * multiplier).toLocaleString()}</p>
+                              </div>
+                              <div className={styles.calcItemRow}>
+                                <p className={styles.calcItemLabel}>Research credits</p>
+                                <span className={styles.calcLeader} />
+                                <p className={styles.calcItemValue}>{(researchCredits2 * multiplier).toLocaleString()}</p>
+                              </div>
+                            </div>
+                            <div className={styles.calcSectionContainer}>
+                              <div style={{ display: "flex", alignItems: "baseline", gap: "8px", width: "100%" }}>
+                                <h3 className={styles.h4Title}>Estimate of engage (all leads)</h3>
+                                <span className={styles.calcLeader} />
+                                <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{(engagementCredits2 * multiplier).toLocaleString()}</p>
+                              </div>
+                              <div className={styles.calcItemRow}>
+                                <p className={styles.calcItemLabel}>Engagement credits</p>
+                                <span className={styles.calcLeader} />
+                                <p className={styles.calcItemValue}>{(engagementCredits2 * multiplier).toLocaleString()}</p>
+                              </div>
+                            </div>
+                            </>) : isCaseMgmt ? (<>
+                            <div className={styles.calcSectionContainer}>
+                              <div style={{ display: "flex", alignItems: "baseline", gap: "8px", width: "100%" }}>
+                                <h3 className={styles.h4Title}>Estimate for generative answers</h3>
+                                <span className={styles.calcLeader} />
+                                <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{(cmGenAnswersCredits * multiplier).toLocaleString()}</p>
+                              </div>
+                              <div className={styles.calcItemRow}>
+                                <p className={styles.calcItemLabel}>Generative answers credits</p>
+                                <span className={styles.calcLeader} />
+                                <p className={styles.calcItemValue}>{(cmGenAnswersCredits * multiplier).toLocaleString()}</p>
+                              </div>
+                            </div>
+                            <div className={styles.calcSectionContainer}>
+                              <div style={{ display: "flex", alignItems: "baseline", gap: "8px", width: "100%" }}>
+                                <h3 className={styles.h4Title}>Estimate for classic answers</h3>
+                                <span className={styles.calcLeader} />
+                                <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{(cmClassicAnswersCredits * multiplier).toLocaleString()}</p>
+                              </div>
+                              <div className={styles.calcItemRow}>
+                                <p className={styles.calcItemLabel}>Classic answers credits</p>
+                                <span className={styles.calcLeader} />
+                                <p className={styles.calcItemValue}>{(cmClassicAnswersCredits * multiplier).toLocaleString()}</p>
+                              </div>
+                            </div>
+                            <div className={styles.calcSectionContainer}>
+                              <div style={{ display: "flex", alignItems: "baseline", gap: "8px", width: "100%" }}>
+                                <h3 className={styles.h4Title}>Estimate for text and generative AI tools (standard)</h3>
+                                <span className={styles.calcLeader} />
+                                <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{(cmTextToolsCredits * multiplier).toLocaleString()}</p>
+                              </div>
+                              <div className={styles.calcItemRow}>
+                                <p className={styles.calcItemLabel}>Text and AI tools credits</p>
+                                <span className={styles.calcLeader} />
+                                <p className={styles.calcItemValue}>{(cmTextToolsCredits * multiplier).toLocaleString()}</p>
+                              </div>
+                            </div>
+                            </>) : (<>
+                            <div className={styles.calcSectionContainer}>
+                              <div style={{ display: "flex", alignItems: "baseline", gap: "8px", width: "100%" }}>
+                                <h3 className={styles.h4Title}>Copilot credits driven by knowledge</h3>
+                                <span className={styles.calcLeader} />
+                                <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{(knowledgeCredits * multiplier).toLocaleString()}</p>
+                              </div>
+                              <div className={styles.calcItemRow}>
+                                <p className={styles.calcItemLabel}>Copilot credits consumed for tenant graph grounding</p>
+                                <span className={styles.calcLeader} />
+                                <p className={styles.calcItemValue}>{(tggCredits * multiplier).toLocaleString()}</p>
+                              </div>
+                              <div className={styles.calcItemRow}>
+                                <p className={styles.calcItemLabel}>Copilot credits consumed for non-tenant graph grounding: Dataverse, web, files</p>
+                                <span className={styles.calcLeader} />
+                                <p className={styles.calcItemValue}>{(nonTggCredits * multiplier).toLocaleString()}</p>
+                              </div>
+                              {showCardNegation && (
+                              <div className={styles.calcNegationRow}>
+                                <p className={styles.calcNegationLabel}>Copilot credits negated for {m365Count} users with Microsoft 365 Copilot licenses</p>
+                                <span className={styles.calcLeader} />
+                                <p className={styles.calcNegationValue}>{(knowledgeNegation * multiplier).toLocaleString()}</p>
+                              </div>
+                              )}
+                            </div>
+
+                            <div className={styles.calcSectionContainer}>
+                              <div style={{ display: "flex", alignItems: "baseline", gap: "8px", width: "100%" }}>
+                                <h3 className={styles.h4Title}>Copilot credits driven by agent tools</h3>
+                                <span className={styles.calcLeader} />
+                                <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{(toolsCredits * multiplier).toLocaleString()}</p>
+                              </div>
+                              {showCardNegation && (
+                              <div className={styles.calcNegationRow}>
+                                <p className={styles.calcNegationLabel}>Copilot credits negated for {m365Count} users with Microsoft 365 Copilot licenses</p>
+                                <span className={styles.calcLeader} />
+                                <p className={styles.calcNegationValue}>{(toolsNegation * multiplier).toLocaleString()}</p>
+                              </div>
+                              )}
+                            </div>
+
+                            <div className={styles.calcSectionContainer}>
+                              <div style={{ display: "flex", alignItems: "baseline", gap: "8px", width: "100%" }}>
+                                <h3 className={styles.h4Title}>Copilot credits driven by agent flows</h3>
+                                <span className={styles.calcLeader} />
+                                <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{(flowsCredits * multiplier).toLocaleString()}</p>
+                              </div>
+                              {showCardNegation && (
+                              <div className={styles.calcNegationRow}>
+                                <p className={styles.calcNegationLabel}>Copilot credits negated for {m365Count} users with Microsoft 365 Copilot licenses</p>
+                                <span className={styles.calcLeader} />
+                                <p className={styles.calcNegationValue}>{(flowsNegation * multiplier).toLocaleString()}</p>
+                              </div>
+                              )}
+                            </div>
+
+                            <div className={styles.calcSectionContainer}>
+                              <div style={{ display: "flex", alignItems: "baseline", gap: "8px", width: "100%" }}>
+                                <h3 className={styles.h4Title}>Copilot credits driven by optional modifiers</h3>
+                                <span className={styles.calcLeader} />
+                                <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{(modifiersCredits * multiplier).toLocaleString()}</p>
+                              </div>
+                              <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, paddingLeft: "15px" }}>Prompts</p>
+                              <div className={styles.calcItemRow}>
+                                <p className={styles.calcItemLabel} style={{ fontWeight: 600, paddingLeft: "16px" }}>Basic</p>
+                                <span className={styles.calcLeader} />
+                                <p className={styles.calcItemValue}>{(basicCredits * multiplier).toLocaleString()}</p>
+                              </div>
+                              <div className={styles.calcItemRow}>
+                                <p className={styles.calcItemLabel} style={{ fontWeight: 600, paddingLeft: "16px" }}>Standard</p>
+                                <span className={styles.calcLeader} />
+                                <p className={styles.calcItemValue}>{(standardCredits * multiplier).toLocaleString()}</p>
+                              </div>
+                              <div className={styles.calcItemRow}>
+                                <p className={styles.calcItemLabel} style={{ fontWeight: 600, paddingLeft: "16px" }}>Premium</p>
+                                <span className={styles.calcLeader} />
+                                <p className={styles.calcItemValue}>{(premiumCredits * multiplier).toLocaleString()}</p>
+                              </div>
+                              {showCardNegation && (
+                              <div className={styles.calcNegationRow}>
+                                <p className={styles.calcNegationLabel}>Copilot credits negated for {m365Count} users with Microsoft 365 Copilot licenses</p>
+                                <span className={styles.calcLeader} />
+                                <p className={styles.calcNegationValue}>{(modifiersNegation * multiplier).toLocaleString()}</p>
+                              </div>
+                              )}
+                            </div>
+                            </>)}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+              {viewMode === "focused" && editingProductId && (
+                <div style={{ display: "flex", flexDirection: "column", borderTop: `1px solid ${tokens.colorNeutralStroke2}`, gap: "16px", paddingTop: "16px" }}>
+                  {products.filter(p => p.id === editingProductId).map(product => {
+                    const multiplier = timePeriod === "year" ? 12 : 1;
+                    const users = parseInt(product.users) || 0;
+                    const m365Count = parseInt(product.m365LicenseCount) || 0;
+                    const interactions = parseInt(product.interactionsPerMonth) || 0;
+                    const knowledgePct = (parseInt(product.knowledgePercent) || 0) / 100;
+                    const tenantGraphPct = (parseInt(product.tenantGraphPercent) || 0) / 100;
+                    const billableUsers = Math.max(users - m365Count, 0);
+                    const billableMessages = billableUsers * interactions;
+                    const knowledgeMessages = Math.round(billableMessages * knowledgePct);
+                    let tggMsgs = Math.round(knowledgeMessages * tenantGraphPct);
+                    if (tenantGraphPct > 0 && knowledgeMessages > 0 && tggMsgs === 0) tggMsgs = 1;
+                    const nonTggMsgs = knowledgeMessages - tggMsgs;
+                    const tggCr = tggMsgs * 12;
+                    const nonTggCr = nonTggMsgs * 2;
+                    const knowledgeCr = tggCr + nonTggCr;
+                    const actionMsgs = Math.round(billableMessages * (1 - knowledgePct));
+                    const ptCount = parseInt(product.promptCount) || 0;
+                    const ptFreq = parseFloat(product.promptFreq) || 0;
+                    const cuCount = parseInt(product.computerUseCount) || 0;
+                    const cuFreq = parseFloat(product.computerUseFreq) || 0;
+                    const ccCount = parseInt(product.customConnectorCount) || 0;
+                    const ccFreq = parseFloat(product.customConnectorFreq) || 0;
+                    const mcpCt = parseInt(product.mcpCount) || 0;
+                    const mcpFr = parseFloat(product.mcpFreq) || 0;
+                    const raCt = parseInt(product.restApiCount) || 0;
+                    const raFr = parseFloat(product.restApiFreq) || 0;
+                    const totalToolInv = ptCount * ptFreq + cuCount * cuFreq + ccCount * ccFreq + mcpCt * mcpFr + raCt * raFr;
+                    const toolsCr = Math.round(totalToolInv * actionMsgs * 5);
+                    const flowsCfg = parseInt(product.agentFlowConfiguredCount) || 0;
+                    const flowActs = parseInt(product.agentFlowActionsCount) || 0;
+                    const flowsCr = Math.round(flowsCfg * flowActs * 0.13);
+                    const puCount = Math.max(users - m365Count, 0);
+                    const bCt = parseInt(product.promptBasicCount) || 0;
+                    const bFr = parseFloat(product.promptBasicFreq) || 0;
+                    const sCt = parseInt(product.promptStandardCount) || 0;
+                    const sFr = parseFloat(product.promptStandardFreq) || 0;
+                    const pCt = parseInt(product.promptPremiumCount) || 0;
+                    const pFr = parseFloat(product.promptPremiumFreq) || 0;
+                    const bCr = Math.round(bCt * bFr * puCount * interactions * (5 + 0.1) / 10);
+                    const sCr = Math.round(sCt * sFr * puCount * interactions * (5 + 1.5) / 10);
+                    const pCr = Math.round(pCt * pFr * puCount * interactions * (5 + 10) / 10);
+                    const modCr = bCr + sCr + pCr;
+
+                    const licMsgs = m365Count * interactions;
+                    const licKnowMsgs = Math.round(licMsgs * knowledgePct);
+                    const licTggMsgs = Math.round(licKnowMsgs * tenantGraphPct);
+                    const licNonTggMsgs = licKnowMsgs - licTggMsgs;
+                    const knowNeg = (users === 0 || m365Count === 0) ? 0 : (licTggMsgs * 12 + licNonTggMsgs * 2);
+                    const licActMsgs = licMsgs - licKnowMsgs;
+                    const toolsNeg = (users === 0 || m365Count === 0) ? 0 : Math.round(totalToolInv * licActMsgs * 5);
+                    const m365R = users > 0 ? m365Count / users : 0;
+                    const flowsNeg = Math.round(flowsCr * m365R);
+                    const modNeg = (users === 0 || m365Count === 0) ? 0 :
+                      Math.round(bCt * bFr * m365Count * interactions * (5 + 0.1) / 10) +
+                      Math.round(sCt * sFr * m365Count * interactions * (5 + 1.5) / 10) +
+                      Math.round(pCt * pFr * m365Count * interactions * (5 + 10) / 10);
+
+                    const isSQ = product.productId === "sales-qualification";
+                    const isCM = product.productId === "case-management";
+
+                    const leads = parseInt(product.leadsPerMonth) || 0;
+                    const lowP = (parseInt(product.leadsLowComplexity) || 0) / 100;
+                    const medP = (parseInt(product.leadsMedComplexity) || 0) / 100;
+                    const highP = (parseInt(product.leadsHighComplexity) || 0) / 100;
+                    const resCr = isSQ ? (Math.round(leads * lowP) * 174 + Math.round(leads * medP) * 209 + Math.round(leads * highP) * 349) : 0;
+                    let engCr = 0;
+                    if (isSQ && product.salesQualMode === "research-outreach-engage") {
+                      const rp = (parseInt(product.leadsReplyPercent) || 0) / 100;
+                      const lr = Math.round(leads * rp);
+                      engCr = 142 * lr + 9 * (leads - lr);
+                    }
+
+                    const cmNE = parseInt(product.cmNewEmails) || 0;
+                    const cmFU = parseInt(product.cmFollowupEmailsPerCase) || 0;
+                    const cmRT = parseInt(product.cmRealTimeConversations) || 0;
+                    const cmAU = parseInt(product.cmManualUpdatesPerConversation) || 0;
+                    const cmACP = (parseInt(product.cmAutoCaseCreationPercent) || 0) / 100;
+                    const cmAFU = parseInt(product.cmFollowupsPerCase) || 0;
+                    const cmTFP = (parseInt(product.cmFollowupTemplatePercent) || 0) / 100;
+                    const cmRE = parseInt(product.cmResolutionEmails) || 0;
+                    const cmKAP = (parseInt(product.cmKnowledgeArticlePercent) || 0) / 100;
+                    const cmTCE = parseInt(product.cmToolCallsPerEmail) || 0;
+                    const cmTRP = (parseInt(product.cmResolutionTemplatePercent) || 0) / 100;
+
+                    const cmGACr = isCM ? ((cmNE + cmRT) + (cmRT * cmAU + cmNE * cmFU) + Math.round((cmNE + cmRT) * cmAFU * cmTFP * 3) + cmRT + Math.round(cmRE * cmKAP * 3 + cmRE * cmTCE + cmRE * cmTRP * 3 + cmRE * (1 - cmTRP))) * 2 : 0;
+                    const cmCACr = isCM ? (Math.round(cmACP * (cmNE + cmRT)) + cmNE * cmFU + Math.round((cmNE + cmRT) * cmAFU * (1 - cmTFP)) + (cmNE + cmRT) + cmRE) : 0;
+                    const cmTTCr = isCM ? Math.round((Math.round((cmNE + cmRT) * cmAFU * (1 - cmTFP) * 8) + cmNE * 2) * 1.5) : 0;
+
+                    return (
+                      <div key={product.id} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                        {isSQ ? (<>
+                        <div className={styles.calcSectionContainer}>
+                          <div style={{ display: "flex", alignItems: "baseline", gap: "8px", width: "100%" }}>
+                            <h3 className={styles.h4Title}>Estimate for research (all leads)</h3>
+                            <span className={styles.calcLeader} />
+                            <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{(resCr * multiplier).toLocaleString()}</p>
+                          </div>
+                          <div className={styles.calcItemRow}>
+                            <p className={styles.calcItemLabel}>Research credits</p>
+                            <span className={styles.calcLeader} />
+                            <p className={styles.calcItemValue}>{(resCr * multiplier).toLocaleString()}</p>
+                          </div>
+                        </div>
+                        <div className={styles.calcSectionContainer}>
+                          <div style={{ display: "flex", alignItems: "baseline", gap: "8px", width: "100%" }}>
+                            <h3 className={styles.h4Title}>Estimate of engage (all leads)</h3>
+                            <span className={styles.calcLeader} />
+                            <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{(engCr * multiplier).toLocaleString()}</p>
+                          </div>
+                          <div className={styles.calcItemRow}>
+                            <p className={styles.calcItemLabel}>Engagement credits</p>
+                            <span className={styles.calcLeader} />
+                            <p className={styles.calcItemValue}>{(engCr * multiplier).toLocaleString()}</p>
+                          </div>
+                        </div>
+                        </>) : isCM ? (<>
+                        <div className={styles.calcSectionContainer}>
+                          <div style={{ display: "flex", alignItems: "baseline", gap: "8px", width: "100%" }}>
+                            <h3 className={styles.h4Title}>Estimate for generative answers</h3>
+                            <span className={styles.calcLeader} />
+                            <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{(cmGACr * multiplier).toLocaleString()}</p>
+                          </div>
+                          <div className={styles.calcItemRow}>
+                            <p className={styles.calcItemLabel}>Generative answers credits</p>
+                            <span className={styles.calcLeader} />
+                            <p className={styles.calcItemValue}>{(cmGACr * multiplier).toLocaleString()}</p>
+                          </div>
+                        </div>
+                        <div className={styles.calcSectionContainer}>
+                          <div style={{ display: "flex", alignItems: "baseline", gap: "8px", width: "100%" }}>
+                            <h3 className={styles.h4Title}>Estimate for classic answers</h3>
+                            <span className={styles.calcLeader} />
+                            <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{(cmCACr * multiplier).toLocaleString()}</p>
+                          </div>
+                          <div className={styles.calcItemRow}>
+                            <p className={styles.calcItemLabel}>Classic answers credits</p>
+                            <span className={styles.calcLeader} />
+                            <p className={styles.calcItemValue}>{(cmCACr * multiplier).toLocaleString()}</p>
+                          </div>
+                        </div>
+                        <div className={styles.calcSectionContainer}>
+                          <div style={{ display: "flex", alignItems: "baseline", gap: "8px", width: "100%" }}>
+                            <h3 className={styles.h4Title}>Estimate for text and generative AI tools (standard)</h3>
+                            <span className={styles.calcLeader} />
+                            <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{(cmTTCr * multiplier).toLocaleString()}</p>
+                          </div>
+                          <div className={styles.calcItemRow}>
+                            <p className={styles.calcItemLabel}>Text and AI tools credits</p>
+                            <span className={styles.calcLeader} />
+                            <p className={styles.calcItemValue}>{(cmTTCr * multiplier).toLocaleString()}</p>
+                          </div>
+                        </div>
+                        </>) : (<>
+                        <div className={styles.calcSectionContainer}>
+                          <div style={{ display: "flex", alignItems: "baseline", gap: "8px", width: "100%" }}>
+                            <h3 className={styles.h4Title}>Copilot credits driven by knowledge</h3>
+                            <span className={styles.calcLeader} />
+                            <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{(knowledgeCr * multiplier).toLocaleString()}</p>
+                          </div>
+                          <div className={styles.calcItemRow}>
+                            <p className={styles.calcItemLabel}>Copilot credits consumed for tenant graph grounding</p>
+                            <span className={styles.calcLeader} />
+                            <p className={styles.calcItemValue}>{(tggCr * multiplier).toLocaleString()}</p>
+                          </div>
+                          <div className={styles.calcItemRow}>
+                            <p className={styles.calcItemLabel}>Copilot credits consumed for non-tenant graph grounding: Dataverse, web, files</p>
+                            <span className={styles.calcLeader} />
+                            <p className={styles.calcItemValue}>{(nonTggCr * multiplier).toLocaleString()}</p>
+                          </div>
+                          <div className={styles.calcNegationRow}>
+                            <p className={styles.calcNegationLabel}>Copilot credits negated for {m365Count} users with Microsoft 365 Copilot licenses</p>
+                            <span className={styles.calcLeader} />
+                            <p className={styles.calcNegationValue}>{(knowNeg * multiplier).toLocaleString()}</p>
+                          </div>
+                        </div>
+
+                        <div className={styles.calcSectionContainer}>
+                          <div style={{ display: "flex", alignItems: "baseline", gap: "8px", width: "100%" }}>
+                            <h3 className={styles.h4Title}>Copilot credits driven by agent tools</h3>
+                            <span className={styles.calcLeader} />
+                            <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{(toolsCr * multiplier).toLocaleString()}</p>
+                          </div>
+                          <div className={styles.calcNegationRow}>
+                            <p className={styles.calcNegationLabel}>Copilot credits negated for {m365Count} users with Microsoft 365 Copilot licenses</p>
+                            <span className={styles.calcLeader} />
+                            <p className={styles.calcNegationValue}>{(toolsNeg * multiplier).toLocaleString()}</p>
+                          </div>
+                        </div>
+
+                        <div className={styles.calcSectionContainer}>
+                          <div style={{ display: "flex", alignItems: "baseline", gap: "8px", width: "100%" }}>
+                            <h3 className={styles.h4Title}>Copilot credits driven by agent flows</h3>
+                            <span className={styles.calcLeader} />
+                            <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{(flowsCr * multiplier).toLocaleString()}</p>
+                          </div>
+                          <div className={styles.calcNegationRow}>
+                            <p className={styles.calcNegationLabel}>Copilot credits negated for {m365Count} users with Microsoft 365 Copilot licenses</p>
+                            <span className={styles.calcLeader} />
+                            <p className={styles.calcNegationValue}>{(flowsNeg * multiplier).toLocaleString()}</p>
+                          </div>
+                        </div>
+
+                        <div className={styles.calcSectionContainer}>
+                          <div style={{ display: "flex", alignItems: "baseline", gap: "8px", width: "100%" }}>
+                            <h3 className={styles.h4Title}>Copilot credits driven by optional modifiers</h3>
+                            <span className={styles.calcLeader} />
+                            <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{(modCr * multiplier).toLocaleString()}</p>
+                          </div>
+                          <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, paddingLeft: "15px" }}>Prompts</p>
+                          <div className={styles.calcItemRow}>
+                            <p className={styles.calcItemLabel} style={{ fontWeight: 600, paddingLeft: "16px" }}>Basic</p>
+                            <span className={styles.calcLeader} />
+                            <p className={styles.calcItemValue}>{(bCr * multiplier).toLocaleString()}</p>
+                          </div>
+                          <div className={styles.calcItemRow}>
+                            <p className={styles.calcItemLabel} style={{ fontWeight: 600, paddingLeft: "16px" }}>Standard</p>
+                            <span className={styles.calcLeader} />
+                            <p className={styles.calcItemValue}>{(sCr * multiplier).toLocaleString()}</p>
+                          </div>
+                          <div className={styles.calcItemRow}>
+                            <p className={styles.calcItemLabel} style={{ fontWeight: 600, paddingLeft: "16px" }}>Premium</p>
+                            <span className={styles.calcLeader} />
+                            <p className={styles.calcItemValue}>{(pCr * multiplier).toLocaleString()}</p>
+                          </div>
+                          <div className={styles.calcNegationRow}>
+                            <p className={styles.calcNegationLabel}>Copilot credits negated for {m365Count} users with Microsoft 365 Copilot licenses</p>
+                            <span className={styles.calcLeader} />
+                            <p className={styles.calcNegationValue}>{(modNeg * multiplier).toLocaleString()}</p>
+                          </div>
+                        </div>
+                        </>)}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
         <div className={styles.bodyContainer}>
               {viewMode === "selection" && (<>
               {/* Header */}
@@ -1372,31 +2147,35 @@ function AppV4({ currentVersion, onVersionChange, versions }: VersionProps) {
               >
                 <div className={styles.navContainer}>
                   <Button
+                    className={styles.navButtonSmall}
                     appearance="primary"
-                    size="large"
+                    size={isSmallScreen ? "small" : "large"}
                     icon={<ArrowSyncRegular />}
                     onClick={handleReset}
                     onMouseEnter={(e) => { e.currentTarget.style.filter = "brightness(0.85)"; }}
                     onMouseLeave={(e) => { e.currentTarget.style.filter = "none"; }}
                   >Reset</Button>
                   <Button
+                    className={styles.navButtonSmall}
                     appearance="outline"
-                    size="large"
+                    size={isSmallScreen ? "small" : "large"}
                     icon={<ArrowDownloadRegular />}
                     onClick={handleDownloadPDF}
                     onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#ebebeb"; }}
                     onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = ""; }}
                   >Download Results</Button>
                   <Button
+                    className={styles.navButtonSmall}
                     appearance="outline"
-                    size="large"
+                    size={isSmallScreen ? "small" : "large"}
                     onClick={() => window.open("https://signup.microsoft.com/get-started/signup?products=25a8ddb8-34ca-4a93-828d-95a68d02e3a9&mproducts=CFQ7TTC0LH1F:000P&fmproducts=CFQ7TTC0LH1F:000P&culture=en-us&country=us&ali=1", "_blank")}
                     onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#ebebeb"; }}
                     onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = ""; }}
                   >Buy Copilot Credits</Button>
                   <Button
+                    className={styles.navButtonSmall}
                     appearance="outline"
-                    size="large"
+                    size={isSmallScreen ? "small" : "large"}
                     onClick={() => window.open("https://www.microsoft.com/en-us/microsoft-365-copilot", "_blank")}
                     onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = "#ebebeb"; }}
                     onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = ""; }}
@@ -1416,19 +2195,19 @@ function AppV4({ currentVersion, onVersionChange, versions }: VersionProps) {
                   borderRadius: isScrolled ? "0 0 12px 12px" : "0",
                 }}
               >
-                <div style={{ display: "flex", alignItems: "center", gap: "12px", width: "100%", justifyContent: "flex-start" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "12px", width: "100%", justifyContent: "flex-start", flexWrap: "wrap" as const }}>
                 <Button
                   appearance="outline"
-                  size="large"
+                  size={isSmallScreen ? "small" : "large"}
                   icon={<ArrowLeftRegular />}
-                  onClick={() => { setViewMode("selection"); setEditingProductId(null); }}
+                  onClick={() => { setViewMode("selection"); setEditingProductId(null); setCategoriesCollapsed(false); setMobileEstimationExpanded(false); }}
                   onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = tokens.colorNeutralBackground3; }}
                   onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = ""; }}
                   style={{ fontWeight: 600 }}
                 >Back to agents</Button>
                 <Button
                   appearance="primary"
-                  size="large"
+                  size={isSmallScreen ? "small" : "large"}
                   icon={<ArrowSyncRegular />}
                   onClick={handleReset}
                   onMouseEnter={(e) => { e.currentTarget.style.filter = "brightness(0.85)"; }}
@@ -1436,7 +2215,7 @@ function AppV4({ currentVersion, onVersionChange, versions }: VersionProps) {
                 >Reset</Button>
                 <Button
                   appearance="primary"
-                  size="large"
+                  size={isSmallScreen ? "small" : "large"}
                   icon={<AddRegular />}
                   onClick={() => {
                     const lastProduct = products[products.length - 1];
@@ -1459,14 +2238,56 @@ function AppV4({ currentVersion, onVersionChange, versions }: VersionProps) {
               {/* Product Category Selection */}
               <div style={{ width: "100%", marginBottom: "16px" }}>
                 <div className={styles.productCategorySection}>
-                  <div>
-                      <h2 style={{ fontSize: "22px", fontWeight: 700, margin: 0, color: tokens.colorBrandBackground }}>
-                        Select agent category or categories
-                      </h2>
-                      <p className={styles.sectionDescription} style={{ marginTop: "8px" }}>
-                        Choose an agent category to begin configuring your agent estimation.
-                      </p>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "flex-start",
+                      ...(categoriesCollapsed && selectedCategories.length > 0 ? { cursor: "pointer" } : {}),
+                    }}
+                    onClick={() => {
+                      if (categoriesCollapsed && selectedCategories.length > 0) {
+                        setCategoriesCollapsed(false);
+                      }
+                    }}
+                  >
+                      <div style={{ flex: 1 }}>
+                        <h2 style={{ fontSize: "22px", fontWeight: 700, margin: 0, color: tokens.colorBrandBackground }}>
+                          Select agent category or categories
+                        </h2>
+                        {!categoriesCollapsed && (
+                          <p className={styles.sectionDescription} style={{ marginTop: "8px" }}>
+                            Choose an agent category to begin configuring your agent estimation.
+                          </p>
+                        )}
+                      </div>
+                      {selectedCategories.length > 0 && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setCategoriesCollapsed(prev => !prev);
+                          }}
+                          style={{
+                            background: "none",
+                            border: "none",
+                            cursor: "pointer",
+                            padding: "4px",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "4px",
+                            color: tokens.colorBrandBackground,
+                            fontSize: "13px",
+                            fontWeight: 500,
+                            marginTop: "2px",
+                            flexShrink: 0,
+                          }}
+                        >
+                          {categoriesCollapsed ? "Edit" : "Collapse"}
+                          {categoriesCollapsed ? <ChevronDownRegular style={{ fontSize: "14px" }} /> : <ChevronUpRegular style={{ fontSize: "14px" }} />}
+                        </button>
+                      )}
                   </div>
+                  {!categoriesCollapsed && (
                   <div className={styles.categoryCatalogGrid}>
                     {[
                       { name: "Copilot Studio Custom" as ProductCategory, description: "Build custom agents for employee or customer-facing scenarios.", icon: <svg width="28" height="28" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><g clipPath="url(#cs_clip)"><path d="M31.8232 6.0311C26.8849 4.38497 24.4153 3.56235 22.708 4.79281C21.0007 6.02337 21.001 8.62627 21.001 13.8319V18.3788L15.8223 16.6532C10.8839 15.007 8.41432 14.1843 6.70703 15.4149C4.99999 16.6455 5 19.2486 5 24.4539V31.786C5 34.6462 5.00036 36.0765 5.77637 37.1532C6.55238 38.2298 7.90874 38.6823 10.6221 39.5868L18.3555 42.1649C21.1836 43.1076 22.598 43.5788 24.0205 43.3846C25.4432 43.1902 26.6795 42.3563 29.1514 40.6893L37.5654 35.0145C40.2278 33.219 41.5593 32.3214 42.2812 30.9637C43.003 29.6062 43.0029 28.0007 43.0029 24.7899V18.6034H43V15.6834C43 12.8233 42.9996 11.3929 42.2236 10.3163C41.4476 9.23982 40.0911 8.78704 37.3779 7.88266L31.8232 6.0311Z" fill="url(#cs_p0)"/><path d="M31.8232 6.0311C26.8849 4.38497 24.4153 3.56235 22.708 4.79281C21.0007 6.02337 21.001 8.62627 21.001 13.8319V18.3788L15.8223 16.6532C10.8839 15.007 8.41432 14.1843 6.70703 15.4149C4.99999 16.6455 5 19.2486 5 24.4539V31.786C5 34.6462 5.00036 36.0765 5.77637 37.1532C6.55238 38.2298 7.90874 38.6823 10.6221 39.5868L18.3555 42.1649C21.1836 43.1076 22.598 43.5788 24.0205 43.3846C25.4432 43.1902 26.6795 42.3563 29.1514 40.6893L37.5654 35.0145C40.2278 33.219 41.5593 32.3214 42.2812 30.9637C43.003 29.6062 43.0029 28.0007 43.0029 24.7899V18.6034H43V15.6834C43 12.8233 42.9996 11.3929 42.2236 10.3163C41.4476 9.23982 40.0911 8.78704 37.3779 7.88266L31.8232 6.0311Z" fill="url(#cs_p1)"/><path d="M31.8232 6.0311C26.8849 4.38497 24.4153 3.56235 22.708 4.79281C21.0007 6.02337 21.001 8.62627 21.001 13.8319V18.3788L15.8223 16.6532C10.8839 15.007 8.41432 14.1843 6.70703 15.4149C4.99999 16.6455 5 19.2486 5 24.4539V31.786C5 34.6462 5.00036 36.0765 5.77637 37.1532C6.55238 38.2298 7.90874 38.6823 10.6221 39.5868L18.3555 42.1649C21.1836 43.1076 22.598 43.5788 24.0205 43.3846C25.4432 43.1902 26.6795 42.3563 29.1514 40.6893L37.5654 35.0145C40.2278 33.219 41.5593 32.3214 42.2812 30.9637C43.003 29.6062 43.0029 28.0007 43.0029 24.7899V18.6034H43V15.6834C43 12.8233 42.9996 11.3929 42.2236 10.3163C41.4476 9.23982 40.0911 8.78704 37.3779 7.88266L31.8232 6.0311Z" fill="url(#cs_p2)"/><path d="M26.9986 26.3054C26.9986 23.4453 26.9986 22.0152 26.2226 20.9385C25.4466 19.8619 24.0899 19.4096 21.3765 18.5052L15.8223 16.6538C10.8838 15.0076 8.4146 14.1845 6.7073 15.4151C5 16.6456 5 19.2484 5 24.454V31.7867C5 34.6469 5 36.077 5.776 37.1537C6.55201 38.2303 7.90872 38.6826 10.6221 39.587L16.1763 41.4384C21.1148 43.0846 23.584 43.9077 25.2913 42.6771C26.9986 41.4466 26.9986 38.8438 26.9986 33.6381V26.3054Z" fill="url(#cs_p3)"/><path d="M26.9986 26.3054C26.9986 23.4453 26.9986 22.0152 26.2226 20.9385C25.4466 19.8619 24.0899 19.4096 21.3765 18.5052L15.8223 16.6538C10.8838 15.0076 8.4146 14.1845 6.7073 15.4151C5 16.6456 5 19.2484 5 24.454V31.7867C5 34.6469 5 36.077 5.776 37.1537C6.55201 38.2303 7.90872 38.6826 10.6221 39.587L16.1763 41.4384C21.1148 43.0846 23.584 43.9077 25.2913 42.6771C26.9986 41.4466 26.9986 38.8438 26.9986 33.6381V26.3054Z" fill="url(#cs_p4)"/><path d="M42.9956 31.296V18.5515L27.2 29.2853L5.00002 22.9129V37.7129L24.1167 44.0853L42.9956 31.296Z" fill="url(#cs_p5)"/><path d="M21.028 10.3942C17.883 9.40833 16.0572 9.09759 14.7076 10.07C13.418 10.9995 13.1032 12.7123 13.026 15.738C13.8601 15.9994 14.7874 16.3079 15.8229 16.653L21.0006 18.3786V13.8317C21.0006 12.5294 21.0011 11.39 21.028 10.3942Z" fill="url(#cs_p6)"/><path d="M21.028 10.3942C17.883 9.40833 16.0572 9.09759 14.7076 10.07C13.418 10.9995 13.1032 12.7123 13.026 15.738C13.8601 15.9994 14.7874 16.3079 15.8229 16.653L21.0006 18.3786V13.8317C21.0006 12.5294 21.0011 11.39 21.028 10.3942Z" fill="url(#cs_p7)" fillOpacity="0.7"/><path d="M21.0277 10.3945C21.001 11.3903 21.0004 12.5298 21.0004 13.832V21.165C21.0004 24.0249 21.0008 25.4547 21.7767 26.5312C22.5527 27.6079 23.9091 28.0604 26.6224 28.9648C26.8447 29.0389 27.3184 29.1968 27.9336 29.4016C31.0918 30.453 32.6709 30.9786 33.833 30.1414C34.9952 29.3041 34.9965 27.6414 34.9991 24.3161C35.0003 22.74 35.0004 21.4148 35.0004 20.9609C35.0004 18.1012 34.9998 16.6713 34.224 15.5947C33.448 14.5181 32.0914 14.0655 29.3783 13.1611L23.8226 11.3086C22.788 10.9637 21.8613 10.6558 21.0277 10.3945Z" fill="url(#cs_p8)"/><path d="M21.0277 10.3945C21.001 11.3903 21.0004 12.5298 21.0004 13.832V21.165C21.0004 24.0249 21.0008 25.4547 21.7767 26.5312C22.5527 27.6079 23.9091 28.0604 26.6224 28.9648C26.8447 29.0389 27.3184 29.1968 27.9336 29.4016C31.0918 30.453 32.6709 30.9786 33.833 30.1414C34.9952 29.3041 34.9965 27.6414 34.9991 24.3161C35.0003 22.74 35.0004 21.4148 35.0004 20.9609C35.0004 18.1012 34.9998 16.6713 34.224 15.5947C33.448 14.5181 32.0914 14.0655 29.3783 13.1611L23.8226 11.3086C22.788 10.9637 21.8613 10.6558 21.0277 10.3945Z" fill="url(#cs_p9)"/><path d="M13.0262 15.738C13.0012 16.718 12.9998 17.8357 12.9998 19.1091V26.4421C12.9998 29.3023 13.0002 30.7327 13.7762 31.8093C14.5522 32.8857 15.9089 33.3376 18.6219 34.2419C18.8431 34.3157 19.3132 34.4723 19.9238 34.6756C23.0879 35.7288 24.6699 36.2554 25.832 35.418C26.9942 34.5807 26.9953 32.9149 26.9977 29.5834C26.9988 28.0375 26.9988 26.7445 26.9988 26.3054C26.9988 23.4452 26.9985 22.0149 26.2225 20.9382C25.4465 19.8617 24.09 19.409 21.3768 18.5046L15.8221 16.6531C14.7869 16.308 13.8601 15.9994 13.0262 15.738Z" fill="url(#cs_p10)"/><path d="M21.0008 21.165C21.0008 24.0246 21.0005 25.4547 21.7762 26.5312C22.5522 27.6079 23.9095 28.0604 26.6229 28.9648L26.9988 29.0898V26.3057C26.9988 23.4455 26.9985 22.0151 26.2225 20.9385C25.4465 19.8619 24.09 19.4093 21.3768 18.5049L21.0008 18.3789V21.165Z" fill="url(#cs_p11)"/></g><defs><linearGradient id="cs_p0" x1="26.7461" y1="35.7058" x2="37.8257" y2="7.96439" gradientUnits="userSpaceOnUse"><stop stopColor="#2764E7"/><stop offset="0.307475" stopColor="#8B52F4"/><stop offset="0.544627" stopColor="#BB45EA"/><stop offset="0.803866" stopColor="#DB56C6"/><stop offset="1" stopColor="#F462AB"/></linearGradient><radialGradient id="cs_p1" cx="0" cy="0" r="1" gradientTransform="matrix(10.3452 9.65562 6.27421 -6.36495 26.3239 22.5577)" gradientUnits="userSpaceOnUse"><stop offset="0.549399" stopColor="#5B2AB5"/><stop offset="1" stopColor="#A931D8" stopOpacity="0"/></radialGradient><radialGradient id="cs_p2" cx="0" cy="0" r="1" gradientTransform="matrix(19.846 6.16317 3.15774 -9.62767 22.7347 18.0381)" gradientUnits="userSpaceOnUse"><stop offset="0.527929" stopColor="#9529C2"/><stop offset="1" stopColor="#DD3CE2" stopOpacity="0"/></radialGradient><radialGradient id="cs_p3" cx="0" cy="0" r="1" gradientTransform="matrix(-19.1297 -27.618 -27.432 19.2594 29.1953 40.6685)" gradientUnits="userSpaceOnUse"><stop stopColor="#2764E7"/><stop offset="0.225228" stopColor="#0094F0"/><stop offset="0.443437" stopColor="#19B2CE"/><stop offset="0.6999" stopColor="#52D17C"/><stop offset="1" stopColor="#FFD638"/></radialGradient><linearGradient id="cs_p4" x1="12.1473" y1="37.9502" x2="26.1208" y2="37.9502" gradientUnits="userSpaceOnUse"><stop stopColor="#16BBDA" stopOpacity="0"/><stop offset="0.535279" stopColor="#0094F0"/><stop offset="1" stopColor="#2764E7"/></linearGradient><radialGradient id="cs_p5" cx="0" cy="0" r="1" gradientTransform="matrix(8.85681 4.54903 3.15823 -5.04838 22.4543 32.7527)" gradientUnits="userSpaceOnUse"><stop stopColor="#1B44B1"/><stop offset="1" stopColor="#367AF2" stopOpacity="0"/></radialGradient><linearGradient id="cs_p6" x1="18.9946" y1="17.7329" x2="19.203" y2="9.33928" gradientUnits="userSpaceOnUse"><stop stopColor="#FF9C70"/><stop offset="1" stopColor="#FFD394"/></linearGradient><linearGradient id="cs_p7" x1="16.7719" y1="14.2895" x2="15.9357" y2="17.9602" gradientUnits="userSpaceOnUse"><stop stopColor="#FFB357" stopOpacity="0"/><stop offset="1" stopColor="#F24A9D"/></linearGradient><linearGradient id="cs_p8" x1="28.7781" y1="12.488" x2="29.0132" y2="31.5134" gradientUnits="userSpaceOnUse"><stop stopColor="#FFB357"/><stop offset="0.380259" stopColor="#FB6F7B"/><stop offset="0.659779" stopColor="#F24A9D"/><stop offset="1" stopColor="#DD3CE2"/></linearGradient><radialGradient id="cs_p9" cx="0" cy="0" r="1" gradientTransform="matrix(9.13889 2.26464 -2.05987 10.0474 21.7781 27.0246)" gradientUnits="userSpaceOnUse"><stop offset="0.567938" stopColor="#D7257D"/><stop offset="1" stopColor="#F462AB" stopOpacity="0"/></radialGradient><linearGradient id="cs_p10" x1="24.6773" y1="36.7373" x2="11.3263" y2="15.7738" gradientUnits="userSpaceOnUse"><stop stopColor="#0FAFFF"/><stop offset="0.54828" stopColor="#2BDABE"/><stop offset="0.765945" stopColor="#88E06C"/><stop offset="1" stopColor="#FFD638"/></linearGradient><linearGradient id="cs_p11" x1="20.3343" y1="22.3955" x2="26.1547" y2="24.1849" gradientUnits="userSpaceOnUse"><stop stopColor="#76EB95"/><stop offset="1" stopColor="#3BD5FF" stopOpacity="0"/></linearGradient><clipPath id="cs_clip"><rect width="48" height="48" fill="white"/></clipPath></defs></svg> },
@@ -1530,6 +2351,7 @@ function AppV4({ currentVersion, onVersionChange, versions }: VersionProps) {
                       );
                     })}
                   </div>
+                  )}
                 </div>
               </div>
 
@@ -2216,7 +3038,7 @@ function AppV4({ currentVersion, onVersionChange, versions }: VersionProps) {
                 </div>
 
                   {/* Calculation Column */}
-                  <div className={styles.calculationPanel}>
+                  <div className={`${styles.calculationPanel} ${styles.mobileCalcHidden}`}>
                    <div className={styles.calcStickyHeader} style={products.length === 0 ? { borderBottom: "none", borderRadius: "12px" } : undefined}>
                     <div style={{
                       display: "inline-flex",
@@ -2279,8 +3101,8 @@ function AppV4({ currentVersion, onVersionChange, versions }: VersionProps) {
                         flex: 1,
                         minWidth: 0,
                       }}>
-                        <p style={{ fontSize: "14px", fontWeight: 600, letterSpacing: "0.5px", textTransform: "uppercase", color: tokens.colorNeutralForeground3, margin: 0, textAlign: "center", lineHeight: "20px" }}>{showNegated ? <>Total estimated<br />Copilot credits</> : "Total estimated Copilot credits"}</p>
-                        <p style={{ fontSize: "40px", fontWeight: 700, color: tokens.colorBrandBackground, margin: 0 }}>{displayCredits.toLocaleString()}</p>
+                        <p className={styles.calcTotalLabel}>{showNegated ? <>Total estimated<br />Copilot credits</> : "Total estimated Copilot credits"}</p>
+                        <p className={styles.calcTotalValue}>{displayCredits.toLocaleString()}</p>
                       </div>
                       {showNegated && (<>
                       <div style={{ width: "1px", backgroundColor: tokens.colorNeutralStroke2, alignSelf: "stretch" }} />
@@ -2292,9 +3114,10 @@ function AppV4({ currentVersion, onVersionChange, versions }: VersionProps) {
                         gap: "12px",
                         flex: 1,
                         minWidth: 0,
+                        paddingLeft: "16px",
                       }}>
-                        <p style={{ fontSize: "14px", fontWeight: 600, letterSpacing: "0.5px", textTransform: "uppercase", color: tokens.colorNeutralForeground3, margin: 0, textAlign: "center", lineHeight: "20px" }}>Total Copilot credits negated<br />with Microsoft 365 Copilot</p>
-                        <p style={{ fontSize: "40px", fontWeight: 700, color: tokens.colorBrandBackground, margin: 0 }}>{displayNegated.toLocaleString()}</p>
+                        <p className={styles.calcTotalLabel}>Total Copilot credits negated with Microsoft 365 Copilot</p>
+                        <p className={styles.calcTotalValue}>{displayNegated.toLocaleString()}</p>
                       </div>
                       </>)}
                     </div>
@@ -2409,6 +3232,21 @@ function AppV4({ currentVersion, onVersionChange, versions }: VersionProps) {
 
                        const cardNegation = calculateProductNegation(product);
                        const showCardNegation = m365Count > 0 && product.category === "Copilot Studio Custom";
+
+                       // Per-section negation calculations (matching focus mode)
+                       const licensedMessages = m365Count * interactions;
+                       const licensedKnowledgeMessages = Math.round(licensedMessages * knowledgePct);
+                       const licensedTggMessages = Math.round(licensedKnowledgeMessages * tenantGraphPct);
+                       const licensedNonTggMessages = licensedKnowledgeMessages - licensedTggMessages;
+                       const knowledgeNegation = (users === 0 || m365Count === 0) ? 0 : (licensedTggMessages * 12 + licensedNonTggMessages * 2);
+                       const licensedActionMessages = licensedMessages - licensedKnowledgeMessages;
+                       const toolsNegation = (users === 0 || m365Count === 0) ? 0 : Math.round(totalToolInvocations * licensedActionMessages * 5);
+                       const m365Ratio = users > 0 ? m365Count / users : 0;
+                       const flowsNegation = Math.round(flowsCredits * m365Ratio);
+                       const modifiersNegation = (users === 0 || m365Count === 0) ? 0 :
+                         Math.round(basicCount * basicFreq * m365Count * interactions * (5 + 0.1) / 10) +
+                         Math.round(standardCount * standardFreq * m365Count * interactions * (5 + 1.5) / 10) +
+                         Math.round(premiumCount * premiumFreq * m365Count * interactions * (5 + 10) / 10);
 
                        return (
                          <div key={product.id} style={{ display: "flex", flexDirection: "column", padding: "20px 32px", borderTop: index > 0 ? `1px solid ${tokens.colorNeutralStroke2}` : "none" }}>
@@ -2568,6 +3406,14 @@ function AppV4({ currentVersion, onVersionChange, versions }: VersionProps) {
                                    <span className={styles.calcLeader} />
                                    <p className={styles.calcItemValue}>{(nonTggCredits * multiplier).toLocaleString()}</p>
                                  </div>
+
+                                 {showCardNegation && (
+                                 <div className={styles.calcNegationRow}>
+                                   <p className={styles.calcNegationLabel}>Copilot credits negated for {m365Count} users with Microsoft 365 Copilot licenses</p>
+                                   <span className={styles.calcLeader} />
+                                   <p className={styles.calcNegationValue}>{(knowledgeNegation * multiplier).toLocaleString()}</p>
+                                 </div>
+                                 )}
                                </div>
 
                                <div className={styles.calcSectionContainer}>
@@ -2576,6 +3422,14 @@ function AppV4({ currentVersion, onVersionChange, versions }: VersionProps) {
                                    <span className={styles.calcLeader} />
                                    <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{(toolsCredits * multiplier).toLocaleString()}</p>
                                  </div>
+
+                                 {showCardNegation && (
+                                 <div className={styles.calcNegationRow}>
+                                   <p className={styles.calcNegationLabel}>Copilot credits negated for {m365Count} users with Microsoft 365 Copilot licenses</p>
+                                   <span className={styles.calcLeader} />
+                                   <p className={styles.calcNegationValue}>{(toolsNegation * multiplier).toLocaleString()}</p>
+                                 </div>
+                                 )}
                                </div>
 
                                <div className={styles.calcSectionContainer}>
@@ -2584,6 +3438,14 @@ function AppV4({ currentVersion, onVersionChange, versions }: VersionProps) {
                                    <span className={styles.calcLeader} />
                                    <p style={{ fontSize: "14px", fontWeight: 600, color: tokens.colorNeutralForeground1, margin: 0, flexShrink: 0, whiteSpace: "nowrap" }}>{(flowsCredits * multiplier).toLocaleString()}</p>
                                  </div>
+
+                                 {showCardNegation && (
+                                 <div className={styles.calcNegationRow}>
+                                   <p className={styles.calcNegationLabel}>Copilot credits negated for {m365Count} users with Microsoft 365 Copilot licenses</p>
+                                   <span className={styles.calcLeader} />
+                                   <p className={styles.calcNegationValue}>{(flowsNegation * multiplier).toLocaleString()}</p>
+                                 </div>
+                                 )}
                                </div>
 
                                <div className={styles.calcSectionContainer}>
@@ -2608,6 +3470,14 @@ function AppV4({ currentVersion, onVersionChange, versions }: VersionProps) {
                                    <span className={styles.calcLeader} />
                                    <p className={styles.calcItemValue}>{(premiumCredits * multiplier).toLocaleString()}</p>
                                  </div>
+
+                                 {showCardNegation && (
+                                 <div className={styles.calcNegationRow}>
+                                   <p className={styles.calcNegationLabel}>Copilot credits negated for {m365Count} users with Microsoft 365 Copilot licenses</p>
+                                   <span className={styles.calcLeader} />
+                                   <p className={styles.calcNegationValue}>{(modifiersNegation * multiplier).toLocaleString()}</p>
+                                 </div>
+                                 )}
                                </div>
                                </>)}
                              </div>
