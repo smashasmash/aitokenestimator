@@ -36,8 +36,8 @@ jobs:
       - name: Build
         run: npm run build
       
-      - name: Encrypt with StatiCrypt
-        if: env.SITE_PASSWORD != ''
+      - name: Encrypt with Staticrypt
+        if: ${{ secrets.SITE_PASSWORD != '' }}
         env:
           SITE_PASSWORD: ${{ secrets.SITE_PASSWORD }}
         run: npx staticrypt dist/index.html "$SITE_PASSWORD" -o dist/index.html --remember 7
